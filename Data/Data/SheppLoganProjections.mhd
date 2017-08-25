@@ -1,0 +1,7 @@
+NDims = 3
+DimSize = 187 128 360
+ElementSize = 4.000000e+000 4.000000e+000 4.000000e+000
+ElementSpacing = 4.000000e+000 4.000000e+000 4.000000e+000
+ElementType = MET_FLOAT
+ElementByteOrderMSB = False
+ElementDataFile = SheppLoganProjections.raw

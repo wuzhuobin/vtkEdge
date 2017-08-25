@@ -1,0 +1,219 @@
+//=============================================================================
+//   This file is part of VTKEdge. See vtkedge.org for more information.
+//
+//   Copyright (c) 2008 Kitware, Inc.
+//
+//   VTKEdge may be used under the terms of the GNU General Public License 
+//   version 3 as published by the Free Software Foundation and appearing in 
+//   the file LICENSE.txt included in the top level directory of this source
+//   code distribution. Alternatively you may (at your option) use any later 
+//   version of the GNU General Public License if such license has been 
+//   publicly approved by Kitware, Inc. (or its successors, if any).
+//
+//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
+//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
+//   PURPOSE. See LICENSE.txt for additional details.
+//
+//   VTKEdge is available under alternative license terms. Please visit
+//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// The version information
+//-----------------------------------------------------------------------------
+#define VTKEdge_VERSION_MAJOR  @VTKEdge_VERSION_MAJOR@
+#define VTKEdge_VERSION_MINOR  @VTKEdge_VERSION_MINOR@
+#define VTKEdge_VERSION_BUILD  @VTKEdge_VERSION_BUILD@
+#define VTKEdge_VERSION        @VTKEdge_VERSION@
+#define VTKEdge_VERSION_STRING "@VTKEdge_VERSION@"
+
+//-----------------------------------------------------------------------------
+// Expose the source directory to allow for style testing
+//-----------------------------------------------------------------------------
+#define VTKEdge_SOURCE_DIR "@VTKEdge_SOURCE_DIR@"
+
+//-----------------------------------------------------------------------------
+// Config options
+//-----------------------------------------------------------------------------
+#cmakedefine VTKEdge_BUILD_SHARED_LIBS
+#cmakedefine VTKEdge_BUILD_EXAMPLES
+#cmakedefine VTKEdge_BUILD_PARAVIEW_PLUGINS
+
+#cmakedefine VTKEdge_BUILD_Common_KIT
+#cmakedefine VTKEdge_BUILD_Filtering_KIT
+#cmakedefine VTKEdge_BUILD_Graphics_KIT
+#cmakedefine VTKEdge_BUILD_Hybrid_KIT
+#cmakedefine VTKEdge_BUILD_Imaging_KIT
+#cmakedefine VTKEdge_BUILD_IO_KIT
+#cmakedefine VTKEdge_BUILD_Rendering_KIT
+#cmakedefine VTKEdge_BUILD_VolumeRendering_KIT
+#cmakedefine VTKEdge_BUILD_Widgets_KIT
+
+#cmakedefine VTKEdge_USE_CUDA
+#cmakedefine VTKEdge_USE_DIRECTX
+#cmakedefine VTKEdge_USE_CORE_GRAPHICS
+#cmakedefine VTKEdge_USE_NVCONTROL
+
+// The VTK_VERSION_DATE. The widgets have code so as to deal with changes
+// in VTK both before and after the Depth peeling compatibility changes.
+#cmakedefine VTKEdge_VTK_VERSION_DATE ${VTKEdge_VTK_VERSION_DATE}
+
+// Define @PROJECT_NAME@_SHARED if the library was built shared.
+// Why are we doing that??
+#if @VTKEdge_BUILD_SHARED_LIBS@
+# define @PROJECT_NAME@_SHARED
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff
+//-----------------------------------------------------------------------------
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #define VTKEdge_EXPORT __declspec( dllexport )
+#else
+ #define VTKEdge_EXPORT
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Common
+//-----------------------------------------------------------------------------
+// vtkKWECommon_EXPORTS is defined by cmake when building the shared
+// library vtkKWECommon.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWECommon_EXPORTS)
+  #define VTKEdge_COMMON_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_COMMON_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_COMMON_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Filtering
+//-----------------------------------------------------------------------------
+// vtkKWEFiltering_EXPORTS is defined by cmake when building the shared
+// library vtkKWEFiltering.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEFiltering_EXPORTS)
+  #define VTKEdge_FILTERING_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_FILTERING_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_FILTERING_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Graphics
+//-----------------------------------------------------------------------------
+// vtkKWEGraphics_EXPORTS is defined by cmake when building the shared
+// library vtkKWEGraphics.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEGraphics_EXPORTS)
+  #define VTKEdge_GRAPHICS_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_GRAPHICS_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_GRAPHICS_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Hybrid 
+//-----------------------------------------------------------------------------
+// vtkKWEHybrid_EXPORTS is defined by cmake when building the shared
+// library vtkKWEHybrid.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEHybrid_EXPORTS)
+  #define VTKEdge_HYBRID_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_HYBRID_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_HYBRID_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Imaging 
+//-----------------------------------------------------------------------------
+// vtkKWEImaging_EXPORTS is defined by cmake when building the shared
+// library vtkKWEImaging.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEImaging_EXPORTS)
+  #define VTKEdge_IMAGING_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_IMAGING_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_IMAGING_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for IO 
+//-----------------------------------------------------------------------------
+// vtkKWEIO_EXPORTS is defined by cmake when building the shared
+// library vtkKWEIO.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEIO_EXPORTS)
+  #define VTKEdge_IO_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_IO_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_IO_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Rendering 
+//-----------------------------------------------------------------------------
+// vtkKWERendering_EXPORTS is defined by cmake when building the shared
+// library vtkKWERendering.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWERendering_EXPORTS)
+  #define VTKEdge_RENDERING_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_RENDERING_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_RENDERING_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for VolumeRendering
+//-----------------------------------------------------------------------------
+// vtkKWEVolumeRendering_EXPORTS is defined by cmake when building the shared
+// library vtkKWEVolumeRendering.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEVolumeRendering_EXPORTS)
+  #define VTKEdge_VOLUMERENDERING_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_VOLUMERENDERING_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_VOLUMERENDERING_EXPORT 
+#endif
+
+//-----------------------------------------------------------------------------
+// export stuff for Widgets
+//-----------------------------------------------------------------------------
+// vtkKWEWidgets_EXPORTS is defined by cmake when building the shared
+// library vtkKWEWidgets.
+
+#if defined(WIN32) && defined(@PROJECT_NAME@_SHARED)
+ #if defined(vtkKWEWidgets_EXPORTS)
+  #define VTKEdge_WIDGETS_EXPORT __declspec( dllexport ) 
+ #else
+  #define VTKEdge_WIDGETS_EXPORT __declspec( dllimport ) 
+ #endif
+#else
+  #define VTKEdge_WIDGETS_EXPORT 
+#endif

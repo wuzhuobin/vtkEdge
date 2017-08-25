@@ -1,0 +1,99 @@
+#-----------------------------------------------------------------------------
+#
+# VTKEdgeConfig.cmake - CMake configuration file for external projects.
+#
+# This file is configured by VTKEdge and used by the UseVTKEdge.cmake 
+# module to load VTKEdge's settings for an external project.
+@VTKEdge_CONFIG_INSTALL_ONLY@
+# The VTKEdge version number.
+set(VTKEdge_VERSION_MAJOR  "@VTKEdge_VERSION_MAJOR@")
+set(VTKEdge_VERSION_MINOR  "@VTKEdge_VERSION_MINOR@")
+set(VTKEdge_VERSION_BUILD  "@VTKEdge_VERSION_BUILD@")
+set(VTKEdge_VERSION        "@VTKEdge_VERSION@")
+
+# The libraries.
+set(VTKEdge_LIBRARIES "@VTKEdge_LIBRARIES@")
+
+# The CMake macros dir.
+set(VTKEdge_CMAKE_DIR "@VTKEdge_CMAKE_DIR_CONFIG@")
+
+# The configuration options.
+set(VTKEdge_BUILD_SHARED_LIBS         "@VTKEdge_BUILD_SHARED_LIBS@")
+set(VTKEdge_BUILD_EXAMPLES            "@VTKEdge_BUILD_EXAMPLES@")
+set(VTKEdge_BUILD_PARAVIEW_PLUGINS    "@VTKEdge_BUILD_PARAVIEW_PLUGINS@")
+
+set(VTKEdge_USE_CUDA                  "@VTKEdge_USE_CUDA@")
+set(VTKEdge_USE_DIRECTX               "@VTKEdge_USE_DIRECTX@")
+set(VTKEdge_USE_CORE_GRAPHICS         "@VTKEdge_USE_CORE_GRAPHICS@")
+set(VTKEdge_USE_NVCONTROL             "@VTKEdge_USE_NVCONTROL@")
+
+set(VTKEdge_USE_ITK                   "@VTKEdge_USE_ITK@")
+
+set(VTKEdge_AVAILABLE_KITS            "@VTKEdge_AVAILABLE_KITS@")
+set(VTKEdge_ENABLED_KITS              "@VTKEdge_ENABLED_KITS@")
+
+set(VTKEdge_BUILD_Common_KIT          "@VTKEdge_BUILD_Common_KIT@")
+set(VTKEdge_BUILD_Filtering_KIT       "@VTKEdge_BUILD_Filtering_KIT@")
+set(VTKEdge_BUILD_Graphics_KIT        "@VTKEdge_BUILD_Graphics_KIT@")
+set(VTKEdge_BUILD_Hybrid_KIT          "@VTKEdge_BUILD_Hybrid_KIT@")
+set(VTKEdge_BUILD_Imaging_KIT         "@VTKEdge_BUILD_Imaging_KIT@")
+set(VTKEdge_BUILD_IO_KIT              "@VTKEdge_BUILD_IO_KIT@")
+set(VTKEdge_BUILD_Rendering_KIT       "@VTKEdge_BUILD_Rendering_KIT@")
+set(VTKEdge_BUILD_VolumeRendering_KIT "@VTKEdge_BUILD_VolumeRendering_KIT@")
+set(VTKEdge_BUILD_Widgets_KIT         "@VTKEdge_BUILD_Widgets_KIT@")
+set(VTKEdge_PAINTBRUSH_LABEL_TYPE     "@VTKEdge_PAINTBRUSH_LABEL_TYPE@")
+
+# The C and C++ flags added to the cmake-configured flags.
+set(VTKEdge_REQUIRED_C_FLAGS 
+  "@VTKEdge_REQUIRED_C_FLAGS@")
+set(VTKEdge_REQUIRED_CXX_FLAGS 
+  "@VTKEdge_REQUIRED_CXX_FLAGS@")
+set(VTKEdge_REQUIRED_EXE_LINKER_FLAGS 
+  "@VTKEdge_REQUIRED_EXE_LINKER_FLAGS@")
+set(VTKEdge_REQUIRED_SHARED_LINKER_FLAGS 
+  "@VTKEdge_REQUIRED_SHARED_LINKER_FLAGS@")
+set(VTKEdge_REQUIRED_MODULE_LINKER_FLAGS 
+  "@VTKEdge_REQUIRED_MODULE_LINKER_FLAGS@")
+
+# The "use" file.
+set(VTKEdge_USE_FILE "@VTKEdge_USE_FILE_CONFIG@")
+
+# The build settings file.
+set(VTKEdge_BUILD_SETTINGS_FILE "@VTKEdge_BUILD_SETTINGS_FILE_CONFIG@")
+
+# The library directories.
+set(VTKEdge_LIBRARY_DIRS "@VTKEdge_LIBRARY_DIRS_CONFIG@")
+
+# The runtime directories.
+# Note that if VTKEdge_CONFIGURATION_TYPES is set (see below) then
+# these directories will be the parent directories under which there will
+# be a directory of runtime binaries for each configuration type.
+set(VTKEdge_RUNTIME_DIRS "@VTKEdge_RUNTIME_DIRS_CONFIG@")
+
+# The include directories.
+set(VTKEdge_INCLUDE_DIRS "@VTKEdge_INCLUDE_DIRS_CONFIG@")
+
+# The library dependencies file.
+if(NOT VTKEdge_NO_LIBRARY_DEPENDS AND
+    EXISTS "@VTKEdge_LIBRARY_DEPENDS_FILE@")
+  include("@VTKEdge_LIBRARY_DEPENDS_FILE@")
+endif(NOT VTKEdge_NO_LIBRARY_DEPENDS AND
+  EXISTS "@VTKEdge_LIBRARY_DEPENDS_FILE@")
+
+# The VTK options.
+set(VTKEdge_VTK_DIR "@VTKEdge_VTK_DIR_CONFIG@")
+
+# An install tree always provides one build configuration.
+# A build tree may provide either one or multiple build
+# configurations depending on the CMake generator used. Since
+# this project can be used either from a build tree or an install tree it
+# is useful for outside projects to know the configurations available.
+# If this VTKEdgeConfig.cmake is in an install tree
+# VTKEdge_CONFIGURATION_TYPES will be empty and VTKEdge_BUILD_TYPE
+# will be set to the value of CMAKE_BUILD_TYPE used to build
+# VTKEdge. If VTKEdgeConfig.cmake is in a build tree
+# then VTKEdge_CONFIGURATION_TYPES and VTKEdge_BUILD_TYPE will
+# have values matching CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE
+# for that build tree (only one will ever be set).
+set(VTKEdge_CONFIGURATION_TYPES @VTKEdge_CONFIGURATION_TYPES_CONFIG@)
+set(VTKEdge_BUILD_TYPE @VTKEdge_BUILD_TYPE_CONFIG@)
