@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushStencilData.h"
@@ -30,7 +30,7 @@
 #include "vtkImageData.h"
 #include <math.h>
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushStencilData, "$Revision: 746 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushStencilData, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushStencilData);
 
 //----------------------------------------------------------------------------
@@ -38,7 +38,7 @@ vtkKWEPaintbrushStencilData::vtkKWEPaintbrushStencilData()
 {
   this->ImageStencilData = vtkImageStencilData::New();
   this->Information->Set(vtkDataObject::DATA_EXTENT_TYPE(), VTK_3D_EXTENT);
-  this->Information->Set(vtkDataObject::DATA_EXTENT(), 
+  this->Information->Set(vtkDataObject::DATA_EXTENT(),
                          this->ImageStencilData->GetExtent(), 6);
 }
 
@@ -215,7 +215,7 @@ void vtkKWEPaintbrushStencilData::Resize(int extent[6], double f)
             }
           } // end for each extent tuple
         } // end for each scan line
-      } // end of each slice       
+      } // end of each slice
 
     oldData->Delete();
     }
@@ -258,7 +258,7 @@ int vtkKWEPaintbrushStencilData::Clip( int extent[6] )
     return 0;
     }
 
-  if (vtkKWEPaintbrushUtilities::GetIntersectingExtents( 
+  if (vtkKWEPaintbrushUtilities::GetIntersectingExtents(
         currentExtent, extent, newExtent ))
     {
     // Copy into a temporary
@@ -278,10 +278,10 @@ int vtkKWEPaintbrushStencilData::Clip( int extent[6] )
         int moreSubExtents = 1;
         while( moreSubExtents )
           {
-          moreSubExtents = tmp->GetNextExtent( 
+          moreSubExtents = tmp->GetNextExtent(
             r1, r2, newExtent[0], newExtent[1], idy, idz, iter);
-          
-          if (r1 <= r2 ) // sanity check 
+
+          if (r1 <= r2 ) // sanity check
             {
             this->ImageStencilData->InsertNextExtent( r1, r2, idy, idz );
             }
@@ -333,7 +333,7 @@ int vtkKWEPaintbrushStencilData::IsInside( double p[3] )
   int moreSubExtents = 1, iter = 0, r1, r2;
   while( moreSubExtents )
     {
-    moreSubExtents = this->ImageStencilData->GetNextExtent( 
+    moreSubExtents = this->ImageStencilData->GetNextExtent(
       r1, r2, extent[0], extent[1], pixelPos[1], pixelPos[2], iter);
 
     if (r1 <= pixelPos[0] && r2 >= pixelPos[0] )

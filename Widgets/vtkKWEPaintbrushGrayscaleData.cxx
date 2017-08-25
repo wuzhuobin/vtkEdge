@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushGrayscaleData.h"
@@ -33,11 +33,11 @@
 #ifndef max
 #define max(x,y) ((x>y) ? (x) : (y))
 #endif
-#ifndef min 
+#ifndef min
 #define min(x,y) ((x<y) ? (x) : (y))
 #endif
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushGrayscaleData, "$Revision: 746 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushGrayscaleData, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushGrayscaleData);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushGrayscaleData, ImageData, vtkImageData);
 
@@ -49,7 +49,7 @@ vtkKWEPaintbrushGrayscaleData::vtkKWEPaintbrushGrayscaleData()
   this->Information->Set(vtkDataObject::DATA_EXTENT_TYPE(), VTK_3D_EXTENT);
   this->Information->Set(vtkDataObject::DATA_EXTENT(),
                          this->ImageData->GetExtent(), 6);
-  
+
   this->OutsideValue           = 0.0;
   this->OutsideValueTolerance = 0.01;
 }
@@ -108,8 +108,8 @@ int vtkKWEPaintbrushGrayscaleDataAdd( vtkKWEPaintbrushGrayscaleData * self,
 {
   const double outsideValue = self->GetOutsideValue();
   const double outsideValueTolerance = self->GetOutsideValueTolerance();
-  
-  // Not using vtkImageMathematics there cause we want to use self as the 
+
+  // Not using vtkImageMathematics there cause we want to use self as the
   // output and do a quick inplace add.
   int extent[6];
   if (!vtkKWEPaintbrushUtilities::GetIntersectingExtents(
@@ -117,32 +117,32 @@ int vtkKWEPaintbrushGrayscaleDataAdd( vtkKWEPaintbrushGrayscaleData * self,
     {
     return 0;
     }
-  
+
   vtkImageIterator< T1 > it1(self->GetImageData(), extent);
   vtkImageIterator< T2 > it2(s, extent);
 
   while( !it2.IsAtEnd() )
-    { 
-    T1 *inSI    = it1.BeginSpan();  
+    {
+    T1 *inSI    = it1.BeginSpan();
     T1 *inSIEnd = it1.EndSpan();
     T2 *inSI2   = it2.BeginSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
-      if ((static_cast< double >(*inSI2) - outsideValue) 
+      if ((static_cast< double >(*inSI2) - outsideValue)
                                   > outsideValueTolerance)
         {
-        *inSI = max(static_cast< T1 >(*inSI2), static_cast< T1 >(*inSI)); 
+        *inSI = max(static_cast< T1 >(*inSI2), static_cast< T1 >(*inSI));
         }
       ++inSI;
       ++inSI2;
-      }      
+      }
     it1.NextSpan();
     it2.NextSpan();
     }
 
   self->GetImageData()->Modified();
   self->Modified();
-  
+
   return 1;
 }
 
@@ -154,8 +154,8 @@ int vtkKWEPaintbrushGrayscaleDataSubtract(vtkKWEPaintbrushGrayscaleData *self,
 {
   const double outsideValue = self->GetOutsideValue();
   const double outsideValueTolerance = self->GetOutsideValueTolerance();
-  
-  // Not using vtkImageMathematics there cause we want to use self as the 
+
+  // Not using vtkImageMathematics there cause we want to use self as the
   // output and do a quick inplace add.
   int extent[6];
   if (!vtkKWEPaintbrushUtilities::GetIntersectingExtents(
@@ -163,32 +163,32 @@ int vtkKWEPaintbrushGrayscaleDataSubtract(vtkKWEPaintbrushGrayscaleData *self,
     {
     return 0;
     }
-  
+
   vtkImageIterator< T1 > it1(self->GetImageData(), extent);
   vtkImageIterator< T2 > it2(s, extent);
 
   while( !it1.IsAtEnd() )
-    { 
-    T1 *inSI    = it1.BeginSpan();  
+    {
+    T1 *inSI    = it1.BeginSpan();
     T1 *inSIEnd = it1.EndSpan();
     T2 *inSI2 = it2.BeginSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
-      if ((static_cast< double >(*inSI2) - outsideValue) 
+      if ((static_cast< double >(*inSI2) - outsideValue)
                                   > outsideValueTolerance)
         {
-        *inSI = min(static_cast< T1 >(*inSI2), static_cast< T1 >(*inSI)); 
+        *inSI = min(static_cast< T1 >(*inSI2), static_cast< T1 >(*inSI));
         }
       ++inSI;
       ++inSI2;
-      }      
+      }
     it1.NextSpan();
     it2.NextSpan();
     }
 
   self->GetImageData()->Modified();
   self->Modified();
- 
+
   return 1;
 }
 
@@ -200,8 +200,8 @@ int vtkKWEPaintbrushGrayscaleDataReplace(vtkKWEPaintbrushGrayscaleData *self,
 {
   const double outsideValue = self->GetOutsideValue();
   const double outsideValueTolerance = self->GetOutsideValueTolerance();
-  
-  // Not using vtkImageMathematics there cause we want to use self as the 
+
+  // Not using vtkImageMathematics there cause we want to use self as the
   // output and do a quick inplace add.
   int extent[6];
   if (!vtkKWEPaintbrushUtilities::GetIntersectingExtents(
@@ -209,32 +209,32 @@ int vtkKWEPaintbrushGrayscaleDataReplace(vtkKWEPaintbrushGrayscaleData *self,
     {
     return 0;
     }
-  
+
   vtkImageIterator< T1 > it1(self->GetImageData(), extent);
   vtkImageIterator< T2 > it2(s, extent);
 
   while( !it1.IsAtEnd() )
-    { 
-    T1 *inSI    = it1.BeginSpan();  
+    {
+    T1 *inSI    = it1.BeginSpan();
     T1 *inSIEnd = it1.EndSpan();
     T2 *inSI2 = it2.BeginSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
-      if ((static_cast< double >(*inSI2) - outsideValue) 
+      if ((static_cast< double >(*inSI2) - outsideValue)
                                   > outsideValueTolerance)
         {
-        *inSI = static_cast< T1 >(*inSI2); 
+        *inSI = static_cast< T1 >(*inSI2);
         }
       ++inSI;
       ++inSI2;
-      }      
+      }
     it1.NextSpan();
     it2.NextSpan();
     }
 
   self->GetImageData()->Modified();
   self->Modified();
- 
+
   return 1;
 }
 
@@ -274,7 +274,7 @@ int vtkKWEPaintbrushGrayscaleDataOper(vtkKWEPaintbrushGrayscaleData *self,
                                                  static_cast< VTK_TT >(0) ));
      }
    }
-   
+
  return ret;
 }
 
@@ -285,7 +285,7 @@ int vtkKWEPaintbrushGrayscaleData::Add(vtkImageData *s,
   int ret = 0;
   switch(this->ImageData->GetScalarType())
     {
-    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper(this,s, 
+    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper(this,s,
           static_cast<VTK_TT>(0), 0 ));
      default:
        {
@@ -303,7 +303,7 @@ int vtkKWEPaintbrushGrayscaleData::Subtract(vtkImageData *s,
   int ret = 0;
   switch(this->ImageData->GetScalarType())
     {
-    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper( this, s, 
+    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper( this, s,
           static_cast< VTK_TT >(0), 1 ));
      default:
        {
@@ -321,7 +321,7 @@ int vtkKWEPaintbrushGrayscaleData::Replace(vtkImageData *s,
   int ret = 0;
   switch(this->ImageData->GetScalarType())
     {
-    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper( this, s, 
+    vtkTemplateMacro( ret = vtkKWEPaintbrushGrayscaleDataOper( this, s,
           static_cast< VTK_TT >(0), 2 ));
      default:
        {
@@ -377,14 +377,14 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferInside(
 {
   vtkImageIterator< T > it(image, image->GetExtent());
   while( !it.IsAtEnd() )
-    { 
-    T *inSI    = it.BeginSpan();  
+    {
+    T *inSI    = it.BeginSpan();
     T *inSIEnd = it.EndSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
       *inSI = static_cast< T >(fillValue);
       ++inSI;
-      }      
+      }
     it.NextSpan();
     }
 }
@@ -396,7 +396,7 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
   int imageExtent[6];
   image->GetExtent(imageExtent);
   int y = imageExtent[2], z = imageExtent[4], e[6];
-  
+
   e[0] = (extent[0] < imageExtent[0] ? imageExtent[0] : extent[0]);
   e[1] = (extent[1] > imageExtent[1] ? imageExtent[1] : extent[1]);
   e[2] = (extent[2] < imageExtent[2] ? imageExtent[2] : extent[2]);
@@ -405,13 +405,13 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
   e[5] = (extent[5] > imageExtent[5] ? imageExtent[5] : extent[5]);
 
   // Handle 4 cases with extent clippers
-  // 
+  //
   // Image                      -------------------
   // ClipExtent Case 0                -------
   // ClipExtent Case 1      ------------
   // ClipExtent Case 2                    --------------
   // ClipExtent Case 3      ---------------------------
-  
+
   int type  = (extent[0] <= imageExtent[0]) ? 0x01 : 0x00;
       type |= (extent[1] >= imageExtent[1]) ? 0x10 : 0x00;
 
@@ -431,15 +431,15 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
       break;
     }
 
-  vtkImageIterator< T > it(image, e);  
+  vtkImageIterator< T > it(image, e);
   while( !it.IsAtEnd() )
     {
-    T *inSI    = it.BeginSpan();  
+    T *inSI    = it.BeginSpan();
     T *inSIEnd = it.EndSpan();
 
     if (z < extent[4] || z > extent[5] || y < extent[2] || y > extent[3])
       {
-      while (inSI != inSIEnd) 
+      while (inSI != inSIEnd)
         {
         *inSI = static_cast< T >(fillValue);
         ++inSI;
@@ -450,12 +450,12 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
       {
       T* inSIEnd0 = inSI + incr0;
       T* inSIBegin1 = inSI + incr1;
-      while (inSI != inSIEnd0) 
+      while (inSI != inSIEnd0)
         {
         *inSI = static_cast< T >(fillValue);
         ++inSI;
         }
-      while (inSIBegin1 != inSIEnd) 
+      while (inSIBegin1 != inSIEnd)
         {
         *inSIBegin1 = static_cast< T >(fillValue);
         ++inSIBegin1;
@@ -465,7 +465,7 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
     else if (type == 1)
       {
       inSI += incr0;
-      while (inSI != inSIEnd) 
+      while (inSI != inSIEnd)
         {
         *inSI = static_cast< T >(fillValue);
         ++inSI;
@@ -475,7 +475,7 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
     else if (type == 2)
       {
       inSIEnd = inSI + incr0;
-      while (inSI != inSIEnd) 
+      while (inSI != inSIEnd)
         {
         *inSI = static_cast< T >(fillValue);
         ++inSI;
@@ -499,7 +499,7 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
 void vtkKWEPaintbrushGrayscaleData::Allocate(double fillValue)
 {
   this->ImageData->AllocateScalars();
-  
+
   switch(this->ImageData->GetScalarType())
     {
     vtkTemplateMacro(
@@ -536,9 +536,9 @@ void vtkKWEPaintbrushGrayscaleData::GetExtent( int extent[6] )
 int vtkKWEPaintbrushGrayscaleData::Clip( int extent[6] )
 {
   // This will not re-allocate extents. In other words, this is not a means
-  // of saving memory. It will simply set to 0, any values in the image 
+  // of saving memory. It will simply set to 0, any values in the image
   // outside the extents.
-  
+
   int intersectingExtent[6], currentExtent[6];
   this->ImageData->GetExtent( currentExtent );
 
@@ -546,11 +546,11 @@ int vtkKWEPaintbrushGrayscaleData::Clip( int extent[6] )
     {
     return 0;
     }
-  
-  if (!vtkKWEPaintbrushUtilities::GetIntersectingExtents( 
+
+  if (!vtkKWEPaintbrushUtilities::GetIntersectingExtents(
           currentExtent, extent, intersectingExtent ))
     {
-    // Nothing is inside.. blank image.. 
+    // Nothing is inside.. blank image..
     switch (this->ImageData->GetScalarType())
       {
       vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataFillBufferInside(
@@ -559,14 +559,14 @@ int vtkKWEPaintbrushGrayscaleData::Clip( int extent[6] )
     }
   else
     {
-    // Nothing is inside.. blank image.. 
+    // Nothing is inside.. blank image..
     switch (this->ImageData->GetScalarType())
       {
       vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataFillBufferOutside(
         this->ImageData, extent, static_cast< VTK_TT >(this->OutsideValue)));
       }
     }
-  
+
   return 1;
 }
 
@@ -593,10 +593,10 @@ int vtkKWEPaintbrushGrayscaleData::IsInside( double p[3] )
     {
     switch (this->ImageData->GetScalarType())
       {
-      vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataGetValue( 
+      vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataGetValue(
                       ijk, value, this->ImageData, static_cast<VTK_TT>(0) ));
       }
-    return (fabs(value - this->OutsideValue) 
+    return (fabs(value - this->OutsideValue)
               < this->OutsideValueTolerance ? 0 : 1);
     }
 
@@ -626,11 +626,11 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataResize(
   vtkImageIterator< T > it2(imageOld, oldExtent);
 
   while( !it2.IsAtEnd() )
-    { 
-    T *inSI    = it1.BeginSpan();  
+    {
+    T *inSI    = it1.BeginSpan();
     T *inSIEnd = it1.EndSpan();
     T *inSI2   = it2.BeginSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
       *inSI = *inSI2;
       ++inSI;
@@ -638,7 +638,7 @@ template< class T > void vtkKWEPaintbrushGrayscaleDataResize(
       }
     it1.NextSpan();
     it2.NextSpan();
-    }    
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -669,15 +669,15 @@ void vtkKWEPaintbrushGrayscaleData::Resize(int extent[6], double f)
 
     switch (this->ImageData->GetScalarType())
       {
-      vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataResize( 
+      vtkTemplateMacro( vtkKWEPaintbrushGrayscaleDataResize(
         this->ImageData, oldData, extent, static_cast<VTK_TT>(0) ));
       }
-    
+
     oldData->Delete();
     }
 
   this->ImageData->Modified();
-  this->Modified();  
+  this->Modified();
 }
 
 

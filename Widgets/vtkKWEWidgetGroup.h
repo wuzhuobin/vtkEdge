@@ -1,35 +1,35 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEWidgetGroup - Synchronize a collection on vtkWidgets drawn on different renderwindows using the Callback - Dispatch Action mechanism.
-// 
+//
 // .SECTION Description
 // The class synchronizes a set of vtkAbstractWidget(s). Widgets typically
 // invoke "Actions" that drive the geometry/behaviour of their representations
 // in response to interactor events. Interactor interactions on a render window
-// are mapped into "Callbacks" by the widget, from which "Actions" are 
+// are mapped into "Callbacks" by the widget, from which "Actions" are
 // dispatched to the entire set. This architecture allows us to tie widgets
 // existing in different render windows together. For instance a HandleWidget
-// might exist on the sagittal view. Moving it around should update the 
-// representations of the corresponding handle widget that lies on the axial 
-// and coronal and volume views as well. 
+// might exist on the sagittal view. Moving it around should update the
+// representations of the corresponding handle widget that lies on the axial
+// and coronal and volume views as well.
 //
 // .SECTION User API
 // A user would use this class as follows.
@@ -48,18 +48,18 @@
 // \endcode
 //
 // .SECTION Motivation
-// The motivation for this class is really to provide a usable API to tie 
+// The motivation for this class is really to provide a usable API to tie
 // widgets drawn on multiple render windows. To enable this, subclasses
 // of vtkAbstractWidget, must be written as follows:
-//   They will generally have callback methods mapped to some user 
+//   They will generally have callback methods mapped to some user
 // interaction such as:
 // \code
 // this->CallbackMapper->SetCallbackMethod(vtkCommand::RightButtonPressEvent,
-//                       vtkEvent::NoModifier, 0, 0, NULL, 
+//                       vtkEvent::NoModifier, 0, 0, NULL,
 //                       vtkKWEPaintbrushWidget::ResizeEvent,
 //                       this, vtkKWEPaintbrushWidget::ResizeCallback);
 // \endcode
-//   The callback invoked when the right button is pressed looks like: 
+//   The callback invoked when the right button is pressed looks like:
 // \code
 // void vtkKWEPaintbrushWidget::ResizeCallback(vtkAbstractWidget *w)
 // {
@@ -78,8 +78,8 @@
 //     {
 //     this->WidgetRep->Resize( eventPos, lastEventPos );
 //
-//     // The active widget can use the return value to signify an abort. 
-//     // The other widgets in the set won't have the action dispatched to 
+//     // The active widget can use the return value to signify an abort.
+//     // The other widgets in the set won't have the action dispatched to
 //     // them at all.
 //     if (newSize == oldSize) return 0;
 //     }
@@ -90,11 +90,11 @@
 //     }
 // }
 // \endcode
-// 
+//
 // .SECTION Caveats
 // Actions are always dispatched first to the activeWidget, the one calling
 // the set, and then to the other widgets in the set.
-// 
+//
 #ifndef __vtkKWEWidgetGroup_h
 #define __vtkKWEWidgetGroup_h
 
@@ -138,19 +138,19 @@ public:
   vtkAbstractWidget *GetNthWidget( unsigned int );
 
   //BTX
-  // TODO: Move this to the protected section. The class vtkAbstractWidget 
-  //       should be a friend of this class. 
+  // TODO: Move this to the protected section. The class vtkAbstractWidget
+  //       should be a friend of this class.
   typedef vtkstd::vector< vtkAbstractWidget * >   WidgetContainerType;
   typedef WidgetContainerType::iterator           WidgetIteratorType;
   typedef WidgetContainerType::const_iterator     WidgetConstIteratorType;
   WidgetContainerType                             Widget;
- 
+
   // Description:
   // Pointer to a member function that takes a vtkAbstractWidget (the active
   // child) and another vtkAbstractWidget (the widget to dispatch an action)
   // to. All "Action" funtions in a widget must conform to this signature.
   // A return value of 0 from the active widget indicates that there is no
-  // need to for the widget set to dispatch the action to other widgets in 
+  // need to for the widget set to dispatch the action to other widgets in
   // the set.
   template< class TWidget > struct ActionFunction
     {
@@ -158,26 +158,26 @@ public:
     };
 
   // Description:
-  // Dispatch an "Action" to every widget in this set. This is meant be be 
+  // Dispatch an "Action" to every widget in this set. This is meant be be
   // invoked from a "Callback" in a widget.
   template < class TWidget >
-  void DispatchAction(TWidget *caller, 
+  void DispatchAction(TWidget *caller,
                       typename ActionFunction< TWidget >::TActionFunctionPointer action)
     {
     // Dispatch action to the caller first.
-    for (WidgetIteratorType it  = this->Widget.begin(); 
+    for (WidgetIteratorType it  = this->Widget.begin();
                             it != this->Widget.end()  ; ++it)
       {
       TWidget *w = static_cast<TWidget *>(*it);
       if (caller == w)
         {
-        if (((*w).*(action))(caller) == 0) return; 
+        if (((*w).*(action))(caller) == 0) return;
         break;
         }
       }
-    
+
     // Dispatch action to all other widgets
-    for (WidgetIteratorType it  = this->Widget.begin(); 
+    for (WidgetIteratorType it  = this->Widget.begin();
                             it != this->Widget.end()  ; ++it)
       {
       TWidget *w = static_cast<TWidget *>(*it);
@@ -190,7 +190,15 @@ public:
   // Enable garbage collection due to ref counting cycles with vtkAbstractWidget
   virtual void Register(vtkObjectBase* o);
   virtual void UnRegister(vtkObjectBase* o);
-  
+
+  // Description:
+  // Is this widget present in the group
+  int HasWidget( vtkAbstractWidget * );
+
+  // Description:
+  // Render all the widgets in the group.
+  void Render();
+
 protected:
   vtkKWEWidgetGroup();
   ~vtkKWEWidgetGroup();
@@ -198,7 +206,7 @@ protected:
   // We need to break reference count loops. The widgets held by us refcount us
   // too
   virtual void ReportReferences(vtkGarbageCollector* collector);
-  
+
 private:
   vtkKWEWidgetGroup(const vtkKWEWidgetGroup&);  //Not implemented
   void operator=(const vtkKWEWidgetGroup&);  //Not implemented

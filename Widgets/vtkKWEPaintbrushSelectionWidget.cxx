@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -34,7 +34,7 @@
 #include "vtkEvent.h"
 #include "vtkWidgetEvent.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushSelectionWidget, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushSelectionWidget, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushSelectionWidget);
 
 //----------------------------------------------------------------------
@@ -46,12 +46,12 @@ vtkKWEPaintbrushSelectionWidget::vtkKWEPaintbrushSelectionWidget()
   // These are the event callbacks supported by this widget
   this->CallbackMapper->SetCallbackMethod(
          vtkCommand::LeftButtonPressEvent,
-         vtkEvent::NoModifier, 0, 0, NULL, 
+         vtkEvent::NoModifier, 0, 0, NULL,
          vtkKWEPaintbrushWidget::SelectSketchEvent,
          this, vtkKWEPaintbrushSelectionWidget::BeginToggleSelectSketchCallback);
   this->CallbackMapper->SetCallbackMethod(
          vtkCommand::LeftButtonReleaseEvent,
-         vtkEvent::NoModifier, 0, 0, NULL, 
+         vtkEvent::NoModifier, 0, 0, NULL,
          vtkCommand::LeftButtonReleaseEvent,
          this, vtkKWEPaintbrushSelectionWidget::EndToggleSelectSketchCallback);
   this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
@@ -69,7 +69,7 @@ vtkKWEPaintbrushSelectionWidget::vtkKWEPaintbrushSelectionWidget()
   this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // Ctrl+a
            vtkEvent::ControlModifier, 1, 0,"a",
            vtkKWEPaintbrushWidget::ToggleSelectAllSketchesEvent,
-           this, vtkKWEPaintbrushSelectionWidget::ToggleSelectAllSketchesCallback); 
+           this, vtkKWEPaintbrushSelectionWidget::ToggleSelectAllSketchesCallback);
   this->CallbackMapper->SetCallbackMethod(vtkCommand::MouseMoveEvent,
          vtkWidgetEvent::Move,
          this, vtkKWEPaintbrushSelectionWidget::MoveCallback);
@@ -110,22 +110,22 @@ void vtkKWEPaintbrushSelectionWidget::SetEnabled(int enabling)
     return; // Nothing to do
     }
 
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
 
   // Start off on a clean slate.
   rep->UnSelectAllSketches();
 
   rep->SetVisibility( enabling );
-  this->Superclass::SetEnabled(enabling);  
+  this->Superclass::SetEnabled(enabling);
 }
 
-// The following methods are the callbacks that the widget responds to. 
+// The following methods are the callbacks that the widget responds to.
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushSelectionWidget
 ::BeginToggleSelectSketchCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
@@ -133,12 +133,12 @@ void vtkKWEPaintbrushSelectionWidget
     }
 
   self->WidgetState = None;
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(self->WidgetRep);
 
-  // Request a selection. The representation is free to deny it based on 
+  // Request a selection. The representation is free to deny it based on
   // constraints of the placer etc.
-  rep->SetInteractionState( 
+  rep->SetInteractionState(
     vtkKWEPaintbrushSelectionRepresentation::PaintbrushRequestSketchSelect);
 
   int interactionState = rep->ComputeInteractionState(
@@ -150,7 +150,7 @@ void vtkKWEPaintbrushSelectionWidget
     {
     // We selected some sketch.
     self->WidgetState = vtkKWEPaintbrushSelectionWidget::BeginSelecting;
-    self->WidgetGroup->DispatchAction( self, 
+    self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::SelectSketchAction);
     self->EventCallbackCommand->SetAbortFlag(1);
     }
@@ -159,7 +159,7 @@ void vtkKWEPaintbrushSelectionWidget
         PaintbrushSketchUnselect)
     {
     // We de-selected some sketch.
-    self->WidgetGroup->DispatchAction( self, 
+    self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::UnselectSketchAction);
     self->EventCallbackCommand->SetAbortFlag(1);
     }
@@ -169,13 +169,13 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::EndToggleSelectSketchCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
     return;
     }
-  self->WidgetGroup->DispatchAction( self, 
+  self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::ReleaseSelectAction);
 }
 
@@ -183,14 +183,14 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::DeleteSelectionCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
     return;
     }
 
-  self->WidgetGroup->DispatchAction( self, 
+  self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::DeleteSelectionAction);
 }
 
@@ -198,14 +198,14 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::ToggleSelectAllSketchesCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
     return;
     }
 
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(self->WidgetRep);
 
   const int nSketches = rep->GetPaintbrushDrawing()->GetNumberOfItems();
@@ -219,11 +219,11 @@ void vtkKWEPaintbrushSelectionWidget
     if (nSelectedSketches > nSketches/2)
       {
       self->UnSelectAllSketchesCallback(self);
-      } 
+      }
     else
       {
       self->SelectAllSketchesCallback(self);
-      }    
+      }
     }
 }
 
@@ -231,14 +231,14 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::SelectAllSketchesCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
     return;
     }
 
-  self->WidgetGroup->DispatchAction( self, 
+  self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::SelectAllSketchesAction);
 }
 
@@ -246,14 +246,14 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::UnSelectAllSketchesCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled)
     {
     return;
     }
 
-  self->WidgetGroup->DispatchAction( self, 
+  self->WidgetGroup->DispatchAction( self,
       &vtkKWEPaintbrushSelectionWidget::UnSelectAllSketchesAction);
 }
 
@@ -261,14 +261,14 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::MergeSelectionCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (!self || self->WidgetState == Disabled || !self->WidgetGroup)
     {
     return;
     }
 
-  self->WidgetGroup->DispatchAction( self, 
+  self->WidgetGroup->DispatchAction( self,
         &vtkKWEPaintbrushSelectionWidget::MergeSelectionAction);
 }
 
@@ -276,7 +276,7 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget
 ::MoveCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushSelectionWidget *self = 
+  vtkKWEPaintbrushSelectionWidget *self =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(w);
   if (self->WidgetState != BeginSelecting)
     {
@@ -285,15 +285,15 @@ void vtkKWEPaintbrushSelectionWidget
 
   if (!self->EnableDragAndDrop)
     {
-    return; // Ignore drag. 
+    return; // Ignore drag.
     }
 
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(self->WidgetRep);
   rep->SetInteractionState( vtkKWEPaintbrushSelectionRepresentation::
       PaintbrushRequestSketchMerge );
 
-  if ( rep->ComputeInteractionState( 
+  if ( rep->ComputeInteractionState(
           self->Interactor->GetEventPosition()[0],
           self->Interactor->GetEventPosition()[1]) !=
               vtkKWEPaintbrushSelectionRepresentation::None )
@@ -308,14 +308,14 @@ void vtkKWEPaintbrushSelectionWidget
 int vtkKWEPaintbrushSelectionWidget
 ::SelectSketchAction(vtkKWEPaintbrushSelectionWidget *dispatcher)
 {
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
-  
+
   this->DeepCopy(dispatcher);
- 
+
   this->Render();
   this->EventCallbackCommand->SetAbortFlag(1);
-  this->InvokeEvent(vtkKWEPaintbrushWidget::SelectSketchEvent, 
+  this->InvokeEvent(vtkKWEPaintbrushWidget::SelectSketchEvent,
                     static_cast<void *>(rep->GetSelectedSketch()) );
   return 1;
 }
@@ -324,11 +324,11 @@ int vtkKWEPaintbrushSelectionWidget
 int vtkKWEPaintbrushSelectionWidget
 ::UnselectSketchAction(vtkKWEPaintbrushSelectionWidget *dispatcher)
 {
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
-  
+
   this->DeepCopy(dispatcher);
- 
+
   this->Render();
   this->EventCallbackCommand->SetAbortFlag(1);
   this->InvokeEvent(vtkKWEPaintbrushWidget::UnselectSketchEvent,
@@ -342,13 +342,13 @@ int vtkKWEPaintbrushSelectionWidget
 {
   if (this == dispatcher)
     {
-    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
       vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
     rep->SelectAllSketches();
     }
   else
     {
-    this->DeepCopy(dispatcher); 
+    this->DeepCopy(dispatcher);
     }
 
   this->Render();
@@ -363,15 +363,15 @@ int vtkKWEPaintbrushSelectionWidget
 {
   if (this == dispatcher)
     {
-    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
       vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
     rep->UnSelectAllSketches();
     }
   else
     {
-    this->DeepCopy(dispatcher); 
+    this->DeepCopy(dispatcher);
     }
-  
+
   this->Render();
   this->EventCallbackCommand->SetAbortFlag(1);
   this->InvokeEvent( vtkKWEPaintbrushWidget::UnSelectAllSketchesEvent );
@@ -384,18 +384,18 @@ int vtkKWEPaintbrushSelectionWidget
 {
   if (this->WidgetState == BeginSelecting)
     {
-    this->WidgetState = EndSelecting; 
+    this->WidgetState = EndSelecting;
     this->EventCallbackCommand->SetAbortFlag(1);
 
     if (!this->EnableDragAndDrop)
       {
       return 0; // Ignore potential drop.
       }
-    
+
     // Drag and drop merge support.
-    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+    vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
       vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
-    if (rep->GetInteractionState() == 
+    if (rep->GetInteractionState() ==
         vtkKWEPaintbrushSelectionRepresentation::PaintbrushSketchMerge)
       {
       rep->DragAndDropMerge();
@@ -412,9 +412,9 @@ int vtkKWEPaintbrushSelectionWidget
 int vtkKWEPaintbrushSelectionWidget
 ::DeleteSelectionAction(vtkKWEPaintbrushSelectionWidget *dispatcher)
 {
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
-  
+
   if (this == dispatcher)
     {
     if (rep->DeleteSelectedSketches() == 0)
@@ -426,7 +426,7 @@ int vtkKWEPaintbrushSelectionWidget
     {
     this->DeepCopy(dispatcher);
     }
- 
+
   // Render only if needed.
   this->Render();
   this->EventCallbackCommand->SetAbortFlag(1);
@@ -438,9 +438,9 @@ int vtkKWEPaintbrushSelectionWidget
 int vtkKWEPaintbrushSelectionWidget
 ::MergeSelectionAction(vtkKWEPaintbrushSelectionWidget *dispatcher)
 {
-  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast< 
+  vtkKWEPaintbrushSelectionRepresentation *rep = static_cast<
     vtkKWEPaintbrushSelectionRepresentation *>(this->WidgetRep);
-  
+
   if (this == dispatcher)
     {
     if (rep->MergeSelectedSketches(
@@ -453,7 +453,7 @@ int vtkKWEPaintbrushSelectionWidget
     {
     this->DeepCopy(dispatcher);
     }
- 
+
   // Render only if needed.
   this->Render();
   this->EventCallbackCommand->SetAbortFlag(1);
@@ -464,15 +464,15 @@ int vtkKWEPaintbrushSelectionWidget
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushSelectionWidget::DeepCopy(vtkAbstractWidget *widget)
 {
-  vtkKWEPaintbrushSelectionWidget *w = 
+  vtkKWEPaintbrushSelectionWidget *w =
     static_cast< vtkKWEPaintbrushSelectionWidget *>(widget);
-  if (this == w || !w) 
+  if (this == w || !w)
     {
     return;
     }
-  
+
   this->WidgetState = w->WidgetState;
-  if (w->WidgetGroup) 
+  if (w->WidgetGroup)
     {
     w->WidgetGroup->AddWidget(this);
     }
@@ -487,7 +487,7 @@ void vtkKWEPaintbrushSelectionWidget::DeepCopy(vtkAbstractWidget *widget)
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushSelectionWidget::DeleteSelectedSketches()
 {
-  this->WidgetGroup->DispatchAction( this, 
+  this->WidgetGroup->DispatchAction( this,
         &vtkKWEPaintbrushSelectionWidget::DeleteSelectionAction);
 }
 
@@ -502,6 +502,6 @@ void vtkKWEPaintbrushSelectionWidget
 void vtkKWEPaintbrushSelectionWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
   //Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
-  this->Superclass::PrintSelf(os,indent); 
+  this->Superclass::PrintSelf(os,indent);
 }
 

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -43,7 +43,7 @@
 #include <limits>
 
 
-vtkCxxRevisionMacro(vtkKWEImageFDKFilter, "$Revision: 710 $");
+vtkCxxRevisionMacro(vtkKWEImageFDKFilter, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEImageFDKFilter);
 
 //----------------------------------------------------------------------------
@@ -87,14 +87,14 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
   //int *tExt;
 
   int inExt[6], outExt[6] = {0, 128, 0, 128, 0 , 128};
-  
+
   inData->GetExtent(inExt);
   outData->GetExtent(outExt);
 
   vtkImageData * inImage = inData;
 
   //inPtr1 = inData->GetScalarPointerForExtent(outExt);
-  
+
 
   // this filter expects that input is the same type as output.
   if (inData->GetScalarType() != outData->GetScalarType())
@@ -106,7 +106,7 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
     return 0;
     }
 
-  
+
 
   // make the temporary regions to iterate over.
  /* vtkImageData *in = vtkImageData::New();
@@ -121,7 +121,7 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
   int N = static_cast<int>(2 * floor( (187)/ (2*sqrt(2.0))));
   int N2 = static_cast<int>(ceil(N/2.0));
   int volExt[6] = { 0, N, 0, N, 0, N };
-  
+
   vtkImageData *out = vtkImageData::New();
   out->SetExtent(volExt);
   out->SetNumberOfScalarComponents(
@@ -192,10 +192,10 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
 
   vtkImageFFT * fft = vtkImageFFT::New();
   vtkImageRFFT * ifft = vtkImageRFFT::New();
-  //vtkStreamingDemandDrivenPipeline * fftPipe = 
+  //vtkStreamingDemandDrivenPipeline * fftPipe =
   //  vtkStreamingDemandDrivenPipeline::SafeDownCast(fft->GetExecutive());
 
-  //vtkStreamingDemandDrivenPipeline * ifftPipe = 
+  //vtkStreamingDemandDrivenPipeline * ifftPipe =
   //  vtkStreamingDemandDrivenPipeline::SafeDownCast(ifft->GetExecutive());
 
   vtkImageData * fftOutput = NULL;
@@ -228,7 +228,7 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
     fft->Update();
     fftOutput = fft->GetOutput();
     fftPtr = static_cast<float *>(fft->GetOutput()->GetScalarPointer());
-    fftOutput->GetExtent(fftExt); 
+    fftOutput->GetExtent(fftExt);
 
     // Filter each Projection row with H
     for(int j = 0; j < 6; j++)
@@ -273,7 +273,7 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
         if(u <= 0 ||u >= (dimX+1))
           {
           // this u is outside the projection, skip
-          //cout << "u: " << u << endl;       
+          //cout << "u: " << u << endl;
           //outPtr++;
           continue;
           }
@@ -284,14 +284,14 @@ int vtkKWEImageFDKFilter::RequestData(vtkInformation *vtkNotUsed(request),
           v = numeric->Round(this->Radius/Radius2 * z + 3);
           /*
           v1=round( v0+nr_p/2 ) ;  % coord. correction
-          idx = id_1_term + v1 ; % idx = sub2ind(szproj,u1, v1); 
+          idx = id_1_term + v1 ; % idx = sub2ind(szproj,u1, v1);
           tmp = proj(idx); % just in case
           tmp = tmp(:).*inv_R_s_quad; % back-projection ... from pixels to voxels ...!
-          tmp1(good_u)=tmp; tmp1(lengoodu)=0;% 
+          tmp1(good_u)=tmp; tmp1(lengoodu)=0;%
           tmp2(maskV)=tmp1; % prepare for image reconst. within the mask
           iposz=iposz_v(iz); % position of the current slice iz in the volume at iposz
           vol_tmp(:,iposz)=vol_tmp(:,iposz)+tmp2; % sum up back-projections without reshaping
-            */       
+            */
           projIdx = (u - 1) * 6 + v;
           u1 = projIdx / order;
           v1 = projIdx  - (u1 * order);
@@ -342,7 +342,7 @@ int vtkKWEImageFDKFilter::RequestInformation (
 {
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  
+
   int extent[6];
   inInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), extent);
   //this->ComputeOutputWholeExtent(extent, this->HandleBoundaries);
@@ -375,7 +375,7 @@ void vtkKWEImageFDKFilter::GenerateWeightingFunction(int projExt[6])
 
   //[X,Y]=meshgrid([[floor(8/2):-1:0],[1:(8-floor(8/2)-1)]],...
 //[[floor(8/2):-1:0],[1:(8-floor(8/2)-1)]]);
-  //W=R.* ( (X.^2 + Y.^2 + R^2).^-0.5 ); 
+  //W=R.* ( (X.^2 + Y.^2 + R^2).^-0.5 );
   int dim2X, dim2Y, p, zeta;
   dim2X = static_cast<int>(floor(dimX/2.0));
   dim2Y = static_cast<int>(floor(dimY/2.0));
@@ -397,7 +397,7 @@ void vtkKWEImageFDKFilter::GenerateWeightingFunction(int projExt[6])
 void vtkKWEImageFDKFilter::ApplyWeightingFunction(
   int row,
   int slice,
-  vtkImageData * projection, 
+  vtkImageData * projection,
   vtkImageData * output)
 {
   int inExt[6], outExt[6];
@@ -441,12 +441,12 @@ void vtkKWEImageFDKFilter::ApplyWeightingFunction(
 void vtkKWEImageFDKFilter::GenerateFilter(float * filter, int order)
 {
   //filt = 2*( 0:(order/2) )./order;
-  //w = 2*pi*(0:size(filt,2)-1)/order;   % frequency axis up to Nyquist 
+  //w = 2*pi*(0:size(filt,2)-1)/order;   % frequency axis up to Nyquist
   //filt(w>pi*d) = 0;                      % Crop the frequency response
   //filt = [filt , filt(end-1:-1:2)];    % Symmetry of the filter
   int i = 0, ii = 0;
   int halfOrder = order/2;
-  
+
   for(i = 0; i < halfOrder; i++)
     {
     filter[i] = static_cast<float>(2 * i/order);

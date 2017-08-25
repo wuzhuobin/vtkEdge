@@ -91,12 +91,20 @@ public:
   //   label value to 0.
   virtual void Clear( vtkKWEPaintbrushEnums::LabelType label );
     
+  // Description:
+  // INTERAL - Do not use.
+  // This is internally called to compute deltas for the Undo-Redo guys
+  void SetComputeDelta( int i ) { this->ComputeDelta = i; }
+  int GetComputeDelta() { return this->ComputeDelta; }
+
 protected:
   vtkKWEPaintbrushData();
   ~vtkKWEPaintbrushData();
 
   // Relevant only for vtkKWEPaintbrushStencilData when editing into label maps.
   vtkKWEPaintbrushEnums::LabelType Label;
+
+  int ComputeDelta;
 
 private:
   vtkKWEPaintbrushData(const vtkKWEPaintbrushData&);  // Not implemented.

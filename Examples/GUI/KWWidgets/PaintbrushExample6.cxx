@@ -1,32 +1,32 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // PaintbrushData drawn can be filtered through "operations". These are
-// represented by abstract base classes: vtkKWEPaintbrushOperation. The base 
-// class acts as a pass through filter. Concrete subclasses can do fancy 
+// represented by abstract base classes: vtkKWEPaintbrushOperation. The base
+// class acts as a pass through filter. Concrete subclasses can do fancy
 // filtering operations such as flood-fill etc. These operations permit an
 // inplace filtering of a paintbrush data during a sketch.
-// 
-// As an example, a flood-fill operation is implemented in 
-// vtkKWEITKConfidenceConnectedPaintbrushOperation. This uses a combination of ITK 
-// region growing and hole-filling filters. This example illustrates how to 
+//
+// As an example, a flood-fill operation is implemented in
+// vtkKWEITKConfidenceConnectedPaintbrushOperation. This uses a combination of ITK
+// region growing and hole-filling filters. This example illustrates how to
 // plug an operation into the paintbrush widget.
 
 #include "vtkKWMyWindow.h"
@@ -63,27 +63,27 @@ public:
   typedef itk::SmartPointer< const Self >              ConstPointer;
   itkTypeMacro(vtkKWEITKBinaryThresholdImageFilter, vtkKWEITKImageToStencilFilter);
   itkNewMacro(Self);
-  
-  typedef  itk::Image< InputPixelType, Dimension >     InputImageType; 
-  typedef  itk::BinaryThresholdImageFilter< 
+
+  typedef  itk::Image< InputPixelType, Dimension >     InputImageType;
+  typedef  itk::BinaryThresholdImageFilter<
     InputImageType, OutputImageType >                  FilterType;
-  
-  // No MTime checks etc.. will update every time.. 
+
+  // No MTime checks etc.. will update every time..
   virtual void Update()
     {
     this->Superclass::Update();
 
-    FilterModuleStencilOutput< FilterType > * f = (dynamic_cast< 
-       FilterModuleStencilOutput< FilterType > * >(this->m_Filter));    
+    FilterModuleStencilOutput< FilterType > * f = (dynamic_cast<
+       FilterModuleStencilOutput< FilterType > * >(this->m_Filter));
 
-    // Update the filter.. If any timing analysis needs to be done.. 
+    // Update the filter.. If any timing analysis needs to be done..
     // This method needs to be interactive enough.
     f->Update();
     }
 
 protected:
   vtkKWEITKBinaryThresholdImageFilter()
-    { 
+    {
     FilterModuleStencilOutput< FilterType > * filter = new FilterModuleStencilOutput< FilterType >();
     this->m_Filter = filter;
     filter->GetFilter()->SetLowerThreshold( 200 );
@@ -99,7 +99,7 @@ class vtkKWEITKBinaryThresholdPaintbrushOperation : public vtkKWEITKPaintbrushOp
 {
 public:
   static vtkKWEITKBinaryThresholdPaintbrushOperation *New();
-  vtkTypeRevisionMacro(vtkKWEITKBinaryThresholdPaintbrushOperation, 
+  vtkTypeRevisionMacro(vtkKWEITKBinaryThresholdPaintbrushOperation,
                        vtkKWEITKPaintbrushOperation);
 
 protected:
@@ -113,11 +113,11 @@ protected:
     // The paintbrush data can be binary or grayscale. Invoke the appropriate
     // filtering operation in each case.
 
-    if (vtkKWEPaintbrushStencilData *sdata = 
+    if (vtkKWEPaintbrushStencilData *sdata =
       vtkKWEPaintbrushStencilData::SafeDownCast(data))
       {
       // Convert from world coords to pixel index.
-      
+
       double spacing[3], origin[3];
       this->ImageData->GetSpacing(spacing);
       this->ImageData->GetOrigin(origin);
@@ -128,13 +128,13 @@ protected:
 private:
   vtkKWEITKBinaryThresholdPaintbrushOperation(
     const vtkKWEITKBinaryThresholdPaintbrushOperation&);  //Not implemented
-  void operator=(const 
+  void operator=(const
       vtkKWEITKBinaryThresholdPaintbrushOperation&);  //Not implemented
 };
 
-template< class T > int 
-MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self, 
-                  double center[3], 
+template< class T > int
+MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self,
+                  double center[3],
                   vtkImageStencilData *stencil,
                   T )
 {
@@ -152,7 +152,7 @@ MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self,
 
   double *width = self->GetPaintbrushShape()->GetWidth();
 
-  // Set the center and radius to mask out a spherical stencil, instead of 
+  // Set the center and radius to mask out a spherical stencil, instead of
   // one with rectangular jagged edges.
   self->GetImageData()->GetOrigin(origin);
 
@@ -163,15 +163,15 @@ MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self,
   extent[4] = (int)((center[2] - width[2])/spacing[2] + 0.5);
   extent[5] = (int)((center[2] + width[2])/spacing[2] + 0.5);
   vtkKWEPaintbrushUtilities::GetIntersectingExtents(extent, imageExtent, extent);
-  
-  // Despite the fact that the FilterModule framework supports updates on 
-  // requested extents, a lot of filters in ITK (such as the 
+
+  // Despite the fact that the FilterModule framework supports updates on
+  // requested extents, a lot of filters in ITK (such as the
   // ConfidenceConnectedImageFilter don't really support updating a subextent.
   // So in most cases, you will have to extract a VOI).
   vtkExtractVOI *extractVOI = vtkExtractVOI::New();
   extractVOI->SetInput( self->GetImageData());
   extractVOI->SetVOI(extent);
-  
+
   // Extract the first component
   vtkImageExtractComponents * extractComponent = vtkImageExtractComponents::New();
   extractComponent->SetInput( extractVOI->GetOutput() );
@@ -179,7 +179,7 @@ MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self,
   extractComponent->SetComponents(0);
   extractComponent->Update();
   filter->SetRequestedExtent(extent);
-  
+
   filter->SetInput( extractComponent->GetOutput() );
   filter->SetRequestedExtent(extent);
   filter->Update();
@@ -191,7 +191,7 @@ MyPaintbrushRunner( vtkKWEITKBinaryThresholdPaintbrushOperation * self,
   return 1;
 }
 vtkStandardNewMacro(vtkKWEITKBinaryThresholdPaintbrushOperation)
-vtkCxxRevisionMacro(vtkKWEITKBinaryThresholdPaintbrushOperation, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEITKBinaryThresholdPaintbrushOperation, "$Revision: 1774 $");
 
 void vtkKWEITKBinaryThresholdPaintbrushOperation::
 DoOperationOnStencil(vtkImageStencilData *stencilData, double p[3])
@@ -201,12 +201,12 @@ DoOperationOnStencil(vtkImageStencilData *stencilData, double p[3])
   vtkImageStencilData * stencil = vtkImageStencilData::New();
   switch (this->ImageData->GetScalarType())
     {
-    vtkitkTemplateMacro( MyPaintbrushRunner( this, p, stencil, 
+    vtkitkTemplateMacro( MyPaintbrushRunner( this, p, stencil,
           static_cast< VTK_TT >(0)));
-    
+
     default:
       {
-      vtkErrorMacro(<< 
+      vtkErrorMacro(<<
           "vtkKWEITKBinaryThresholdPaintbrushOperation: Unknown ScalarType");
       break;
       }
@@ -231,16 +231,16 @@ int my_example( int , char *[],
   vtkImageData  * imageData  = example->GetInput();
 
   vtkKWEWidgetGroup *set = vtkKWEWidgetGroup::New();
-  
-  vtkKWEITKBinaryThresholdPaintbrushOperation * operation 
+
+  vtkKWEITKBinaryThresholdPaintbrushOperation * operation
     = vtkKWEITKBinaryThresholdPaintbrushOperation::New();
-  
+
   for (int i = 0; i < 3; i++)
     {
     vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::New();
     w->SetInteractor( example->GetNthRenderWidget(i)->
                       GetRenderWindow()->GetInteractor());
-    vtkKWEPaintbrushRepresentation2D * rep = 
+    vtkKWEPaintbrushRepresentation2D * rep =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(w->GetRepresentation());
 
     rep->SetImageActor( example->GetNthImageActor(i) );
@@ -248,23 +248,23 @@ int my_example( int , char *[],
     // Note that an operation if set, must be set before the image data.
     rep->SetPaintbrushOperation(operation);
     rep->SetImageData(imageData);
-    
-    rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+
+    rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
         imageData->GetSpacing() );
-    rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+    rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
         imageData->GetOrigin() );
 
     set->AddWidget(w);
     w->Delete();
     }
 
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
-      set->GetNthWidget(0)->GetRepresentation());  
+      set->GetNthWidget(0)->GetRepresentation());
   vtkKWEPaintbrushDrawing * drawing = rep->GetPaintbrushDrawing();
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation2D * repr = 
+    vtkKWEPaintbrushRepresentation2D * repr =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawing );
@@ -273,7 +273,7 @@ int my_example( int , char *[],
   set->SetEnabled(1);
 
   int res = example->Run();
-  
+
   operation->Delete();
   set->Delete();
   return res;

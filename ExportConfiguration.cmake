@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -54,7 +54,7 @@ set(VTKEdge_CONFIG_INSTALL_ONLY)
 set(VTKEdge_USE_FILE_CONFIG ${CMAKE_CURRENT_SOURCE_DIR}/UseVTKEdge.cmake)
 
 # The build settings file.
-set(VTKEdge_BUILD_SETTINGS_FILE_CONFIG 
+set(VTKEdge_BUILD_SETTINGS_FILE_CONFIG
   ${VTKEdge_BINARY_DIR}/VTKEdgeBuildSettings.cmake)
 
 # The library directories.
@@ -67,7 +67,7 @@ set(VTKEdge_RUNTIME_DIRS_CONFIG ${VTKEdge_RUNTIME_DIRS})
 set(VTKEdge_INCLUDE_DIRS_CONFIG ${VTKEdge_INCLUDE_PATH})
 
 # The library dependencies file.
-set(VTKEdge_LIBRARY_DEPENDS_FILE 
+set(VTKEdge_LIBRARY_DEPENDS_FILE
   ${VTKEdge_BINARY_DIR}/VTKEdgeLibraryDepends.cmake)
 
 # The CMake macros dir.
@@ -89,29 +89,29 @@ configure_file(
 # Settings specific to the install tree.
 
 # The "use" file.
-set(VTKEdge_USE_FILE_CONFIG 
+set(VTKEdge_USE_FILE_CONFIG
   ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_PACKAGE_DIR}/UseVTKEdge.cmake)
 
 # The build settings file.
-set(VTKEdge_BUILD_SETTINGS_FILE_CONFIG 
+set(VTKEdge_BUILD_SETTINGS_FILE_CONFIG
   ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_PACKAGE_DIR}/VTKEdgeBuildSettings.cmake)
 
 # The library directories.
 if(CYGWIN AND VTKEdge_BUILD_SHARED_LIBS)
   # In Cygwin programs directly link to the .dll files.
-  set(VTKEdge_LIBRARY_DIRS_CONFIG 
+  set(VTKEdge_LIBRARY_DIRS_CONFIG
     ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_BIN_DIR})
 else(CYGWIN AND VTKEdge_BUILD_SHARED_LIBS)
-  set(VTKEdge_LIBRARY_DIRS_CONFIG 
+  set(VTKEdge_LIBRARY_DIRS_CONFIG
     ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_LIB_DIR})
 endif(CYGWIN AND VTKEdge_BUILD_SHARED_LIBS)
 
 # The runtime directories.
 if(WIN32)
-  set(VTKEdge_RUNTIME_DIRS_CONFIG 
+  set(VTKEdge_RUNTIME_DIRS_CONFIG
     ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_BIN_DIR})
 else(WIN32)
-  set(VTKEdge_RUNTIME_DIRS_CONFIG 
+  set(VTKEdge_RUNTIME_DIRS_CONFIG
     ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_LIB_DIR})
 endif(WIN32)
 
@@ -120,11 +120,11 @@ set(VTKEdge_INCLUDE_DIRS_CONFIG
   ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_INCLUDE_DIR})
 
 # The library dependencies file.
-set(VTKEdge_LIBRARY_DEPENDS_FILE 
+set(VTKEdge_LIBRARY_DEPENDS_FILE
   ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_PACKAGE_DIR}/VTKEdgeLibraryDepends.cmake)
 
 # The CMake macros dir.
-set(VTKEdge_CMAKE_DIR_CONFIG 
+set(VTKEdge_CMAKE_DIR_CONFIG
   ${DOLLAR}{VTKEdge_INSTALL_PREFIX}${VTKEdge_INSTALL_PACKAGE_DIR}/CMake)
 
 # The VTK options.

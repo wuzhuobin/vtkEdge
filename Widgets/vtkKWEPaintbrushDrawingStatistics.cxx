@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushDrawingStatistics.h"
@@ -28,10 +28,13 @@
 #include "vtkAlgorithmOutput.h"
 #include "vtkKWEPaintbrushSketch.h"
 #include "vtkKWEPaintbrushDrawing.h"
-#include "vtkKWEPaintbrushData.h"
+#include "vtkKWEPaintbrushLabelData.h"
 #include "vtkKWEPaintbrushDataStatistics.h"
+#include "vtkImageData.h"
+#include "vtkDataArray.h"
+#include "vtkPointData.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushDrawingStatistics, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushDrawingStatistics, "$Revision: 3258 $");
 vtkStandardNewMacro(vtkKWEPaintbrushDrawingStatistics);
 
 //----------------------------------------------------------------------------
@@ -41,11 +44,20 @@ vtkKWEPaintbrushDrawingStatistics::vtkKWEPaintbrushDrawingStatistics()
   this->SetNumberOfOutputPorts(0);
   this->Volume = 0;
   this->Volumes.clear();
+  
+  this->MaximumLabelValue = 1;
+  for (int i = 0; i < sizeof( vtkKWEPaintbrushEnums::LabelType ); i++)
+    {
+    this->MaximumLabelValue *= 256;
+    }
+  this->VolumesArray = new unsigned long[this->MaximumLabelValue];
+  
 }
 
 //----------------------------------------------------------------------------
 vtkKWEPaintbrushDrawingStatistics::~vtkKWEPaintbrushDrawingStatistics()
 {
+  delete this->VolumesArray;
 }
 
 //----------------------------------------------------------------------------
@@ -55,25 +67,64 @@ int vtkKWEPaintbrushDrawingStatistics
                vtkInformationVector* vtkNotUsed( outputVector ))
 {
   vtkInformation *info = inputVector[0]->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                              info->Get(vtkDataObject::DATA_OBJECT()));
 
   this->Volume = 0;
-  this->Volumes.clear();
-  const int nSketches = inputDrawing->GetNumberOfItems();
-  for (int n = 0; n < nSketches; n++)
-    {
-    vtkKWEPaintbrushSketch * sketch = inputDrawing->GetItem(n);
-    vtkKWEPaintbrushData * data = sketch->GetPaintbrushData();
-    vtkKWEPaintbrushDataStatistics * stats = vtkKWEPaintbrushDataStatistics::New();
-    stats->SetInput(data);
-    stats->Update();
 
-    const double sketchVolume = stats->GetVolume();
-    this->Volumes.push_back(sketchVolume);
-    this->Volume += sketchVolume;
+  if (inputDrawing->GetRepresentation() != vtkKWEPaintbrushEnums::Label)
+    {
+    this->Volumes.clear();
+    const int nSketches = inputDrawing->GetNumberOfItems();
+    for (int n = 0; n < nSketches; n++)
+      {
+      vtkKWEPaintbrushSketch * sketch = inputDrawing->GetItem(n);
+      vtkKWEPaintbrushData * data = sketch->GetPaintbrushData();
+      vtkKWEPaintbrushDataStatistics * stats = vtkKWEPaintbrushDataStatistics::New();
+      stats->SetInput(data);
+      stats->Update();
+
+      const double sketchVolume = stats->GetVolume();
+      this->Volumes.push_back(sketchVolume);
+      this->Volume += sketchVolume;
+
+      stats->Delete();
+      }
+    }
+  else
+    {
+
+    for (unsigned long i = 0; i < this->MaximumLabelValue; i++)
+      {
+      this->VolumesArray[i] = 0;
+      }      
+
+    vtkKWEPaintbrushLabelData *ldata = vtkKWEPaintbrushLabelData::SafeDownCast(
+        inputDrawing->GetPaintbrushData());
+    vtkImageData *labelImage = ldata->GetLabelMap();
     
-    stats->Delete();
+    vtkDataArray * array = labelImage->GetPointData()->GetScalars();
+    vtkKWEPaintbrushEnums::LabelType *arrayPointer =
+      static_cast<vtkKWEPaintbrushEnums::LabelType *>(array->GetVoidPointer(0));
+
+    const unsigned long size = array->GetDataSize();
+    for (unsigned long i = 0; i < size; ++i, ++arrayPointer)
+      {
+      vtkKWEPaintbrushEnums::LabelType l = *arrayPointer;
+      if (l != vtkKWEPaintbrushLabelData::NoLabelValue)
+        {
+        ++(this->VolumesArray[l]);
+        }
+      }
+
+    double spacing[3];
+    ldata->GetSpacing(spacing);
+    const double voxelVolume = spacing[0] * spacing[1] * spacing[2];
+
+    for (unsigned long i = 0; i < this->MaximumLabelValue; i++)
+      {
+      this->Volume += ((double)(this->VolumesArray[i]) * voxelVolume);
+      }
     }
 
   return 1;
@@ -106,15 +157,55 @@ ProcessRequest(vtkInformation* request,
 //----------------------------------------------------------------------------
 double vtkKWEPaintbrushDrawingStatistics::GetVolume()
 {
-  this->Update(); 
+  this->Update();
   return this->Volume;
+}
+
+//----------------------------------------------------------------------------
+vtkKWEPaintbrushDrawing * vtkKWEPaintbrushDrawingStatistics::GetDrawing()
+{
+  return vtkKWEPaintbrushDrawing::SafeDownCast(
+    this->GetExecutive()->GetInputData(0, 0));
 }
 
 //----------------------------------------------------------------------------
 double vtkKWEPaintbrushDrawingStatistics::GetVolume(int n)
 {
-  this->Update(); 
-  return static_cast<size_t>(n) < this->Volumes.size() ? this->Volumes[n] : 0.0;
+  this->Update();
+
+  if (this->GetDrawing()->GetRepresentation() != vtkKWEPaintbrushEnums::Label)
+    {
+    return static_cast<size_t>(n) < this->Volumes.size() ? this->Volumes[n] : 0.0;
+    }
+  else
+    {
+    double spacing[3];
+    vtkKWEPaintbrushLabelData *ldata = vtkKWEPaintbrushLabelData::SafeDownCast(
+        this->GetDrawing()->GetPaintbrushData());    
+    ldata->GetSpacing(spacing);
+    const double voxelVolume = spacing[0] * spacing[1] * spacing[2];
+    return voxelVolume * (double)(this->VolumesArray[
+          this->GetDrawing()->GetItem(n)->GetLabel()]);
+    }
+}
+
+//----------------------------------------------------------------------------
+double vtkKWEPaintbrushDrawingStatistics::GetVolume( vtkKWEPaintbrushSketch *s )
+{
+  return this->GetVolume(this->GetDrawing()->GetIndexOfItem(s));
+}
+
+//----------------------------------------------------------------------------
+double vtkKWEPaintbrushDrawingStatistics
+::GetLabelVolume( vtkKWEPaintbrushEnums::LabelType l )
+{
+  this->Update();
+  double spacing[3];
+  vtkKWEPaintbrushLabelData *ldata = vtkKWEPaintbrushLabelData::SafeDownCast(
+      this->GetDrawing()->GetPaintbrushData());    
+  ldata->GetSpacing(spacing);
+  const double voxelVolume = spacing[0] * spacing[1] * spacing[2];
+  return voxelVolume * (double)(this->VolumesArray[l]);
 }
 
 //----------------------------------------------------------------------------

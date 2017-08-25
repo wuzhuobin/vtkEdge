@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEVoxelAlignedImageActorPointPlacer.h"
@@ -24,7 +24,7 @@
 #include "vtkImageActor.h"
 #include "vtkImageData.h"
 
-vtkCxxRevisionMacro(vtkKWEVoxelAlignedImageActorPointPlacer, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEVoxelAlignedImageActorPointPlacer, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEVoxelAlignedImageActorPointPlacer);
 
 //----------------------------------------------------------------------
@@ -44,11 +44,11 @@ int vtkKWEVoxelAlignedImageActorPointPlacer::ComputeWorldPosition( vtkRenderer *
                                                     double  worldPos[3],
                                                     double  worldOrient[9] )
 {
-  return (this->Superclass::ComputeWorldPosition( ren, displayPos, 
-                            refWorldPos, worldPos, worldOrient ) 
+  return (this->Superclass::ComputeWorldPosition( ren, displayPos,
+                            refWorldPos, worldPos, worldOrient )
       && this->InternalValidateWorldPosition(worldPos));
 }
-  
+
 //----------------------------------------------------------------------
 int vtkKWEVoxelAlignedImageActorPointPlacer::InternalValidateWorldPosition(
                                                     double worldPos[3])
@@ -73,7 +73,7 @@ int vtkKWEVoxelAlignedImageActorPointPlacer::InternalValidateWorldPosition(
   worldPos[0] = imagePosition[0] * spacing[0] + origin[0];
   worldPos[1] = imagePosition[1] * spacing[1] + origin[1];
   worldPos[2] = imagePosition[2] * spacing[2] + origin[2];
-  
+
   return 1;
 }
 
@@ -83,8 +83,8 @@ int vtkKWEVoxelAlignedImageActorPointPlacer::ComputeWorldPosition( vtkRenderer *
                                                     double worldPos[3],
                                                     double worldOrient[9] )
 {
-  return (this->Superclass::ComputeWorldPosition( 
-             ren, displayPos, worldPos, worldOrient ) && 
+  return (this->Superclass::ComputeWorldPosition(
+             ren, displayPos, worldPos, worldOrient ) &&
           this->InternalValidateWorldPosition(worldPos));
 }
 

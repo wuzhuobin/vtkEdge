@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // This example loads a file IBSRData.mha and a label map IBSRLabelMap-UCHAR.mha.
@@ -39,7 +39,7 @@
 //   Ctrl-Right click and drag - Resize the shape anisotropically
 //   Shift "<"                 - Decrease the opacity of the overlaid drawing
 //   Shift ">"                 - Increase the opacity of the overlaid drawing
-//   "l" key                   - Render the current sketch immutable/mutable. 
+//   "l" key                   - Render the current sketch immutable/mutable.
 //                               (Supported only when editing labelmaps)
 //   Escape                    - Enable/Disable interactions
 //
@@ -76,13 +76,13 @@ class PaintbrushExample1Labels
 {
 public:
   class Annotation
-    { 
+    {
     public:
       Annotation() {};
       Annotation(const std::string &l, unsigned char r, unsigned char g, unsigned char b )
         { label = l; R = r; G = g; B = b; }
       bool operator!=(const Annotation &a) const { return a.label != this->label; }
-      std::string label; unsigned char R, G, B; 
+      std::string label; unsigned char R, G, B;
     };
   std::map< unsigned short, Annotation > LabelMap;
 };
@@ -171,29 +171,29 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
   vtkImageData  * imageData  = example->GetInput();
 
   vtkKWEWidgetGroup *set = vtkKWEWidgetGroup::New();
-  
+
   for (int i = 0; i < 3; i++)
     {
     vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::New();
     w->SetInteractor( example->GetNthRenderWidget(i)->
                       GetRenderWindow()->GetInteractor());
-    vtkKWEPaintbrushRepresentation2D * rep = 
+    vtkKWEPaintbrushRepresentation2D * rep =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(w->GetRepresentation());
     if (rep)
       {
       vtkImageActor * imageActor = example->GetNthImageActor(i);
       rep->SetImageActor(imageActor);
       rep->SetImageData(imageData);
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
           imageData->GetSpacing() );
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
           imageData->GetOrigin() );
       }
 
-    // This will simply cause the method 
-    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Edit ) or 
-    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select ) 
-    // to be invoked based on which radio button is depressed.  
+    // This will simply cause the method
+    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Edit ) or
+    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select )
+    // to be invoked based on which radio button is depressed.
     example->SetSelectEditCallbackMethod( MySelectEditCallbackMethod );
     example->AddSelectEditCallback(w);
 
@@ -201,10 +201,10 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
     w->Delete();
     }
 
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
       set->GetNthWidget(0)->GetRepresentation());
-  
+
   vtkKWEPaintbrushDrawing * drawing = rep->GetPaintbrushDrawing();
 
   // Our internal representation will be to manage a label map.
@@ -213,12 +213,12 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
   // This will allocate our canvas based on the size of the overlay image
   // that was set on the WidgetRepresentation.
   drawing->InitializeData();
-  
+
   // Clear the drawing and start on a clean slate. The drawing would have
   // automatically created 1 empty sketch for us, so we can start drawing
   // right away. Let's remove it, since we'd like to initialize the drawing
   // with our IBSR label map.
-  drawing->RemoveAllItems(); 
+  drawing->RemoveAllItems();
 
   // Read the IBSR label map
   vtkMetaImageReader * reader = vtkMetaImageReader::New();
@@ -231,25 +231,25 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
 
   // Set the label map as the initial canvas data of the drawing.
   drawing->SetPaintbrushData( paintbrushLabelMap );
-  
-  // Create a sketch for each label in the label map, we'd like to edit. 
-  // NOTE: We can skip labels in the label map that we do not care about simply 
-  // by not adding a sketch corresponding to that label into the drawing. In 
-  // this case, we will take into account all the labels (1-62). 
-  // NOTE: As a reminder, bear in mind that 0 is a reserved value and must not 
+
+  // Create a sketch for each label in the label map, we'd like to edit.
+  // NOTE: We can skip labels in the label map that we do not care about simply
+  // by not adding a sketch corresponding to that label into the drawing. In
+  // this case, we will take into account all the labels (1-62).
+  // NOTE: As a reminder, bear in mind that 0 is a reserved value and must not
   // be used as a label.
 
-  for (std::map< unsigned short, AnnotationType >::const_iterator cit = 
+  for (std::map< unsigned short, AnnotationType >::const_iterator cit =
       MyLabels.LabelMap.begin(); cit != MyLabels.LabelMap.end(); ++cit)
     {  // For each label.
 
-    // Initialize the sketch with the label map. Note that you must add the 
+    // Initialize the sketch with the label map. Note that you must add the
     // sketch to the drawing and set the label you wish the sketch to represent
-    // before you initialize it from the label map. 
+    // before you initialize it from the label map.
     //   Also note that when the representation is a "Label-map", all sketches
-    // share the same label map to avoid memory duplication. The corollary to 
+    // share the same label map to avoid memory duplication. The corollary to
     // this is that if you initialize sketches in your drawing using a labelmap,
-    // you must use the same "vtkKWEPaintbrushLabelData" that is used by the 
+    // you must use the same "vtkKWEPaintbrushLabelData" that is used by the
     // drawing.
     vtkKWEPaintbrushSketch * sketch = vtkKWEPaintbrushSketch::New();
     drawing->AddItem( sketch );
@@ -260,7 +260,7 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
     // you navigate through your maze of sketches. 62 segmentations can sure
     // get you lost pretty quickly.
     sketch->GetPaintbrushProperty()->SetIdentifier(cit->second.label.c_str());
-    
+
     // Assign a nice color to the sketch.
     double sketchColor[3] = { (double)(cit->second.R)/255.0,
                               (double)(cit->second.G)/255.0,
@@ -271,12 +271,12 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
     }
 
   reader->Delete();
-  
+
   // Now set the drawing on all representations (axial, coronal and sagittal)
   // in the WidgetSet.
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation2D * repr = 
+    vtkKWEPaintbrushRepresentation2D * repr =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawing );
@@ -287,23 +287,23 @@ vtkMultiThreader::SetGlobalMaximumNumberOfThreads(1);
   int res = example->Run();
 
 
-  // Save out each of the resulting segmentations. We will write out each 
+  // Save out each of the resulting segmentations. We will write out each
   // sketch in the drawing as a seperate file. This will take a while. You
   // might have noticed that when you quit this application it takes a while,
   // This is because we are writing out our edited segmentation for validation.
   const bool writeOutResults = false;
   if (writeOutResults)
     {
-    vtkKWEPaintbrushLabelData * finalLabelMap = 
+    vtkKWEPaintbrushLabelData * finalLabelMap =
       vtkKWEPaintbrushLabelData::SafeDownCast(drawing->GetPaintbrushData());
-    
+
     vtkMetaImageWriter * outputWriter = vtkMetaImageWriter::New();
     outputWriter->SetFileName("EditedLabelMap.mha");
     outputWriter->SetInput( finalLabelMap->GetLabelMap() );
     outputWriter->Write();
     outputWriter->Delete();
     }
-  
+
   paintbrushLabelMap->Delete();
   set->Delete();
 

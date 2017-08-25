@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -26,7 +26,7 @@
 
 #include <vtksys/ios/sstream>
 
-vtkCxxRevisionMacro(vtkKWEFunctionToGLSL, "$Revision: 592 $");
+vtkCxxRevisionMacro(vtkKWEFunctionToGLSL, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEFunctionToGLSL);
 
 // GLSL Operator Precedence (from the GLSL spec). 1 is the highest,
@@ -54,7 +54,7 @@ void vtkKWEFunctionToGLSL::AllocateStringStack()
 {
   assert("pre: void" && this->StringStack==0);
   assert("pre: positive_size" && this->StackSize>0);
-  
+
   this->StringStack=new vtkStdString[this->StackSize];
 
 #if 0
@@ -112,13 +112,13 @@ int vtkKWEFunctionToGLSL::GetResultDimension()
 // Update ParseStatus.
 void vtkKWEFunctionToGLSL::GenerateGLSL()
 {
-  // Almost like vtkFunctionParser::Evaluate() 
-  
+  // Almost like vtkFunctionParser::Evaluate()
+
   int numBytesProcessed;
   int numImmediatesProcessed = 0;
   int stackPosition = -1;
   this->ResultDimension=0; // 1 or 3.
-  
+
   if (this->FunctionMTime.GetMTime() > this->ParseMTime.GetMTime())
     {
     this->ParseStatus=this->Parse()==1;
@@ -148,9 +148,9 @@ void vtkKWEFunctionToGLSL::GenerateGLSL()
       }
     this->BuildGLSLVariableNames();
     }
-  
+
   int dim=0; // dimension of the result of the last operation (1 or 3).
-  
+
   for (numBytesProcessed = 0; numBytesProcessed < this->ByteCodeSize;
        numBytesProcessed++)
     {
@@ -164,7 +164,7 @@ void vtkKWEFunctionToGLSL::GenerateGLSL()
         // ost<<std::showpoint<<std::noshowpoint because of a VS6 bug.
         ost.setf(ios::showpoint);
         ost<<this->Immediates[numImmediatesProcessed++];
-        ost.unsetf(ios::showpoint);          
+        ost.unsetf(ios::showpoint);
         this->StringStack[stackPosition]=ost.str();
         this->PrecedenceStack[stackPosition]=1; // highest GLSL priority.
         dim=1;
@@ -570,7 +570,7 @@ void vtkKWEFunctionToGLSL::GenerateGLSL()
         ost<<this->StringStack[stackPosition];
         ost<<")";
 #endif
-          
+
         // Update the precedence.
         this->PrecedenceStack[stackPosition-1]=2; // function is 2
         --stackPosition;
@@ -1042,7 +1042,10 @@ void vtkKWEFunctionToGLSL::GenerateGLSL()
     }
 
   vtksys_ios::ostringstream ost2;
-  
+
+  // It has to be the first line of code.
+  ost2 << "#version 110" << endl;
+
   int c=this->NumberOfScalarVariables;
   int i=0;
   while(i<c)
@@ -1065,7 +1068,7 @@ void vtkKWEFunctionToGLSL::GenerateGLSL()
     }
   ost2<<"void main(void) "<<endl;
   ost2<<"{"<<endl;
-  
+
   c=this->NumberOfScalarVariables;
   i=0;
   while(i<c)
@@ -1140,7 +1143,7 @@ vtkStdString *vtkKWEFunctionToGLSL::GetGLSLScalarName(int index)
 {
   assert("pre: valid_index" && index>=0 && index<this->NumberOfScalarVariables);
   assert("pre: used_scalar" && this->GetScalarIsUsed(index));
-  
+
   return &this->GLSLScalarNames[index];
 }
 
@@ -1310,7 +1313,7 @@ void vtkKWEFunctionToGLSL::BuildGLSLVariableNames()
       }
     ++i;
     }
-  
+
 #if 0
   if(usedScalars!=0)
     {

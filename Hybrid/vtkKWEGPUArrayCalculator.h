@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -73,7 +73,7 @@ class vtkKWEFunctionToGLSL;
 class vtkRenderWindow;
 class vtkFloatArray;
 
-class VTKEdge_HYBRID_EXPORT vtkKWEGPUArrayCalculator : public vtkArrayCalculator 
+class VTKEdge_HYBRID_EXPORT vtkKWEGPUArrayCalculator : public vtkArrayCalculator
 {
 public:
   vtkTypeRevisionMacro(vtkKWEGPUArrayCalculator,vtkArrayCalculator);
@@ -106,7 +106,7 @@ public:
   // a good threshold.
   vtkSetMacro(SizeThreshold,vtkIdType);
   vtkGetMacro(SizeThreshold,vtkIdType);
-  
+
   // Description:
   // Tell the filter to use CalibratedSizeThreshold instead of SizeThreshold.
   // If CalibratedSizeThreshold has not been computed yet, a calibration is
@@ -123,7 +123,7 @@ public:
   // on. But you can call it directly to control at what time the calibration
   // happens or to force a new calibration.
   void Calibrate();
-  
+
   // Description:
   // Return the size threshold computed by the last calibration. Initial value
   // is 0.
@@ -132,15 +132,15 @@ public:
   // Description:
   // Remove all the scalar variable names and their associated array names.
   virtual void RemoveScalarVariables();
-  
+
   // Description:
   // Remove all the scalar variable names and their associated array names.
   virtual void RemoveVectorVariables();
-  
+
   // Description:
   // Remove all the coordinate variables.
   virtual void RemoveCoordinateScalarVariables();
-  
+
   // Description:
   // Remove all the coordinate variables.
   virtual void RemoveCoordinateVectorVariables();
@@ -161,7 +161,7 @@ protected:
   void SimulateGPUComputation(vtkFloatArray *values);
 
   virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  
+
   virtual void ComputeSubRange(vtkDataArray *array,
                                vtkIdType first,
                                vtkIdType last,

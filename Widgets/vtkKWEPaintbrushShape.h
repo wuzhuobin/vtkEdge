@@ -1,29 +1,29 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEPaintbrushShape - An abstract class to represent a paintbrush shape
 // .SECTION Description
-// The class represents a paintbrush shape. It defines two pure virtual 
+// The class represents a paintbrush shape. It defines two pure virtual
 // methods: \c GetStencil and \c GetShapePolyData. The first returns the shape
 // stencil centered at a given point. The second returns the shape polydata
-// in world coordinates intersecting with the specified plane. If the plane 
+// in world coordinates intersecting with the specified plane. If the plane
 // is NULL, it should return the shape polydata in 3D.
 //
 // .SECTION See Also
@@ -45,27 +45,27 @@ class vtkPlane;
 class VTKEdge_WIDGETS_EXPORT vtkKWEPaintbrushShape : public vtkObject
 {
 public:
-  
+
   // Description:
   // Standard methods for instances of this class.
   vtkTypeRevisionMacro(vtkKWEPaintbrushShape, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
-  // It allows the paintbrush representation to query the template for a 
-  // paintbrush outline centered at the specified point and intersecting 
+  // It allows the paintbrush representation to query the template for a
+  // paintbrush outline centered at the specified point and intersecting
   // with the specified plane. If the plane is NULL, a polydata representation
-  // of the template in 3D is returned. 
-  // Returns NULL if the plane does not intersect with the template. 
-//BTX  
+  // of the template in 3D is returned.
+  // Returns NULL if the plane does not intersect with the template.
+//BTX
   virtual vtkSmartPointer< vtkPolyData > GetShapePolyData( double *center,
-                               vtkPlane *plane = NULL) = 0;  
+                               vtkPlane *plane = NULL) = 0;
 //ETX
 
   // Description:
   // Get the template as a stencil or as a grayscale data.
   virtual void GetStencil(vtkImageStencilData *, double p[3]) = 0;
-  virtual void GetGrayscaleData(vtkImageData  *, double p[3]) = 0; 
+  virtual void GetGrayscaleData(vtkImageData  *, double p[3]) = 0;
   void GetPaintbrushData(vtkKWEPaintbrushData *, int x, int y, int z);
   void GetPaintbrushData(vtkKWEPaintbrushData *, double p[3]);
 
@@ -78,7 +78,7 @@ public:
   vtkGetVector3Macro( Origin,  double );
 
   // Description:
-  // Set the datatype of the grayscale data returned. (ie VTK_UNSIGNED_CHAR 
+  // Set the datatype of the grayscale data returned. (ie VTK_UNSIGNED_CHAR
   // etc)
   vtkSetMacro(ScalarType,int);
   vtkGetMacro(ScalarType,int);
@@ -86,7 +86,7 @@ public:
   // Description:
   // Set the polarity of the shape. Positive by default. Positive shapes
   // are intended to draw. Negative shapes are intended to be used for
-  // erasing. 
+  // erasing.
   vtkSetMacro(Polarity, int);
   vtkGetMacro(Polarity, int);
   virtual void SetPolarityToDraw();
@@ -104,11 +104,11 @@ public:
     PaintbrushResize_XZ
     };
   //ETX
-  
+
   // Description:
   // Optionally, you may set a constraint on the resizing of the brush. This
   // constraint is imposed during interactive resizing of the brush. See the
-  // enum: PaintbrushResizeEnum. 
+  // enum: PaintbrushResizeEnum.
   // Default is UnConstrained.
   vtkSetMacro( ResizeConstraint, int );
   vtkGetMacro( ResizeConstraint, int );
@@ -122,19 +122,19 @@ public:
   // 'ResizeType' must be one fo the PaintbrushResizeEnum's specified below.
   // Returns 1 if resize is successful. 0 otherwise.
   virtual int Resize(double factor[3], int ResizeType) = 0;
-  
+
   // Description:
   // Deep copy.. Synchronizes states etc.
   virtual void DeepCopy(vtkKWEPaintbrushShape *);
 
   // Description:
-  // Provide some kind of contextual annotation about the shape that 
+  // Provide some kind of contextual annotation about the shape that
   // indicates its size etc..
   virtual void GetAnnotation(char *) = 0;
 
   // Description:
   // Check if point is inside the shape. Subclasses must implement this.
-  virtual int IsInside(double vtkNotUsed(currPos)[3], 
+  virtual int IsInside(double vtkNotUsed(currPos)[3],
                        double vtkNotUsed(testPos)[3]) { return 1; }
 
   // Description:
@@ -143,22 +143,30 @@ public:
   virtual void GetWidth (double &, double &, double &) = 0;
 
   // Description:
-  // Set the shape representation. Either: 
+  // Set the shape representation. Either:
   //   vtkKWEPaintbrushEnums::Binary or
   //   vtkKWEPaintbrushEnums::Grayscale
   vtkSetMacro( Representation, int );
   vtkGetMacro( Representation, int );
 
   // Description:
-  // Set the maximum width of the shape for each axe. 
+  // Set the maximum width of the shape for each axe.
   vtkSetVector3Macro( MaxWidth,  double );
   vtkGetVector3Macro( MaxWidth,  double );
+
+  // Description:
+  // The etch produced by the shape can be sent through these clip extents, so
+  // as to confine it to a certain axis aligned region. The default clip
+  // extents are infinite.
+  void SetClipExtent( int e[6] );
+  void GetClipExtent( int e[6] );
+  int * GetClipExtent();
 
   // Description:
   // INTERNAL - Do not use.
   // Get the extents of a shape drawn at the current location.
   virtual void GetExtent( int extent[6], double p[3] ) = 0;
-  
+
 protected:
   vtkKWEPaintbrushShape();
   ~vtkKWEPaintbrushShape();
@@ -170,6 +178,7 @@ protected:
   int            ResizeConstraint;
   int            Representation;
   double         MaxWidth[3];
+  int            ClipExtent[6];
 
 private:
   vtkKWEPaintbrushShape(const vtkKWEPaintbrushShape&);  //Not implemented

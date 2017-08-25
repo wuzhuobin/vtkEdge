@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -44,13 +44,13 @@ public:
   typedef typename Superclass::RegionType         RegionType;
 
   /**  Constructor */
-  FilterModule() 
+  FilterModule()
     {
     this->m_ImportFilter       = ImportFilterType::New();
     this->m_ExportFilter       = ExportFilterType::New();
     this->m_Filter             = FilterType::New();
     this->m_Filter->ReleaseDataFlagOn();
- 
+
     this->m_Filter->SetInput( this->m_ImportFilter->GetOutput() );
     this->m_ExportFilter->SetInput( this->m_Filter->GetOutput() );
 
@@ -62,21 +62,21 @@ public:
     }
 
   /**  Destructor */
-  virtual ~FilterModule() 
+  virtual ~FilterModule()
     {
     }
 
   /** Give access to the input image */
-  void SetInput(vtkImageData * image) 
+  void SetInput(vtkImageData * image)
     {
-    this->m_ImportFilter->SetInput(image);  
+    this->m_ImportFilter->SetInput(image);
     }
 
   /** Give access to the input image */
-  const InputImageType * GetInput() 
+  const InputImageType * GetInput()
     {
-    this->m_ImportFilter->Update();  
-    return this->m_ImportFilter->GetOutput(); 
+    this->m_ImportFilter->Update();
+    return this->m_ImportFilter->GetOutput();
     }
 
   /** Return  a pointer to the internal filter */
@@ -97,7 +97,7 @@ public:
     this->m_LetITKAllocateOutputMemory = false;
     RegionType region = this->m_Filter->GetOutput()->GetLargestPossibleRegion();
     const unsigned long nPixels = region.GetNumberOfPixels();
-    this->m_Filter->GetOutput()->SetImportPointer( 
+    this->m_Filter->GetOutput()->SetImportPointer(
         static_cast< OutputPixelType * >(buffer),  nPixels );
     this->m_Filter->GetOutput()->Allocate( ); // TODO Check if necessary
     }

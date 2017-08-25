@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushSelectionRepresentation.h"
@@ -31,7 +31,7 @@
 #include "vtkProperty.h"
 #include <algorithm>
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushSelectionRepresentation, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushSelectionRepresentation, "$Revision: 1774 $");
 vtkCxxSetObjectMacro(vtkKWEPaintbrushSelectionRepresentation, PointPlacer, vtkPointPlacer);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushSelectionRepresentation, PaintbrushDrawing, vtkKWEPaintbrushDrawing);
 
@@ -42,8 +42,8 @@ vtkKWEPaintbrushSelectionRepresentation::vtkKWEPaintbrushSelectionRepresentation
   this->PointPlacer         = NULL;
   this->SelectedSketch      = NULL;
   this->InteractionState    = None;
-  this->DragBeginPoint[0]   = 
-  this->DragBeginPoint[1]   = 
+  this->DragBeginPoint[0]   =
+  this->DragBeginPoint[1]   =
   this->DragBeginPoint[2]   = VTK_DOUBLE_MIN;
 }
 
@@ -73,20 +73,20 @@ int vtkKWEPaintbrushSelectionRepresentation
       // Traverse the list of selected sketches and see if we are trying
       // to unselect any of them.
 
-      for (SelectedSketchesType::reverse_iterator rit = 
+      for (SelectedSketchesType::reverse_iterator rit =
               this->SelectedSketches.rbegin();
            rit != this->SelectedSketches.rend(); ++rit)
         {
         if (this->WorldPositionIsInside( *rit, worldPos ))
-          {            
-          // We clicked on a selected sketch. We should toggle its selection; 
-          // Unselect it.            
+          {
+          // We clicked on a selected sketch. We should toggle its selection;
+          // Unselect it.
 
-          this->InteractionState = 
+          this->InteractionState =
             this->PrevInteractionState = PaintbrushSketchUnselect;
           this->SelectedSketch = *rit; // Its really an unselected sketch.
-          this->RemoveSketchFromSelection(*rit);            
-          return this->InteractionState;          
+          this->RemoveSketchFromSelection(*rit);
+          return this->InteractionState;
           }
         }
 
@@ -101,45 +101,45 @@ int vtkKWEPaintbrushSelectionRepresentation
         // know that we aren't over an already selected sketch; if we were,
         // we'd have unselected it in above.
 
-        if (vtkstd::find(this->SelectedSketches.begin(), 
+        if (vtkstd::find(this->SelectedSketches.begin(),
              this->SelectedSketches.end(), s) != this->SelectedSketches.end())
           {
           continue;
           }
 
         if (this->WorldPositionIsInside( s, worldPos ))
-          {            
+          {
           // Select this sketch.
 
-          this->InteractionState = 
+          this->InteractionState =
             this->PrevInteractionState = PaintbrushSketchSelect;
           this->SelectedSketch = s;
-          this->AddSketchToSelection(s);            
-          return this->InteractionState;          
-          }          
+          this->AddSketchToSelection(s);
+          return this->InteractionState;
+          }
         }
       }
     }
 
   // Drag and drop merge support...
 
-  else if (this->InteractionState == PaintbrushRequestSketchMerge 
+  else if (this->InteractionState == PaintbrushRequestSketchMerge
         && nSketches > 1)
     {
     double displayPos[2]={X, Y}, worldOrient[9] = {1.0,0.0,0.0,
                                                    0.0,1.0,0.0,
                                                    0.0,0.0,1.0};
-    if (this->PrevInteractionState == PaintbrushSketchSelect && 
+    if (this->PrevInteractionState == PaintbrushSketchSelect &&
         this->SelectedSketch )
       {
-      this->DragEndPoint[0] = 
-      this->DragEndPoint[1] = 
+      this->DragEndPoint[0] =
+      this->DragEndPoint[1] =
       this->DragEndPoint[2] = VTK_DOUBLE_MIN;
       if ( !this->PointPlacer->ComputeWorldPosition( this->Renderer,
              displayPos, this->DragBeginPoint, worldOrient ) )
         {
-        this->DragBeginPoint[0] = 
-        this->DragBeginPoint[1] = 
+        this->DragBeginPoint[0] =
+        this->DragBeginPoint[1] =
         this->DragBeginPoint[2] = VTK_DOUBLE_MIN;
         }
       this->PrevInteractionState = PaintbrushRequestSketchMerge;
@@ -148,8 +148,8 @@ int vtkKWEPaintbrushSelectionRepresentation
     if ( !this->PointPlacer->ComputeWorldPosition( this->Renderer,
            displayPos, this->DragEndPoint, worldOrient ) )
       {
-      this->DragEndPoint[0] = 
-      this->DragEndPoint[1] = 
+      this->DragEndPoint[0] =
+      this->DragEndPoint[1] =
       this->DragEndPoint[2] = VTK_DOUBLE_MIN;
       }
     else
@@ -166,10 +166,10 @@ int vtkKWEPaintbrushSelectionRepresentation
           }
         }
       }
-    
+
     return this->InteractionState;
     }
-  
+
 
   // Clearly, if we got here, we haven't managed to toggle the selected
   // state of any sketch.
@@ -183,7 +183,7 @@ int vtkKWEPaintbrushSelectionRepresentation
 void vtkKWEPaintbrushSelectionRepresentation
 ::AddSketchToSelection( vtkKWEPaintbrushSketch * s )
 {
-  if (vtkstd::find(this->SelectedSketches.begin(), 
+  if (vtkstd::find(this->SelectedSketches.begin(),
        this->SelectedSketches.end(), s) == this->SelectedSketches.end())
     {
     this->SelectedSketches.push_back(s);
@@ -209,7 +209,7 @@ void vtkKWEPaintbrushSelectionRepresentation::UnSelectAllSketches()
 {
   // Iterate over all the sketches and un-highlight them.
 
-  for (SelectedSketchesType::iterator it = this->SelectedSketches.begin(); 
+  for (SelectedSketchesType::iterator it = this->SelectedSketches.begin();
        it != this->SelectedSketches.end(); ++it)
     {
     if (this->PaintbrushDrawing->IsItemPresent(*it))
@@ -217,7 +217,7 @@ void vtkKWEPaintbrushSelectionRepresentation::UnSelectAllSketches()
       (*it)->GetPaintbrushProperty()->HighlightOff();
       }
     }
-  this->SelectedSketches.clear();  
+  this->SelectedSketches.clear();
 }
 
 //----------------------------------------------------------------------
@@ -319,7 +319,7 @@ int vtkKWEPaintbrushSelectionRepresentation
     {
     // If the sketch being merged into was a part of the selection, leave it as
     // selected and remove the rest.
-    if (vtkstd::find(this->SelectedSketches.begin(), this->SelectedSketches.end(), 
+    if (vtkstd::find(this->SelectedSketches.begin(), this->SelectedSketches.end(),
           sketchToMergeInto) != this->SelectedSketches.end())
       {
       this->SelectedSketch = sketchToMergeInto;
@@ -341,7 +341,7 @@ int vtkKWEPaintbrushSelectionRepresentation
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushSelectionRepresentation::DeepCopy(vtkWidgetRepresentation *rep)
 {
-  vtkKWEPaintbrushSelectionRepresentation *r 
+  vtkKWEPaintbrushSelectionRepresentation *r
     = vtkKWEPaintbrushSelectionRepresentation::SafeDownCast(rep);
   if (this == r || !r)
     {
@@ -367,7 +367,7 @@ int vtkKWEPaintbrushSelectionRepresentation::DragAndDropMerge()
       this->PaintbrushDrawing->IsItemPresent(this->SelectedSketch) &&
       this->PaintbrushDrawing->IsItemPresent(this->DragAndDropDestination))
     {
-    this->DragAndDropDestination->GetPaintbrushData()->Add( 
+    this->DragAndDropDestination->GetPaintbrushData()->Add(
                 this->SelectedSketch->GetPaintbrushData() );
     this->RemoveSketchFromSelection(this->SelectedSketch);
     this->PaintbrushDrawing->RemoveItem(this->SelectedSketch);

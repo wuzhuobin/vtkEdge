@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWERenderingSerializationHelper.h"
@@ -26,7 +26,7 @@
 #include "vtkKWEXMLElement.h"
 #include <vtkObjectFactory.h>
 
-vtkCxxRevisionMacro(vtkKWERenderingSerializationHelper, "$Revision: 752 $");
+vtkCxxRevisionMacro(vtkKWERenderingSerializationHelper, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWERenderingSerializationHelper);
 
 //-----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ vtkKWERenderingSerializationHelper::vtkKWERenderingSerializationHelper()
 }
 
 //-----------------------------------------------------------------------------
-int vtkKWERenderingSerializationHelper::Serialize(vtkObject *object, 
+int vtkKWERenderingSerializationHelper::Serialize(vtkObject *object,
                                                   vtkKWESerializer *serializer)
 {
   if (vtkCamera::SafeDownCast(object))
@@ -48,7 +48,7 @@ int vtkKWERenderingSerializationHelper::Serialize(vtkObject *object,
 }
 
 //-----------------------------------------------------------------------------
-void vtkKWERenderingSerializationHelper::RegisterWithHelperMap() 
+void vtkKWERenderingSerializationHelper::RegisterWithHelperMap()
 {
   vtkKWESerializationHelperMap::RegisterHelperForClass("vtkCamera", this);
   vtkKWESerializationHelperMap::RegisterHelperForClass("vtkOpenGLCamera", this);
@@ -56,7 +56,7 @@ void vtkKWERenderingSerializationHelper::RegisterWithHelperMap()
 }
 
 //-----------------------------------------------------------------------------
-void vtkKWERenderingSerializationHelper::UnRegisterWithHelperMap() 
+void vtkKWERenderingSerializationHelper::UnRegisterWithHelperMap()
 {
   vtkKWESerializationHelperMap::UnRegisterHelperForClass("vtkCamera", this);
   vtkKWESerializationHelperMap::UnRegisterHelperForClass("vtkOpenGLCamera", this);
@@ -90,10 +90,12 @@ void vtkKWERenderingSerializationHelper::SerializeCamera(vtkCamera *camera,
     serializer->Serialize("ViewAngle", viewAngle);
     int parallelProjection = camera->GetParallelProjection();
     serializer->Serialize("ParallelProjection", parallelProjection);
+    double parallelScale = camera->GetParallelScale();
+    serializer->Serialize("ParallelScale", parallelScale);
     int useHorizontalViewAngle = camera->GetUseHorizontalViewAngle();
     serializer->Serialize("UseHorizontalViewAngle", useHorizontalViewAngle);
     }
-  else 
+  else
     {
     unsigned int length = 0;
 
@@ -141,6 +143,10 @@ void vtkKWERenderingSerializationHelper::SerializeCamera(vtkCamera *camera,
     int parallelProjection = camera->GetParallelProjection();
     serializer->Serialize("ParallelProjection", parallelProjection);
     camera->SetParallelProjection(parallelProjection);
+
+    double parallelScale = camera->GetParallelScale();
+    serializer->Serialize("ParallelScale", parallelScale);
+    camera->SetParallelScale(parallelScale);
 
     int useHorizontalViewAngle = camera->GetUseHorizontalViewAngle();
     serializer->Serialize("UseHorizontalViewAngle", useHorizontalViewAngle);

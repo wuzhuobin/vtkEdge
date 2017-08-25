@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
+// 
+//   Alternatively, you may see: 
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   http://www.vtkedge.org/vtkedge/project/license.html
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEIlluminatedLinesPainter.h"
@@ -25,7 +25,7 @@
 #include "vtkChooserPainter.h"
 #include "vtkInformation.h"
 #include "vtkInformationIntegerKey.h"
-#include "vtkKWELightingHelper.h"
+#include "vtkLightingHelper.h"
 #include "vtkShaderProgram2.h"
 #include "vtkShader2Collection.h"
 #include "vtkUniformVariables.h"
@@ -47,7 +47,7 @@ extern const char* vtkKWEIlluminatedLinesPainter_vs;
 extern const char* vtkKWEIlluminatedLinesPainter_fs;
 
 vtkStandardNewMacro(vtkKWEIlluminatedLinesPainter);
-vtkCxxRevisionMacro(vtkKWEIlluminatedLinesPainter, "$Revision: 808 $");
+vtkCxxRevisionMacro(vtkKWEIlluminatedLinesPainter, "$Revision: 1973 $");
 vtkInformationKeyMacro(vtkKWEIlluminatedLinesPainter, ENABLE, Integer);
 //-----------------------------------------------------------------------------
 vtkKWEIlluminatedLinesPainter::vtkKWEIlluminatedLinesPainter()
@@ -63,7 +63,7 @@ vtkKWEIlluminatedLinesPainter::~vtkKWEIlluminatedLinesPainter()
 {
   if (this->LastRenderWindow)
     {
-    vtkSmartPointer<vtkWindow> lastWindow = 
+    vtkSmartPointer<vtkWindow> lastWindow =
       this->LastRenderWindow.GetPointer();
     this->ReleaseGraphicsResources(this->LastRenderWindow);
     }
@@ -73,7 +73,7 @@ vtkKWEIlluminatedLinesPainter::~vtkKWEIlluminatedLinesPainter()
     this->FragmentShader->Delete();
     this->FragmentShader=0;
     }
-  
+
   if (this->Program)
     {
     this->Program->Delete();
@@ -144,35 +144,35 @@ void vtkKWEIlluminatedLinesPainter::PrepareForRendering(vtkRenderer* renderer, v
       {
       this->Program = vtkShaderProgram2::New();
       this->Program->SetContext(static_cast<vtkOpenGLRenderWindow *>(renderer->GetRenderWindow()));
-      
+
       vtkShader2 *s1=vtkShader2::New();
       s1->SetType(VTK_SHADER_TYPE_VERTEX);
       s1->SetSourceCode(vtkKWEIlluminatedLinesPainter_vs);
       s1->SetContext(this->Program->GetContext());
       this->Program->GetShaders()->AddItem(s1);
       s1->Delete();
-      
+
       vtkShader2 *s2=vtkShader2::New();
       s2->SetType(VTK_SHADER_TYPE_FRAGMENT);
       s2->SetSourceCode(vtkKWEIlluminatedLinesPainter_fs);
       s2->SetContext(this->Program->GetContext());
       this->Program->GetShaders()->AddItem(s2);
       this->FragmentShader=s2;
-      
+
 #if 0
-      
+
       this->Program->Build();
   if(this->Program->GetLastBuildStatus()!=VTK_SHADER_PROGRAM2_LINK_SUCCEEDED)
     {
     vtkErrorMacro("Program bind failed.");
 //    return 0;
     }
-  
+
   int value=0;
   this->Program->GetUniformVariables()->SetUniformi("tex",1,&value);
   value=1;
   this->Program->GetUniformVariables()->SetUniformi("uMode",1,&value);
-  
+
   this->Program->Use();
   if(!this->Program->IsValid())
     {
@@ -180,11 +180,11 @@ void vtkKWEIlluminatedLinesPainter::PrepareForRendering(vtkRenderer* renderer, v
     }
   this->Program->Restore();
   cout << "done" << endl;
-      
-      
+
+
 #endif
-      
-      
+
+
       }
     else
       {
@@ -331,13 +331,13 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
   vtkPainterDeviceAdapter* device = ren->GetRenderWindow()->
     GetPainterDeviceAdapter();
   void *points = p->GetVoidPointer(0);
-  void *tcoords = 0;  
+  void *tcoords = 0;
   unsigned char *colors = 0;
   if (ca->GetNumberOfCells() == 0)
     {
     return 1;
     }
-  
+
   if (t)
     {
     tcoords = t->GetVoidPointer(0);
@@ -349,8 +349,8 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
   vtkIdType *ptIds = ca->GetPointer();
   vtkIdType *endPtIds = ptIds + ca->GetNumberOfConnectivityEntries();
   int ptype = p->GetDataType();
-  int ttype = (t)? t->GetDataType() : 0;  
-  int tcomps = (t)? t->GetNumberOfComponents() : 0;  
+  int ttype = (t)? t->GetDataType() : 0;
+  int tcomps = (t)? t->GetNumberOfComponents() : 0;
   int primitive = (this->RenderPolys)? VTK_TETRA : VTK_POLY_LINE;
 
   // since this painter does not deal with field colors specially,
@@ -359,7 +359,7 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
   idx &= (~static_cast<unsigned long>(VTK_PDM_NORMALS));
 
   //::vtkUpdateLights();
-  vtkKWELightingHelper* lhelper = vtkKWELightingHelper::New();
+  vtkLightingHelper* lhelper = vtkLightingHelper::New();
   lhelper->PrepareForRendering();
   lhelper->Delete();
 
@@ -412,33 +412,33 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
       }
     }
 #endif
-  
+
   this->Program->Build();
   if(this->Program->GetLastBuildStatus()!=VTK_SHADER_PROGRAM2_LINK_SUCCEEDED)
     {
     vtkErrorMacro("Program bind failed.");
     return 0;
     }
-  
+
   int value=0;
   this->Program->GetUniformVariables()->SetUniformi("tex",1,&value);
   value=mode;
   this->Program->GetUniformVariables()->SetUniformi("uMode",1,&value);
-  
+
   this->Program->Use();
   if(!this->Program->IsValid())
     {
     vtkErrorMacro(<<" validation of the program failed: "<<this->Program->GetLastValidateLog());
     }
-  
+
   switch (idx)
     {
     case 0:
-      vtkDrawPrimsMacro(primitive, 
+      vtkDrawPrimsMacro(primitive,
         device->SendAttribute(vtkPointData::NUM_ATTRIBUTES, 3,
           ptype, points, 3**ptIds);,;);
       break;
-      
+
     case VTK_PDM_COLORS:
       vtkDrawPrimsMacro(primitive,
         device->SendAttribute(vtkPointData::SCALARS, 4,
@@ -446,7 +446,7 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
         device->SendAttribute(vtkPointData::NUM_ATTRIBUTES, 3,
           ptype, points, 3**ptIds);,;);
       break;
-      
+
     case VTK_PDM_COLORS | VTK_PDM_OPAQUE_COLORS:
       vtkDrawPrimsMacro(primitive,
         device->SendAttribute(vtkPointData::SCALARS, 3,
@@ -456,7 +456,7 @@ int vtkKWEIlluminatedLinesPainter::RenderPrimitive(unsigned long idx, vtkDataArr
       break;
 
     case VTK_PDM_TCOORDS:
-      vtkDrawPrimsMacro(primitive, 
+      vtkDrawPrimsMacro(primitive,
         device->SendAttribute(vtkPointData::TCOORDS, tcomps,
           ttype, tcoords, tcomps**ptIds);
         device->SendAttribute(vtkPointData::NUM_ATTRIBUTES, 3,

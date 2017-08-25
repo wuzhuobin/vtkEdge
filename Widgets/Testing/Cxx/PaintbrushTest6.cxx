@@ -1,27 +1,27 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
-// 
+//
 // The example differs from the previous ones in that it renders the brush in
 // as contours. The brush data is grayscale in nature and is represented with
-// vtkKWEPaintbrushGrayscaleData. The paintbrush representation is also a grayscale 
+// vtkKWEPaintbrushGrayscaleData. The paintbrush representation is also a grayscale
 // representation (vtkKWEPaintbrushRepresentationGrayscale2D).
 
 #include "vtkKWEPaintbrushTesting.h"
@@ -52,7 +52,7 @@ int PaintbrushTest6( int argc, char *argv[] )
 {
   if( argc < 5 )
     {
-    std::cerr << "Usage error: \t " << argv[0] << "\t" 
+    std::cerr << "Usage error: \t " << argv[0] << "\t"
               << "Input_Image_Data  InitialLabelMap EventsLogFile Mode(0:replay 1:record)"
               << "[OutputLabelMap]" << std::endl;
     return EXIT_FAILURE;
@@ -64,13 +64,13 @@ int PaintbrushTest6( int argc, char *argv[] )
   vtkImageData * imageData  = paintbrushTesting->GetInput();
 
   vtkKWEWidgetGroup *set = vtkKWEWidgetGroup::New();
-  
+
   for (int i = 0; i < 3; i++)
     {
     vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::New();
     w->SetInteractor( paintbrushTesting->GetNthImageViewer(i)->
                       GetRenderWindow()->GetInteractor());
-    vtkKWEPaintbrushRepresentationGrayscale2D * rep = 
+    vtkKWEPaintbrushRepresentationGrayscale2D * rep =
                 vtkKWEPaintbrushRepresentationGrayscale2D::New();
     w->SetRepresentation(rep);
     if (rep)
@@ -78,24 +78,24 @@ int PaintbrushTest6( int argc, char *argv[] )
       vtkImageActor * imageActor = paintbrushTesting->GetNthImageActor(i);
       rep->SetImageActor(imageActor);
       rep->SetImageData(imageData);
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
           imageData->GetSpacing() );
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
           imageData->GetOrigin() );
       }
-    
+
     set->AddWidget(w);
     rep->Delete();
     w->Delete();
     }
 
-  vtkKWEPaintbrushRepresentation2D * repx = 
+  vtkKWEPaintbrushRepresentation2D * repx =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
-      set->GetNthWidget(0)->GetRepresentation());  
+      set->GetNthWidget(0)->GetRepresentation());
   vtkKWEPaintbrushDrawing * drawingx = repx->GetPaintbrushDrawing();
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation2D * repr = 
+    vtkKWEPaintbrushRepresentation2D * repr =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawingx );
@@ -103,23 +103,23 @@ int PaintbrushTest6( int argc, char *argv[] )
 
   // Now read in an initial segmentation.
 
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
       set->GetNthWidget(0)->GetRepresentation());
-  
+
   vtkKWEPaintbrushDrawing * drawing = rep->GetPaintbrushDrawing();
   drawing->InitializeData();
   vtkKWEPaintbrushGrayscaleData *data = vtkKWEPaintbrushGrayscaleData::New();
 
-  // Read the file (initial segmentation) 
+  // Read the file (initial segmentation)
   vtkMetaImageReader * reader = vtkMetaImageReader::New();
   reader->SetFileName( argv[2] );
   reader->Update();
   data->SetImageData(reader->GetOutput());
   reader->Delete();
-  
-  // Set the first stroke as the initial segmentation. 
-  drawing->AddNewStroke(0, vtkKWEPaintbrushEnums::Draw, data); 
+
+  // Set the first stroke as the initial segmentation.
+  drawing->AddNewStroke(0, vtkKWEPaintbrushEnums::Draw, data);
 
   // Instead of the above line, you can set this directly as the new stencil,
   // saves some memory, as the overhead data of an extra stroke need not be
@@ -128,7 +128,7 @@ int PaintbrushTest6( int argc, char *argv[] )
 
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation * repr = 
+    vtkKWEPaintbrushRepresentation * repr =
       vtkKWEPaintbrushRepresentation::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawing );
@@ -139,8 +139,8 @@ int PaintbrushTest6( int argc, char *argv[] )
 
   // record/replay events
   vtkInteractorEventRecorder *recorder = vtkInteractorEventRecorder::New();
- 
-  //Interaction only in the first Image Viewer 
+
+  //Interaction only in the first Image Viewer
   recorder->SetInteractor( paintbrushTesting->GetNthImageViewer(0)->
                       GetRenderWindow()->GetInteractor());
 
@@ -149,10 +149,10 @@ int PaintbrushTest6( int argc, char *argv[] )
   recorder->SetFileName(eventLogFileName.c_str());
   recorder->On();
 
-  //Set recorder mode depending on the user's choice 
+  //Set recorder mode depending on the user's choice
   unsigned int mode = atoi( argv[4] );
   int retVal = 1;
-  if( mode ) 
+  if( mode )
     {
     std::cout << "Interaction recording....." << std::endl;
     recorder->Record();
@@ -164,7 +164,7 @@ int PaintbrushTest6( int argc, char *argv[] )
     recorder->Play();
     //recorder must be turned off before regression testing
     recorder->Off();
-    retVal = vtkRegressionTestImage( 
+    retVal = vtkRegressionTestImage(
             paintbrushTesting->GetNthImageViewer(0)->GetRenderWindow() );
     if ( retVal == vtkRegressionTester::DO_INTERACTOR)
       {
@@ -173,7 +173,7 @@ int PaintbrushTest6( int argc, char *argv[] )
     }
 
 
-  
+
   // Save out the resulting segmentation.
   //
   vtkImageData * output = vtkImageData::New();

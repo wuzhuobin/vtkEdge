@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -47,7 +47,7 @@
 class vtkKWEPaintbrushTestingSliderCallback : public vtkCommand
 {
 public:
-  static vtkKWEPaintbrushTestingSliderCallback *New() 
+  static vtkKWEPaintbrushTestingSliderCallback *New()
     { return new vtkKWEPaintbrushTestingSliderCallback; }
   void SetImageViewer(vtkImageViewer2 *viewer)
     { m_Viewer =  viewer; }
@@ -64,7 +64,7 @@ protected:
 };
 
 static const char *vtkKWEPaintbrushTestingWindowStrings[] = {
-  "Paintbrush - Axial", 
+  "Paintbrush - Axial",
   "Paintbrush - Coronal",
   "Paintbrush - Sagittal",
   NULL
@@ -72,7 +72,7 @@ static const char *vtkKWEPaintbrushTestingWindowStrings[] = {
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro( vtkKWEPaintbrushTesting );
-vtkCxxRevisionMacro(vtkKWEPaintbrushTesting, "$Revision: 822 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushTesting, "$Revision: 1774 $");
 vtkCxxSetObjectMacro( vtkKWEPaintbrushTesting, Input, vtkImageData );
 
 //----------------------------------------------------------------------------
@@ -89,11 +89,11 @@ vtkKWEPaintbrushTesting::vtkKWEPaintbrushTesting()
     this->ImageViewer[i]->SetRenderWindow(renWin);
     this->ImageViewer[i]->SetRenderer(renderer);
     this->ImageViewer[i]->SetupInteractor(iren);
-    
+
     renWin->SetWindowName( vtkKWEPaintbrushTestingWindowStrings[i] );
-    
+
     this->SliderCallbacks[i] = vtkKWEPaintbrushTestingSliderCallback::New();
-    this->SliderCallbacks[i]->SetImageViewer( this->ImageViewer[i] ); 
+    this->SliderCallbacks[i]->SetImageViewer( this->ImageViewer[i] );
 
     vtkSliderRepresentation2D *SliderRepres = vtkSliderRepresentation2D::New();
     SliderRepres->SetTitleText("Slice");
@@ -119,9 +119,9 @@ vtkKWEPaintbrushTesting::vtkKWEPaintbrushTesting()
     this->SliderWidget[i]->KeyPressActivationOff();
     this->SliderWidget[i]->SetAnimationModeToAnimate();
     SliderRepres->Delete();
-    
-    this->SliderWidget[i]->AddObserver(vtkCommand::InteractionEvent, this->SliderCallbacks[i]);  
-    
+
+    this->SliderWidget[i]->AddObserver(vtkCommand::InteractionEvent, this->SliderCallbacks[i]);
+
     renderer->Delete();
     renWin->Delete();
     iren->Delete();
@@ -175,7 +175,7 @@ void vtkKWEPaintbrushTesting::Initialize()
 
   if (this->FourPaneView == 0)
     {
-    
+
     this->ImageViewer[0]->SetInput(this->Input);
 
     // Reset the window/level and the camera
@@ -185,7 +185,7 @@ void vtkKWEPaintbrushTesting::Initialize()
 
     int min = ImageViewer[0]->GetSliceMin();
     int max = ImageViewer[0]->GetSliceMax();
-    vtkSliderRepresentation2D *sliderRepres = 
+    vtkSliderRepresentation2D *sliderRepres =
       vtkSliderRepresentation2D::SafeDownCast(
            this->SliderWidget[0]->GetRepresentation());
     sliderRepres->SetMinimumValue(min);
@@ -196,7 +196,7 @@ void vtkKWEPaintbrushTesting::Initialize()
     this->SliderWidget[0]->EnabledOn();
     this->ImageViewer[0]->SetSize( size, size );
     this->ImageViewer[0]->SetPosition( 0, 0 );
-      
+
     }
   else
     {
@@ -213,19 +213,19 @@ void vtkKWEPaintbrushTesting::Initialize()
 
       int min = ImageViewer[i]->GetSliceMin();
       int max = ImageViewer[i]->GetSliceMax();
-      vtkSliderRepresentation2D *sliderRepres = 
+      vtkSliderRepresentation2D *sliderRepres =
         vtkSliderRepresentation2D::SafeDownCast(
              this->SliderWidget[i]->GetRepresentation());
       sliderRepres->SetMinimumValue(min);
       sliderRepres->SetMaximumValue(max);
       sliderRepres->SetValue(static_cast<int>((min + max) / 2));
-      
+
       ImageViewer[i]->SetSlice(static_cast<int>(sliderRepres->GetValue()));
       this->SliderWidget[i]->EnabledOn();
 
       this->ImageViewer[i]->SetSize( size, size );
       this->ImageViewer[i]->SetPosition(
-        static_cast<int>(1.2 * size * (i%2)), 
+        static_cast<int>(1.2 * size * (i%2)),
         static_cast<int>(1.2 * size * (i/2)) );
       }
     }
@@ -256,7 +256,7 @@ vtkImageActor * vtkKWEPaintbrushTesting::GetNthImageActor( int i )
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEPaintbrushTesting::GetValidReader( 
+void vtkKWEPaintbrushTesting::GetValidReader(
     vtkImageReader2* & reader, const char *filename)
 {
   if (filename == NULL)
@@ -274,7 +274,7 @@ void vtkKWEPaintbrushTesting::GetValidReader(
 /*
  * Damn ! I can't read .vtk files. they don't subclass from vtkImageReader2
  * TODO : put a work around for VTK files later
- * 
+ *
  * reader = vtkXMLImageDataReader::New();
   int valid = reader->CanReadFile(filename);
   if (reader->CanReadFile(filename) == 3)

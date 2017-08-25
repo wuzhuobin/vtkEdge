@@ -1,27 +1,27 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushUtilities.h"
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushUtilities, "$Revision: 725 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushUtilities, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushUtilities);
 
 vtkKWEPaintbrushUtilities::vtkKWEPaintbrushUtilities()
@@ -39,16 +39,16 @@ void vtkKWEPaintbrushUtilities::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-int vtkKWEPaintbrushUtilities::GetIntersectingExtents( int extent1[6], 
+int vtkKWEPaintbrushUtilities::GetIntersectingExtents( int extent1[6],
                                                     int extent2[6],
                                                     int extent[6])
 {
-  if ((extent1[0] > extent2[1]) || (extent1[1] < extent2[0]) || 
-      (extent1[2] > extent2[3]) || (extent1[3] < extent2[2]) || 
+  if ((extent1[0] > extent2[1]) || (extent1[1] < extent2[0]) ||
+      (extent1[2] > extent2[3]) || (extent1[3] < extent2[2]) ||
       (extent1[4] > extent2[5]) || (extent1[5] < extent2[4]))
     {
     // The extents don't intersect
-    extent[0] = extent[1] = extent[2] = extent[3] 
+    extent[0] = extent[1] = extent[2] = extent[3]
               = extent[4] = extent[5] = -1;
     return 0;
     }
@@ -63,8 +63,8 @@ int vtkKWEPaintbrushUtilities::GetIntersectingExtents( int extent1[6],
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEPaintbrushUtilities::GetImageFromStencil( 
-                          vtkImageData *image, 
+void vtkKWEPaintbrushUtilities::GetImageFromStencil(
+                          vtkImageData *image,
                           vtkImageStencilData *stencilData,
                           unsigned char inVal, unsigned char outVal,
                           bool useImageExtent )
@@ -89,21 +89,21 @@ void vtkKWEPaintbrushUtilities::GetImageFromStencil(
     extent[2] = (extent[2] < imageExtent[2] ? imageExtent[2] : extent[2]);
     extent[3] = (extent[3] > imageExtent[3] ? imageExtent[3] : extent[3]);
     extent[4] = (extent[4] < imageExtent[4] ? imageExtent[4] : extent[4]);
-    extent[5] = (extent[5] > imageExtent[5] ? imageExtent[5] : extent[5]); 
+    extent[5] = (extent[5] > imageExtent[5] ? imageExtent[5] : extent[5]);
     }
 
   // Fill image with zeroes
 
   vtkImageIterator< unsigned char > it(image, image->GetExtent());
   while( !it.IsAtEnd() )
-    { 
-    unsigned char *inSI    = it.BeginSpan();  
+    {
+    unsigned char *inSI    = it.BeginSpan();
     unsigned char *inSIEnd = it.EndSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
       *inSI = outVal;
       ++inSI;
-      }      
+      }
     it.NextSpan();
     }
 
@@ -136,7 +136,7 @@ void vtkKWEPaintbrushUtilities::GetImageFromStencil(
           }
         } // end for each extent tuple
       } // end for each scan line
-    } // end of each slice 
+    } // end of each slice
 
   image->Modified();
 }
@@ -149,7 +149,7 @@ int vtkKWEPaintbrushUtilities
     {
     return 0;
     }
-  
+
   return (extent1[0] == extent2[0] &&
           extent1[1] == extent2[1] &&
           extent1[2] == extent2[2] &&

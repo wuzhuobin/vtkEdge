@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -40,7 +40,7 @@
 //   Ctrl-Right click and drag - Resize the shape anisotropically
 //   Shift "<"                 - Decrease the opacity of the overlaid drawing
 //   Shift ">"                 - Increase the opacity of the overlaid drawing
-//   "l" key                   - Render the current sketch immutable/mutable. 
+//   "l" key                   - Render the current sketch immutable/mutable.
 //                               (Supported only when editing labelmaps)
 //   Escape                    - Enable/Disable interactions
 //
@@ -80,7 +80,7 @@
 #include "vtkSliderWidget.h"
 #include "vtkMetaImageReader.h"
 #include "vtkImageActor.h"
-#include "vtkImageData.h" 
+#include "vtkImageData.h"
 #include "vtkKWEPaintbrushWidget.h"
 #include "vtkKWEPaintbrushRepresentation2D.h"
 #include "vtkKWEPaintbrushShape.h"
@@ -102,13 +102,13 @@ class PaintbrushTest1Labels
 {
 public:
   class Annotation
-    { 
+    {
     public:
       Annotation() {};
       Annotation(const std::string &l, unsigned char r, unsigned char g, unsigned char b )
         { label = l; R = r; G = g; B = b; }
       bool operator!=(const Annotation &a) const { return a.label != this->label; }
-      std::string label; unsigned char R, G, B; 
+      std::string label; unsigned char R, G, B;
     };
   std::map< unsigned short, Annotation > LabelMap;
 };
@@ -116,7 +116,7 @@ public:
 class vtkSliderCallback100 : public vtkCommand
 {
 public:
-  static vtkSliderCallback100 *New() 
+  static vtkSliderCallback100 *New()
     { return new vtkSliderCallback100; }
   void SetImageViewer(vtkImageViewer2 *viewer)
     { m_Viewer =  viewer; }
@@ -136,20 +136,20 @@ int PaintbrushTest1( int argc , char *argv[])
 {
   if( argc < 6 )
     {
-    std::cerr << "Usage error: \t " << argv[0] << "\t" 
+    std::cerr << "Usage error: \t " << argv[0] << "\t"
               << "Input_Image_Data  InitialLabelMap EventsLogFile Mode(0:replay 1:record)"
               << "[OutputLabelMap]" << std::endl;
     return EXIT_FAILURE;
     }
-   
+
   vtkImageReader2 * reader = vtkMetaImageReader::New();
 
   reader->SetFileName( argv[1] );
   if( reader->CanReadFile( argv[1] ) != 3 )
     {
-    std::cerr << "Meta image reader couldn't read the input data\t" << std::endl; 
+    std::cerr << "Meta image reader couldn't read the input data\t" << std::endl;
     return EXIT_FAILURE;
-    } 
+    }
 
   reader->Update();
   vtkImageData * imageData  = reader->GetOutput();
@@ -168,7 +168,7 @@ int PaintbrushTest1( int argc , char *argv[])
   double *range = imageData->GetScalarRange();
   viewer->SetColorWindow(range[1] - range[0]);
   viewer->SetColorLevel(0.5 * (range[1] + range[0])+ 0.0000001);
- 
+
   // Tie a slider widget to manipulate the slices of the image viewer
   //
   vtkSliderRepresentation2D *SliderRepres = vtkSliderRepresentation2D::New();
@@ -199,7 +199,7 @@ int PaintbrushTest1( int argc , char *argv[])
   SliderWidget->SetEnabled(true);
   vtkSliderCallback100 *SliderCb = vtkSliderCallback100::New();
   SliderCb->SetImageViewer(viewer);
-  SliderWidget->AddObserver(vtkCommand::InteractionEvent, SliderCb);  
+  SliderWidget->AddObserver(vtkCommand::InteractionEvent, SliderCb);
 
   viewer->SetSlice(static_cast<int>(SliderRepres->GetValue()));
 
@@ -214,20 +214,20 @@ int PaintbrushTest1( int argc , char *argv[])
   MyLabels.LabelMap[44]=AnnotationType("Right-Inf-Lat-Vent",               196 ,  58,  250 );
 
   vtkKWEWidgetGroup *set = vtkKWEWidgetGroup::New();
-  
+
   for (int i = 0; i < 1; i++)
     {
     vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::New();
     w->SetInteractor( iren );
-    vtkKWEPaintbrushRepresentation2D * rep = 
+    vtkKWEPaintbrushRepresentation2D * rep =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(w->GetRepresentation());
     if (rep)
       {
       rep->SetImageActor( viewer->GetImageActor() );
       rep->SetImageData(imageData);
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
           imageData->GetSpacing() );
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
           imageData->GetOrigin() );
       }
 
@@ -235,10 +235,10 @@ int PaintbrushTest1( int argc , char *argv[])
     w->Delete();
     }
 
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
       set->GetNthWidget(0)->GetRepresentation());
-  
+
   vtkKWEPaintbrushDrawing * drawing = rep->GetPaintbrushDrawing();
 
   // Our internal representation will be to manage a label map.
@@ -247,12 +247,12 @@ int PaintbrushTest1( int argc , char *argv[])
   // This will allocate our canvas based on the size of the overlay image
   // that was set on the WidgetRepresentation.
   drawing->InitializeData();
-  
+
   // Clear the drawing and start on a clean slate. The drawing would have
   // automatically created 1 empty sketch for us, so we can start drawing
   // right away. Let's remove it, since we'd like to initialize the drawing
   // with our IBSR label map.
-  drawing->RemoveAllItems(); 
+  drawing->RemoveAllItems();
 
   // Read the IBSR label map
   vtkMetaImageReader * reader2 = vtkMetaImageReader::New();
@@ -265,25 +265,25 @@ int PaintbrushTest1( int argc , char *argv[])
 
   // Set the label map as the initial canvas data of the drawing.
   drawing->SetPaintbrushData( paintbrushLabelMap );
-  
-  // Create a sketch for each label in the label map, we'd like to edit. 
-  // NOTE: We can skip labels in the label map that we do not care about simply 
-  // by not adding a sketch corresponding to that label into the drawing. In 
-  // this case, we will take into account all the labels (1-62). 
-  // NOTE: As a reminder, bear in mind that 0 is a reserved value and must not 
+
+  // Create a sketch for each label in the label map, we'd like to edit.
+  // NOTE: We can skip labels in the label map that we do not care about simply
+  // by not adding a sketch corresponding to that label into the drawing. In
+  // this case, we will take into account all the labels (1-62).
+  // NOTE: As a reminder, bear in mind that 0 is a reserved value and must not
   // be used as a label.
 
-  for (std::map< unsigned short, AnnotationType >::const_iterator cit = 
+  for (std::map< unsigned short, AnnotationType >::const_iterator cit =
       MyLabels.LabelMap.begin(); cit != MyLabels.LabelMap.end(); ++cit)
     {  // For each label.
 
-    // Initialize the sketch with the label map. Note that you must add the 
+    // Initialize the sketch with the label map. Note that you must add the
     // sketch to the drawing and set the label you wish the sketch to represent
-    // before you initialize it from the label map. 
+    // before you initialize it from the label map.
     //   Also note that when the representation is a "Label-map", all sketches
-    // share the same label map to avoid memory duplication. The corollary to 
+    // share the same label map to avoid memory duplication. The corollary to
     // this is that if you initialize sketches in your drawing using a labelmap,
-    // you must use the same "vtkKWEPaintbrushLabelData" that is used by the 
+    // you must use the same "vtkKWEPaintbrushLabelData" that is used by the
     // drawing.
     vtkKWEPaintbrushSketch * sketch = vtkKWEPaintbrushSketch::New();
     drawing->AddItem( sketch );
@@ -294,7 +294,7 @@ int PaintbrushTest1( int argc , char *argv[])
     // you navigate through your maze of sketches. 62 segmentations can sure
     // get you lost pretty quickly.
     sketch->GetPaintbrushProperty()->SetIdentifier(cit->second.label.c_str());
-    
+
     // Assign a nice color to the sketch.
     double sketchColor[3] = { cit->second.R/255.0,
                               cit->second.G/255.0,
@@ -308,7 +308,7 @@ int PaintbrushTest1( int argc , char *argv[])
   // in the WidgetSet.
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation2D * repr = 
+    vtkKWEPaintbrushRepresentation2D * repr =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawing );
@@ -327,12 +327,11 @@ int PaintbrushTest1( int argc , char *argv[])
   //Set event log recording file
   std::string eventLogFileName = argv[3];
   recorder->SetFileName(eventLogFileName.c_str());
-  recorder->On();
 
-  //Set recorder mode depending on the user's choice 
+  //Set recorder mode depending on the user's choice
   int retVal = 1;
   unsigned int mode= atoi( argv[4] );
-  if( mode ) 
+  if( mode )
     {
     std::cout << "Interaction recording....." << std::endl;
     recorder->Record();
@@ -340,6 +339,7 @@ int PaintbrushTest1( int argc , char *argv[])
     }
   else
     {
+    recorder->On();
     std::cout << "Interaction replaying....." << std::endl;
     recorder->Play();
     //recorder must be turned off before regression testing
@@ -354,9 +354,9 @@ int PaintbrushTest1( int argc , char *argv[])
 
   if (argc >= 6)
     {
-    vtkKWEPaintbrushLabelData * finalLabelMap = 
+    vtkKWEPaintbrushLabelData * finalLabelMap =
       vtkKWEPaintbrushLabelData::SafeDownCast(drawing->GetPaintbrushData());
-    
+
     vtkMetaImageWriter * outputWriter = vtkMetaImageWriter::New();
     outputWriter->SetFileName(argv[5]);
     outputWriter->SetInput( finalLabelMap->GetLabelMap() );
@@ -364,7 +364,7 @@ int PaintbrushTest1( int argc , char *argv[])
     outputWriter->Delete();
     }
 
-  // Clean up  
+  // Clean up
   recorder->Off();
   recorder->Delete();
   viewer->Delete();

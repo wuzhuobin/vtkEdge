@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushWidget.h"
@@ -28,6 +28,7 @@
 #include "vtkKWEPaintbrushProperty.h"
 #include "vtkKWEPaintbrushAnnotationWidget.h"
 #include "vtkKWEPaintbrushSelectionWidget.h"
+#include "vtkKWEPaintbrushWidgetCallbackMapper.h"
 #include "vtkCommand.h"
 #include "vtkCallbackCommand.h"
 #include "vtkRenderWindowInteractor.h"
@@ -42,11 +43,11 @@
 #include "vtkMath.h"
 #include "vtkImageActor.h"
 #include "vtkImageData.h"
-#include "vtkGarbageCollector.h"
+#include "vtkKWEPaintbrushPropertyManager.h"
 
 #define sign(x) ((static_cast<double>(x) < 0.0) ? (-1) : (1))
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushWidget, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushWidget, "$Revision: 3416 $");
 vtkStandardNewMacro(vtkKWEPaintbrushWidget);
 
 //----------------------------------------------------------------------
@@ -55,103 +56,11 @@ vtkKWEPaintbrushWidget::vtkKWEPaintbrushWidget()
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushInteract;
   this->ResizeStartPosition[0] = this->ResizeStartPosition[1] = -1;
 
-  // These are the event callbacks supported by this widget
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonPressEvent,
-           vtkEvent::NoModifier, 0, 0, NULL, 
-           vtkKWEPaintbrushWidget::BeginDrawStrokeEvent,
-           this, vtkKWEPaintbrushWidget::BeginDrawCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonPressEvent,
-           vtkEvent::ControlModifier, 0, 0, NULL, 
-           vtkKWEPaintbrushWidget::BeginEraseStrokeEvent,
-           this, vtkKWEPaintbrushWidget::BeginEraseCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::MouseMoveEvent,
-           vtkWidgetEvent::Move,
-           this, vtkKWEPaintbrushWidget::MoveCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonReleaseEvent,
-           vtkKWEPaintbrushWidget::EndStrokeEvent,
-           this, vtkKWEPaintbrushWidget::EndStrokeCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 8, 1,"BackSpace",
-           vtkKWEPaintbrushWidget::UndoStrokeEvent,
-           this, vtkKWEPaintbrushWidget::UndoCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // Ctrl+z
-           vtkEvent::ControlModifier, 26, 0,"z",
-           vtkKWEPaintbrushWidget::UndoStrokeEvent,
-           this, vtkKWEPaintbrushWidget::UndoCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 40, 1, "Right",
-           vtkKWEPaintbrushWidget::RedoStrokeEvent,
-           this, vtkKWEPaintbrushWidget::RedoCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // Ctrl+y
-           vtkEvent::ControlModifier, 25, 0,"y",
-           vtkKWEPaintbrushWidget::RedoStrokeEvent,
-           this, vtkKWEPaintbrushWidget::RedoCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::ControlModifier, 8, 1,"BackSpace",
-           vtkKWEPaintbrushWidget::RedoStrokeEvent,
-           this, vtkKWEPaintbrushWidget::RedoCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 47, 1, "Delete",
-           vtkWidgetEvent::Delete,
-           this, vtkKWEPaintbrushWidget::DeleteCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonPressEvent,
-           vtkEvent::ShiftModifier, 0, 0, NULL, 
-           vtkKWEPaintbrushWidget::BeginIsotropicResizeEvent,
-           this, vtkKWEPaintbrushWidget::BeginIsotropicResizeShapeCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::RightButtonPressEvent,
-           vtkEvent::NoModifier, 0, 0, NULL, 
-           vtkKWEPaintbrushWidget::BeginIsotropicResizeEvent,
-           this, vtkKWEPaintbrushWidget::BeginIsotropicResizeShapeCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::RightButtonPressEvent,
-           vtkEvent::ControlModifier, 0, 0, NULL, 
-           vtkKWEPaintbrushWidget::BeginResizeEvent,
-           this, vtkKWEPaintbrushWidget::BeginResizeShapeCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::RightButtonReleaseEvent,
-           vtkKWEPaintbrushWidget::EndResizeEvent,
-           this, vtkKWEPaintbrushWidget::EndResizeShapeCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 27, 1,"Escape",
-           vtkKWEPaintbrushWidget::ToggleSelectStateEvent,
-           this, vtkKWEPaintbrushWidget::ToggleSelectStateCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // Shift+
-           vtkEvent::ShiftModifier, 43, 1,"plus",
-           vtkKWEPaintbrushWidget::BeginNewSketchEvent,
-           this, vtkKWEPaintbrushWidget::BeginNewSketchCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::ShiftModifier, 40, 1, "Right",
-           vtkKWEPaintbrushWidget::IncrementSketchEvent,
-           this, vtkKWEPaintbrushWidget::IncrementSketchCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::ShiftModifier, 38, 1, "Left",
-           vtkKWEPaintbrushWidget::DecrementSketchEvent,
-           this, vtkKWEPaintbrushWidget::DecrementSketchCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 109, 0, "m",
-           vtkKWEPaintbrushWidget::MergeSelectionEvent,
-           this, vtkKWEPaintbrushWidget::MergeSelectionCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // Ctrl+a
-           vtkEvent::ControlModifier, 1, 0,"a",
-           vtkKWEPaintbrushWidget::ToggleSelectAllSketchesEvent,
-           this, vtkKWEPaintbrushWidget::ToggleSelectAllSketchesCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // "<"
-           vtkEvent::ShiftModifier, 60, 0,"less",
-           vtkKWEPaintbrushWidget::DecreaseOpacityEvent,
-           this, vtkKWEPaintbrushWidget::DecreaseOpacityCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent, // ">"
-           vtkEvent::ShiftModifier, 62, 0,"greater",
-           vtkKWEPaintbrushWidget::IncreaseOpacityEvent,
-           this, vtkKWEPaintbrushWidget::IncreaseOpacityCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::EnterEvent,
-           vtkKWEPaintbrushWidget::EnterEvent,
-           this, vtkKWEPaintbrushWidget::EnterWidgetCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::LeaveEvent,
-           vtkKWEPaintbrushWidget::LeaveEvent,
-           this, vtkKWEPaintbrushWidget::LeaveWidgetCallback);
-  this->CallbackMapper->SetCallbackMethod(vtkCommand::KeyPressEvent,
-           vtkEvent::NoModifier, 108, 0, "l",
-           vtkKWEPaintbrushWidget::ToggleSketchMutabilityEvent,
-           this, vtkKWEPaintbrushWidget::ToggleSketchMutabilityCallback);
-
+  // Set the bindings.
+  vtkKWEPaintbrushWidgetCallbackMapper *bindings
+    = vtkKWEPaintbrushWidgetCallbackMapper::New();
+  this->SetCallbackMapper(bindings);
+  bindings->Delete();
 
   this->PaintbrushMode = vtkKWEPaintbrushWidget::Edit;
 
@@ -189,7 +98,7 @@ void vtkKWEPaintbrushWidget::CreateDefaultRepresentation()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushWidget::SetEnabled(int enabling)
 {
-  vtkKWEPaintbrushRepresentation *rep 
+  vtkKWEPaintbrushRepresentation *rep
       = vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   // The handle widgets are not actually enabled until they are placed.
@@ -204,14 +113,14 @@ void vtkKWEPaintbrushWidget::SetEnabled(int enabling)
     rep->VisibilityOff();
     }
 
-  this->Superclass::SetEnabled(enabling);  
+  this->Superclass::SetEnabled(enabling);
   this->PaintbrushAnnotationWidget->SetInteractor(this->Interactor);
   this->PaintbrushAnnotationWidget->SetEnabled(enabling);
 
   // The selection widget is enabled only if we are in selection mode and if
   // the parent widget (ourself) is enabled.
   this->PaintbrushSelectionWidget->SetInteractor(this->Interactor);
-  this->PaintbrushSelectionWidget->SetEnabled( (this->PaintbrushMode 
+  this->PaintbrushSelectionWidget->SetEnabled( (this->PaintbrushMode
     == vtkKWEPaintbrushWidget::Select && enabling == 1) ? 1 : 0 );
 
   if (enabling)
@@ -224,13 +133,12 @@ void vtkKWEPaintbrushWidget::SetEnabled(int enabling)
     }
 }
 
-// The following methods are the callbacks that the widget responds to. 
+// The following methods are the callbacks that the widget responds to.
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushWidget::BeginDrawCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if ( self->WidgetState == PaintbrushDisabled || 
-      !self->WidgetGroup)
+  if ( self->WidgetState == PaintbrushDisabled || !self->WidgetGroup)
     {
     return;
     }
@@ -238,7 +146,7 @@ void vtkKWEPaintbrushWidget::BeginDrawCallback(vtkAbstractWidget *w)
   // If we are in "Select" mode, let the PaintbrushSelectionWidget handle it.
   if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
     {
-    // Invoke an event for the PaintbrushSelectionWidget. The 
+    // Invoke an event for the PaintbrushSelectionWidget. The
     // PaintbrushSelectionWidget's parent is ourself and the widget will
     // respond to our invocation of the the event.
     self->InvokeEvent( vtkCommand::LeftButtonPressEvent);
@@ -251,15 +159,63 @@ void vtkKWEPaintbrushWidget::BeginDrawCallback(vtkAbstractWidget *w)
 
   // We are in "Edit" mode.
   // Check if we are inside the canvas. If we aren't just return.
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
   if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
     {
     return;
     }
-  
+
   self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::BeginDrawAction);
   self->InvokeEvent( vtkKWEPaintbrushWidget::BeginDrawStrokeEvent );
+  self->EventCallbackCommand->SetAbortFlag(1);
+}
+
+//-------------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::BeginDrawThisSketchCallback(vtkAbstractWidget *w)
+{
+  vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
+  if ( self->WidgetState == PaintbrushDisabled || !self->WidgetGroup)
+    {
+    return;
+    }
+
+  // If we are in "Select" mode, let the PaintbrushSelectionWidget handle it.
+  if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
+    {
+    // Invoke an event for the PaintbrushSelectionWidget. The
+    // PaintbrushSelectionWidget's parent is ourself and the widget will
+    // respond to our invocation of the the event.
+    self->InvokeEvent( vtkCommand::LeftButtonPressEvent);
+
+    // Propagate abort events from the selection widget.
+    self->EventCallbackCommand->SetAbortFlag( self->
+      PaintbrushSelectionWidget->GetEventCallbackCommand()->GetAbortFlag());
+    return;
+    }
+
+  // We are in "Edit" mode.
+  // Check if we are inside the canvas. If we aren't just return.
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
+  if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
+    {
+    return;
+    }
+
+  // Make all other sketches except the active one immutable, so that we will
+  // erase only this particular sketch.
+  if (vtkKWEPaintbrushDrawing *drawing = rep->GetPaintbrushDrawing())
+    {
+    if (vtkKWEPaintbrushSketch *sketch =
+          drawing->GetItem(rep->GetSketchIndex()))
+      {
+      drawing->GetPaintbrushPropertyManager()->GrabFocus(sketch);
+      }
+    }
+
+  self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::BeginDrawAction);
+  self->InvokeEvent( vtkKWEPaintbrushWidget::BeginDrawStrokeForThisSketchEvent );
   self->EventCallbackCommand->SetAbortFlag(1);
 }
 
@@ -267,9 +223,16 @@ void vtkKWEPaintbrushWidget::BeginDrawCallback(vtkAbstractWidget *w)
 void vtkKWEPaintbrushWidget::BeginEraseCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if ( self->WidgetState == PaintbrushDisabled || 
+  if ( self->WidgetState == PaintbrushDisabled ||
       !self->WidgetGroup                       ||
       self->PaintbrushMode == vtkKWEPaintbrushWidget::Select )
+    {
+    return;
+    }
+
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
+  if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
     {
     return;
     }
@@ -280,31 +243,65 @@ void vtkKWEPaintbrushWidget::BeginEraseCallback(vtkAbstractWidget *w)
 }
 
 //-------------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::BeginEraseThisSketchCallback(vtkAbstractWidget *w)
+{
+  vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
+  if ( self->WidgetState == PaintbrushDisabled ||
+      !self->WidgetGroup                       ||
+      self->PaintbrushMode == vtkKWEPaintbrushWidget::Select )
+    {
+    return;
+    }
+
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
+  if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
+    {
+    return;
+    }
+
+  // Make all other sketches except the active one immutable, so that we will
+  // erase only this particular sketch.
+  if (vtkKWEPaintbrushDrawing *drawing = rep->GetPaintbrushDrawing())
+    {
+    if (vtkKWEPaintbrushSketch *sketch =
+          drawing->GetItem(rep->GetSketchIndex()))
+      {
+      drawing->GetPaintbrushPropertyManager()->GrabFocus(sketch);
+      }
+    }
+
+  self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::BeginEraseAction);
+  self->InvokeEvent( vtkKWEPaintbrushWidget::BeginEraseStrokeForThisSketchEvent );
+  self->EventCallbackCommand->SetAbortFlag(1);
+}
+
+//-------------------------------------------------------------------------
 void vtkKWEPaintbrushWidget::MoveCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
   if (self->WidgetState == PaintbrushDisabled)
     {
     return;
-    }  
+    }
 
   if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
     {
-    // Invoke an event for the PaintbrushSelectionWidget. The 
+    // Invoke an event for the PaintbrushSelectionWidget. The
     // PaintbrushSelectionWidget's parent is ourself and the widget will
     // respond to our invocation of the the event.
     self->InvokeEvent( vtkCommand::MouseMoveEvent);
     return;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
 
   double eventPos[2] = { self->Interactor->GetEventPosition()[0],
                          self->Interactor->GetEventPosition()[1] };
 
   if (self->WidgetState == vtkKWEPaintbrushWidget::PaintbrushInteract ||
-      self->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDraw     || 
+      self->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDraw     ||
       self->WidgetState == vtkKWEPaintbrushWidget::PaintbrushErase)
     {
     // We are in Interact mode.. The template should just
@@ -328,19 +325,19 @@ void vtkKWEPaintbrushWidget::MoveCallback(vtkAbstractWidget *w)
     // Compute the distance in world co-ordinates from the previous point
     // This will determine how much we resize.. If we moved up, we will
     // grow. If we moved down, we will shrink
-  
+
     vtkCoordinate *c = vtkCoordinate::New();
     c->SetCoordinateSystemToDisplay();
     c->SetValue(eventPos[0],eventPos[1],0.0);
     double * p = c->GetComputedWorldValue(self->GetCurrentRenderer());
     double p1[3] = { p[0], p[1], p[2] };
     c->SetValue( self->ResizeStartPosition[0],
-                 self->ResizeStartPosition[1], 
+                 self->ResizeStartPosition[1],
                  0.0);
     p = c->GetComputedWorldValue(self->GetCurrentRenderer());
     double p2[3] = { p[0], p[1], p[2] };
     c->Delete();
-    
+
     // Compute the resize sign.. (grow or shrink)
 
     int signVal;
@@ -383,12 +380,13 @@ void vtkKWEPaintbrushWidget::MoveCallback(vtkAbstractWidget *w)
     // Let the representation do the actual resize
 
     if (rep->ResizeShape(
-          distance, 
-          (self->WidgetState == PaintbrushIsotropicResize) ? 
-              vtkKWEPaintbrushShape::PaintbrushResizeIsotropic : 
+          distance,
+          (self->WidgetState == PaintbrushIsotropicResize) ?
+              vtkKWEPaintbrushShape::PaintbrushResizeIsotropic :
               vtkKWEPaintbrushShape::PaintbrushResizeAnisotropic ))
       {
       self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::ResizeAction);
+      self->InvokeEvent( vtkKWEPaintbrushWidget::ResizeEvent );
       }
 
     self->ResizeStartPosition[0] = static_cast<int>(eventPos[0]);
@@ -405,7 +403,9 @@ void vtkKWEPaintbrushWidget::EndStrokeCallback(vtkAbstractWidget *w)
     if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select &&
         self->WidgetState != PaintbrushDisabled)
       {
-      // Invoke an event for the PaintbrushSelectionWidget. The 
+      self->ResizeStartPosition[0] = self->ResizeStartPosition[1] = -1;
+
+      // Invoke an event for the PaintbrushSelectionWidget. The
       // PaintbrushSelectionWidget's parent is ourself and the widget will
       // respond to our invocation of the the event.
       self->InvokeEvent( vtkCommand::LeftButtonReleaseEvent );
@@ -416,8 +416,22 @@ void vtkKWEPaintbrushWidget::EndStrokeCallback(vtkAbstractWidget *w)
       {
       return;
       }
-    
-    self->WidgetGroup->DispatchAction( self, 
+
+    vtkKWEPaintbrushRepresentation *rep =
+      vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
+
+    // Make all other sketches except the active one immutable, so that we will
+    // erase only this particular sketch.
+    if (vtkKWEPaintbrushDrawing *drawing = rep->GetPaintbrushDrawing())
+      {
+      if (vtkKWEPaintbrushSketch *sketch =
+            drawing->GetItem(rep->GetSketchIndex()))
+        {
+        drawing->GetPaintbrushPropertyManager()->ReleaseFocus();
+        }
+      }
+
+    self->WidgetGroup->DispatchAction( self,
          &vtkKWEPaintbrushWidget::EndStrokeAction);
     self->InvokeEvent( vtkKWEPaintbrushWidget::EndStrokeEvent );
     }
@@ -432,7 +446,7 @@ void vtkKWEPaintbrushWidget::UndoCallback(vtkAbstractWidget *w)
     if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select &&
         self->WidgetState != PaintbrushDisabled)
       {
-      // Invoke an event for the PaintbrushSelectionWidget. The 
+      // Invoke an event for the PaintbrushSelectionWidget. The
       // PaintbrushSelectionWidget's parent is ourself and the widget will
       // respond to our invocation of the the event.
       self->InvokeEvent( vtkCommand::KeyPressEvent);
@@ -443,7 +457,7 @@ void vtkKWEPaintbrushWidget::UndoCallback(vtkAbstractWidget *w)
       return;
       }
     }
-  
+
   self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::UndoAction);
 }
 
@@ -457,7 +471,7 @@ void vtkKWEPaintbrushWidget::DeleteCallback(vtkAbstractWidget *w)
     if (self->PaintbrushMode == vtkKWEPaintbrushWidget::Select &&
         self->WidgetState != PaintbrushDisabled)
       {
-      // Invoke an event for the PaintbrushSelectionWidget. The 
+      // Invoke an event for the PaintbrushSelectionWidget. The
       // PaintbrushSelectionWidget's parent is ourself and the widget will
       // respond to our invocation of the the event.
       self->InvokeEvent( vtkCommand::KeyPressEvent);
@@ -468,7 +482,7 @@ void vtkKWEPaintbrushWidget::DeleteCallback(vtkAbstractWidget *w)
       return;
       }
     }
-  
+
   self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::DeleteAction);
 }
 
@@ -482,7 +496,7 @@ void vtkKWEPaintbrushWidget::RedoCallback(vtkAbstractWidget *w)
     {
     return;
     }
-  
+
   self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::RedoAction);
 }
 
@@ -495,12 +509,12 @@ void vtkKWEPaintbrushWidget::BeginNewSketchCallback(vtkAbstractWidget *w)
     {
     return;
     }
-  
+
   // If the user has set a limit on the number of sketches in the drawing,
   // obey the limit.
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
-  int maxSketchesAllowed = 
+  int maxSketchesAllowed =
     rep->GetPaintbrushDrawing()->GetMaximumNumberOfSketches();
   if (maxSketchesAllowed &&
       rep->GetPaintbrushDrawing()->GetNumberOfItems() == maxSketchesAllowed)
@@ -508,10 +522,16 @@ void vtkKWEPaintbrushWidget::BeginNewSketchCallback(vtkAbstractWidget *w)
     return; // We hit the limit.
     }
 
-  self->WidgetGroup->DispatchAction(self, 
+  self->WidgetGroup->DispatchAction(self,
       &vtkKWEPaintbrushWidget::BeginNewSketchAction);
-  self->PaintbrushAnnotationWidget->AnnotateNewSketch();  
+  self->PaintbrushAnnotationWidget->AnnotateNewSketch();
   self->InvokeEvent( vtkKWEPaintbrushWidget::BeginNewSketchEvent );
+}
+
+//-------------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::IncrementSketch()
+{
+  this->IncrementSketchCallback(this);
 }
 
 //-------------------------------------------------------------------------
@@ -524,17 +544,24 @@ void vtkKWEPaintbrushWidget::IncrementSketchCallback(vtkAbstractWidget *w)
     return;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
   if (rep->GetPaintbrushDrawing()->GetMaximumNumberOfSketches() == 1)
     {
     return; // We just got one sketch. Why annotate it ?
     }
-  
-  self->WidgetGroup->DispatchAction(self, 
+
+  const int oldSketchIndex = rep->GetSketchIndex();
+  self->WidgetGroup->DispatchAction(self,
       &vtkKWEPaintbrushWidget::IncrementSketchAction);
+  int newSketchIndex = rep->GetSketchIndex();
+
   self->PaintbrushAnnotationWidget->AnnotateIncrementSketch();
-  self->InvokeEvent( vtkKWEPaintbrushWidget::IncrementSketchEvent );
+  if (newSketchIndex != oldSketchIndex)
+    {
+    self->InvokeEvent(
+      vtkKWEPaintbrushWidget::IncrementSketchEvent, &newSketchIndex );
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -547,17 +574,43 @@ void vtkKWEPaintbrushWidget::DecrementSketchCallback(vtkAbstractWidget *w)
     return;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
   if (rep->GetPaintbrushDrawing()->GetMaximumNumberOfSketches() == 1)
     {
     return; // We just got one sketch. Why annotate it ?
     }
-  
-  self->WidgetGroup->DispatchAction(self, 
+
+  const int oldSketchIndex = rep->GetSketchIndex();
+  self->WidgetGroup->DispatchAction(self,
       &vtkKWEPaintbrushWidget::DecrementSketchAction);
+  int newSketchIndex = rep->GetSketchIndex();
+
   self->PaintbrushAnnotationWidget->AnnotateDecrementSketch();
-  self->InvokeEvent( vtkKWEPaintbrushWidget::DecrementSketchEvent );
+  if (newSketchIndex != oldSketchIndex)
+    {
+    self->InvokeEvent(
+      vtkKWEPaintbrushWidget::DecrementSketchEvent, &newSketchIndex );
+    }
+}
+
+//-------------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::GoToSketch(int n)
+{
+  if (this->WidgetState != vtkKWEPaintbrushWidget::PaintbrushInteract ||
+      this->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
+    {
+    return;
+    }
+
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
+
+  this->Payload = &n;
+  this->WidgetGroup->DispatchAction(this,
+      &vtkKWEPaintbrushWidget::GoToSketchAction);
+  int idx = rep->GetSketchIndex();
+  this->InvokeEvent( vtkKWEPaintbrushWidget::GoToSketchEvent, &idx );
 }
 
 //----------------------------------------------------------------------
@@ -570,13 +623,13 @@ void vtkKWEPaintbrushWidget::BeginResizeShapeCallback(vtkAbstractWidget *w)
     return;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
   if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
     {
     return;
     }
-  
+
   self->WidgetGroup->DispatchAction(
       self, &vtkKWEPaintbrushWidget::BeginResizeAction);
   self->InvokeEvent( vtkKWEPaintbrushWidget::BeginResizeEvent );
@@ -592,8 +645,8 @@ void vtkKWEPaintbrushWidget::BeginIsotropicResizeShapeCallback(vtkAbstractWidget
     {
     return;
     }
-  
-  vtkKWEPaintbrushRepresentation *rep = 
+
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
   if (!rep->IsInsideCanvas( self->Interactor->GetEventPosition() ))
     {
@@ -621,55 +674,26 @@ void vtkKWEPaintbrushWidget::EndResizeShapeCallback(vtkAbstractWidget *w)
 
 //----------------------------------------------------------------------
 // The motivation for this method is strange.. Let me explain.. The widget
-// by default grabs focus during draws and erases, resize, anisotropic 
+// by default grabs focus during draws and erases, resize, anisotropic
 // resize etc.. Sometimes, you may be drawing on an image actor where you
 // have other callbacks mapped onto similar events.. (for instance window
 // /level, zoom, translate etc). This method toggles the select state
 // of the widget
 void vtkKWEPaintbrushWidget::ToggleSelectStateCallback(vtkAbstractWidget *w)
 {
-  // TODO : Write the corresponding actions for it
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if (!self)
-    {
-    return;
-    }
-
-  vtkKWEPaintbrushRepresentation *rep = 
-    vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
-
-  if (self->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    {
-    self->PaintbrushAnnotationWidget->AnnotateString("Brush enabled");  
-    self->WidgetState = vtkKWEPaintbrushWidget::PaintbrushInteract;
-    self->PaintbrushSelectionWidget->ProcessEventsOn();
-    rep->SetStateToInteract();
-    rep->SetShapeOutlineVisibility( self->PaintbrushMode 
-                == vtkKWEPaintbrushWidget::Select ? 0 : 1 );
-    }
-  else
-    {
-    self->PaintbrushAnnotationWidget->AnnotateString("Brush disabled");  
-    self->WidgetState = vtkKWEPaintbrushWidget::PaintbrushDisabled;
-    self->ResizeStartPosition[0] = self->ResizeStartPosition[1] = -1;
-    self->PaintbrushSelectionWidget->ProcessEventsOff();
-    rep->SetStateToDisabled();
-    }
-
-  self->SetCursor( rep->GetInteractionState() );  
-  self->EventCallbackCommand->SetAbortFlag(1);
-  w->Render();
-  self->InvokeEvent( vtkKWEPaintbrushWidget::ToggleSelectStateEvent );  
+  self->WidgetGroup->DispatchAction(self,
+      &vtkKWEPaintbrushWidget::ToggleSelectStateAction);
 }
 
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushWidget::MergeSelectionCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if (self && self->WidgetState != PaintbrushDisabled 
+  if (self && self->WidgetState != PaintbrushDisabled
            && self->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
     {
-    // Invoke an event for the PaintbrushSelectionWidget. The 
+    // Invoke an event for the PaintbrushSelectionWidget. The
     // PaintbrushSelectionWidget's parent is ourself and the widget will
     // respond to our invocation of the the event.
     self->InvokeEvent( vtkCommand::KeyPressEvent);
@@ -680,10 +704,10 @@ void vtkKWEPaintbrushWidget::MergeSelectionCallback(vtkAbstractWidget *w)
 void vtkKWEPaintbrushWidget::ToggleSelectAllSketchesCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if (self && self->WidgetState != PaintbrushDisabled 
+  if (self && self->WidgetState != PaintbrushDisabled
            && self->PaintbrushMode == vtkKWEPaintbrushWidget::Select)
     {
-    // Invoke an event for the PaintbrushSelectionWidget. The 
+    // Invoke an event for the PaintbrushSelectionWidget. The
     // PaintbrushSelectionWidget's parent is ourself and the widget will
     // respond to our invocation of the the event.
     self->InvokeEvent( vtkCommand::KeyPressEvent );
@@ -694,15 +718,16 @@ void vtkKWEPaintbrushWidget::ToggleSelectAllSketchesCallback(vtkAbstractWidget *
 void vtkKWEPaintbrushWidget::ToggleSketchMutabilityCallback(vtkAbstractWidget *w)
 {
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
-  if (self && self->WidgetState != PaintbrushDisabled 
+  if (self && self->WidgetState != PaintbrushDisabled
            && self->PaintbrushMode == vtkKWEPaintbrushWidget::Edit)
     {
-    vtkKWEPaintbrushRepresentation *rep = 
+    vtkKWEPaintbrushRepresentation *rep =
       vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
-    vtkKWEPaintbrushSketch * sketch 
+    vtkKWEPaintbrushSketch * sketch
       = rep->GetPaintbrushDrawing()->GetItem(rep->GetSketchIndex());
     vtkKWEPaintbrushProperty *property = sketch->GetPaintbrushProperty();
     property->SetMutable( 1- property->GetMutable() );
+    self->InvokeEvent( vtkKWEPaintbrushWidget::ToggleSketchMutabilityEvent );
     }
 }
 
@@ -712,13 +737,14 @@ void vtkKWEPaintbrushWidget::DecreaseOpacityCallback(vtkAbstractWidget *w)
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
   if (self->WidgetState != PaintbrushDisabled)
     {
-    vtkKWEPaintbrushRepresentation *rep = 
+    vtkKWEPaintbrushRepresentation *rep =
       vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
     if (rep->DecreaseOpacity())
       {
       self->Render();
+      self->InvokeEvent(vtkKWEPaintbrushWidget::DecreaseOpacityEvent);
       }
-    }    
+    }
 }
 
 //----------------------------------------------------------------------
@@ -727,13 +753,14 @@ void vtkKWEPaintbrushWidget::IncreaseOpacityCallback(vtkAbstractWidget *w)
   vtkKWEPaintbrushWidget *self = vtkKWEPaintbrushWidget::SafeDownCast(w);
   if (self->WidgetState != PaintbrushDisabled)
     {
-    vtkKWEPaintbrushRepresentation *rep = 
+    vtkKWEPaintbrushRepresentation *rep =
       vtkKWEPaintbrushRepresentation::SafeDownCast(self->WidgetRep);
     if (rep->IncreaseOpacity())
       {
       self->Render();
+      self->InvokeEvent(vtkKWEPaintbrushWidget::IncreaseOpacityEvent);
       }
-    }    
+    }
 }
 
 //----------------------------------------------------------------------
@@ -757,7 +784,7 @@ void vtkKWEPaintbrushWidget::LeaveWidgetCallback(vtkAbstractWidget *w)
     return;
     }
   self->WidgetGroup->DispatchAction(self, &vtkKWEPaintbrushWidget::LeaveWidgetAction);
-  self->InvokeEvent( vtkKWEPaintbrushWidget::LeaveEvent );  
+  self->InvokeEvent( vtkKWEPaintbrushWidget::LeaveEvent );
 }
 
 //----------------------------------------------------------------------
@@ -765,13 +792,13 @@ void vtkKWEPaintbrushWidget::LeaveWidgetCallback(vtkAbstractWidget *w)
 int vtkKWEPaintbrushWidget::BeginDrawAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
-  
-  vtkKWEPaintbrushRepresentation *rep = 
+
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
-  
+
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushDraw;
   rep->SetStateToDraw();
 
@@ -781,20 +808,20 @@ int vtkKWEPaintbrushWidget::BeginDrawAction(vtkKWEPaintbrushWidget *dispatcher)
     rep->ActivateShapeOutline( this->Interactor->GetEventPosition()[0],
                                this->Interactor->GetEventPosition()[1] );
     rep->BeginNewStroke();
+
     // Get the current position from the active widget.
     double d[3];
-    vtkKWEPaintbrushRepresentation *dispatcher_rep = 
+    vtkKWEPaintbrushRepresentation *dispatcher_rep =
       vtkKWEPaintbrushRepresentation::SafeDownCast(dispatcher->WidgetRep);
 
     dispatcher_rep->GetCurrentShapePosition(d[0], d[1], d[2]);
     rep->CreateShapeOutline(d);
 
     // If the draw action results in a draw or an erase, do it on the active widget
-    if ((rep->GetInteractionState() == PaintbrushDraw || 
+    if ((rep->GetInteractionState() == PaintbrushDraw ||
          rep->GetInteractionState() == PaintbrushErase))
       {
-      rep->GetPaintbrushDrawing()->
-        AddShapeToCurrentStroke( rep->GetSketchIndex(), d );
+      rep->AddShapeToCurrentStroke( d );
       }
     }
   else
@@ -807,17 +834,17 @@ int vtkKWEPaintbrushWidget::BeginDrawAction(vtkKWEPaintbrushWidget *dispatcher)
   this->EventCallbackCommand->SetAbortFlag(1);
   return 1;
 }
-    
+
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushWidget::
 EndStrokeAction( vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher) )
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushInteract;
@@ -826,7 +853,6 @@ EndStrokeAction( vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher) )
   // Remove focus
   this->SetCursor( rep->GetInteractionState() );
   this->EventCallbackCommand->SetAbortFlag(0);
-  this->InvokeEvent(vtkKWEPaintbrushWidget::EndStrokeEvent, NULL);
   return 1;
 }
 
@@ -834,11 +860,11 @@ EndStrokeAction( vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher) )
 int vtkKWEPaintbrushWidget::BeginEraseAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushErase;
@@ -846,7 +872,24 @@ int vtkKWEPaintbrushWidget::BeginEraseAction(vtkKWEPaintbrushWidget *dispatcher)
 
   if (dispatcher == this)
     {
+    // Make sure that the current shape position is updated.
+    rep->ActivateShapeOutline( this->Interactor->GetEventPosition()[0],
+                               this->Interactor->GetEventPosition()[1] );
     rep->BeginNewStroke();
+
+    double d[3];
+    vtkKWEPaintbrushRepresentation *dispatcher_rep =
+      vtkKWEPaintbrushRepresentation::SafeDownCast(dispatcher->WidgetRep);
+
+    dispatcher_rep->GetCurrentShapePosition(d[0], d[1], d[2]);
+    rep->CreateShapeOutline(d);
+
+    // If the draw action results in a draw or an erase, do it on the active widget
+    if ((rep->GetInteractionState() == PaintbrushDraw ||
+         rep->GetInteractionState() == PaintbrushErase))
+      {
+      rep->AddShapeToCurrentStroke( d );
+      }
     }
   else
     {
@@ -863,15 +906,15 @@ int vtkKWEPaintbrushWidget::BeginEraseAction(vtkKWEPaintbrushWidget *dispatcher)
 int vtkKWEPaintbrushWidget::HoverAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
   // Get the current position from the active widget.
   double d[3];
-  vtkKWEPaintbrushRepresentation *dispatcher_rep = 
+  vtkKWEPaintbrushRepresentation *dispatcher_rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(dispatcher->WidgetRep);
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   dispatcher_rep->GetCurrentShapePosition(d[0], d[1], d[2]);
@@ -879,12 +922,11 @@ int vtkKWEPaintbrushWidget::HoverAction(vtkKWEPaintbrushWidget *dispatcher)
   rep->CreateShapeOutline(d);
 
   // If the hover results in a draw or an erase, do it on the active widget
-  if (this == dispatcher && 
-      (rep->GetInteractionState() == PaintbrushDraw || 
+  if (this == dispatcher &&
+      (rep->GetInteractionState() == PaintbrushDraw ||
        rep->GetInteractionState() == PaintbrushErase))
     {
-    rep->GetPaintbrushDrawing()->
-      AddShapeToCurrentStroke( rep->GetSketchIndex(), d );
+    rep->AddShapeToCurrentStroke( d );
     }
 
   this->SetCursor( PaintbrushDraw );
@@ -896,11 +938,11 @@ int vtkKWEPaintbrushWidget::HoverAction(vtkKWEPaintbrushWidget *dispatcher)
 int vtkKWEPaintbrushWidget::UndoAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   if (dispatcher == this)
@@ -921,11 +963,11 @@ int vtkKWEPaintbrushWidget::UndoAction(vtkKWEPaintbrushWidget *dispatcher)
 int vtkKWEPaintbrushWidget::RedoAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   if (dispatcher == this)
@@ -946,11 +988,11 @@ int vtkKWEPaintbrushWidget::RedoAction(vtkKWEPaintbrushWidget *dispatcher)
 int vtkKWEPaintbrushWidget::BeginNewSketchAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   if (dispatcher == this)
@@ -960,7 +1002,7 @@ int vtkKWEPaintbrushWidget::BeginNewSketchAction(vtkKWEPaintbrushWidget *dispatc
   else
     {
     rep->DeepCopy(dispatcher->WidgetRep);
-    }  
+    }
   return 1;
 }
 
@@ -969,13 +1011,44 @@ int vtkKWEPaintbrushWidget
 ::IncrementSketchAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
-  rep->IncrementSketch();
+  return rep->IncrementSketch();
+}
+
+//-------------------------------------------------------------------------
+int vtkKWEPaintbrushWidget
+::ToggleSelectStateAction(vtkKWEPaintbrushWidget *dispatcher)
+{
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
+
+  if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
+    {
+    this->PaintbrushAnnotationWidget->AnnotateString("Brush enabled");
+    this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushInteract;
+    this->PaintbrushSelectionWidget->ProcessEventsOn();
+    rep->SetStateToInteract();
+    rep->SetShapeOutlineVisibility( this->PaintbrushMode
+                == vtkKWEPaintbrushWidget::Select ? 0 : 1 );
+    }
+  else
+    {
+    this->PaintbrushAnnotationWidget->AnnotateString("Brush disabled");
+    this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushDisabled;
+    this->ResizeStartPosition[0] = this->ResizeStartPosition[1] = -1;
+    this->PaintbrushSelectionWidget->ProcessEventsOff();
+    rep->SetStateToDisabled();
+    }
+
+  this->SetCursor( rep->GetInteractionState() );
+  this->EventCallbackCommand->SetAbortFlag(1);
+  this->Render();
+  this->InvokeEvent( vtkKWEPaintbrushWidget::ToggleSelectStateEvent );
   return 1;
 }
 
@@ -984,24 +1057,38 @@ int vtkKWEPaintbrushWidget
 ::DecrementSketchAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
-  rep->DecrementSketch();
-  return 1;
+  return rep->DecrementSketch();
+}
+
+//-------------------------------------------------------------------------
+int vtkKWEPaintbrushWidget
+::GoToSketchAction(vtkKWEPaintbrushWidget *dispatcher)
+{
+  if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
+    {
+    return 0;
+    }
+
+  int *n = static_cast< int * >( dispatcher->Payload );
+  vtkKWEPaintbrushRepresentation *rep =
+    vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
+  return rep->GoToSketch(*n);
 }
 
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushWidget::DeleteAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   if (dispatcher == this)
@@ -1021,11 +1108,11 @@ int vtkKWEPaintbrushWidget::DeleteAction(vtkKWEPaintbrushWidget *dispatcher)
 int vtkKWEPaintbrushWidget::BeginResizeAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
-  
-  vtkKWEPaintbrushRepresentation *rep = 
+
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   rep->SetStateToResize();
@@ -1035,9 +1122,9 @@ int vtkKWEPaintbrushWidget::BeginResizeAction(vtkKWEPaintbrushWidget *dispatcher
     {
     this->ResizeStartPosition[0] = this->Interactor->GetEventPosition()[0];
     this->ResizeStartPosition[1] = this->Interactor->GetEventPosition()[1];
-    this->PaintbrushAnnotationWidget->AnnotateSize();  
+    this->PaintbrushAnnotationWidget->AnnotateSize();
     }
-  
+
   this->SetCursor( rep->GetInteractionState() );
   this->EventCallbackCommand->SetAbortFlag(1); // We are definitely selected
   return 1;
@@ -1048,11 +1135,11 @@ int vtkKWEPaintbrushWidget::BeginIsotropicResizeAction(
                      vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
-  
-  vtkKWEPaintbrushRepresentation *rep = 
+
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushIsotropicResize;
@@ -1062,7 +1149,7 @@ int vtkKWEPaintbrushWidget::BeginIsotropicResizeAction(
     {
     this->ResizeStartPosition[0] = this->Interactor->GetEventPosition()[0];
     this->ResizeStartPosition[1] = this->Interactor->GetEventPosition()[1];
-    this->PaintbrushAnnotationWidget->AnnotateSize();  
+    this->PaintbrushAnnotationWidget->AnnotateSize();
     }
 
   this->SetCursor( rep->GetInteractionState() );
@@ -1075,8 +1162,8 @@ int vtkKWEPaintbrushWidget::BeginIsotropicResizeAction(
 int vtkKWEPaintbrushWidget::ResizeAction(vtkKWEPaintbrushWidget *dispatcher)
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
 
   if (this == dispatcher)
@@ -1084,7 +1171,7 @@ int vtkKWEPaintbrushWidget::ResizeAction(vtkKWEPaintbrushWidget *dispatcher)
     // Compute the distance in world co-ordinates from the previous point
     // This will determine how much we resize.. If we moved up, we will
     // grow. If we moved down, we will shrink
-  
+
     double eventPos[2] = { this->Interactor->GetEventPosition()[0],
                            this->Interactor->GetEventPosition()[1] };
 
@@ -1094,12 +1181,12 @@ int vtkKWEPaintbrushWidget::ResizeAction(vtkKWEPaintbrushWidget *dispatcher)
     double * p = c->GetComputedWorldValue(this->GetCurrentRenderer());
     double p1[3] = { p[0], p[1], p[2] };
     c->SetValue( this->ResizeStartPosition[0],
-                 this->ResizeStartPosition[1], 
+                 this->ResizeStartPosition[1],
                  0.0);
     p = c->GetComputedWorldValue(this->GetCurrentRenderer());
     double p2[3] = { p[0], p[1], p[2] };
     c->Delete();
-    
+
     // Compute the resize sign.. (grow or shrink)
 
     int signVal;
@@ -1125,15 +1212,15 @@ int vtkKWEPaintbrushWidget::ResizeAction(vtkKWEPaintbrushWidget *dispatcher)
     this->ResizeFactor[0] = fabs(p2[0] - p1[0]) * signVal;
     this->ResizeFactor[1] = fabs(p2[1] - p1[1]) * signVal;
     this->ResizeFactor[2] = fabs(p2[2] - p1[2]) * signVal;
-    
+
     // Throw some annotation up on the screen.
-    this->PaintbrushAnnotationWidget->AnnotateSize();    
+    this->PaintbrushAnnotationWidget->AnnotateSize();
     }
   else
     {
     this->DeepCopy(dispatcher); // synchronize states with the dispatcher
     }
-  
+
   this->Render();
   return 1;
 }
@@ -1143,27 +1230,19 @@ int vtkKWEPaintbrushWidget
 ::EndResizeAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
 {
   if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
-    { 
-    return 0; 
+    {
+    return 0;
     }
-  
-  vtkKWEPaintbrushRepresentation *rep = 
+
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
-  
+
   this->WidgetState = vtkKWEPaintbrushWidget::PaintbrushInteract;
   this->ResizeStartPosition[0] = this->ResizeStartPosition[1] = -1;
   rep->SetStateToInteract();
   this->EventCallbackCommand->SetAbortFlag(0); // remove focus
 
   this->SetCursor( rep->GetInteractionState() );
-  return 1;
-}
-
-//-------------------------------------------------------------------------
-int vtkKWEPaintbrushWidget::
-ToggleSelectStateAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
-{
-  // TODO, probably move some stuffs from the callback here
   return 1;
 }
 
@@ -1184,7 +1263,7 @@ LeaveWidgetAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
     return 0;
     }
 
-  vtkKWEPaintbrushRepresentation *rep = 
+  vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep);
 
   if ( rep->GetShapeOutlineVisibility() )
@@ -1201,13 +1280,13 @@ LeaveWidgetAction(vtkKWEPaintbrushWidget *vtkNotUsed(dispatcher))
 void vtkKWEPaintbrushWidget::DeepCopy(vtkAbstractWidget *widget)
 {
   vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::SafeDownCast(widget);
-  if (this == w || !w) 
+  if (this == w || !w)
     {
     return;
     }
-  
+
   this->WidgetState = w->WidgetState;
-  if (w->WidgetGroup) 
+  if (w->WidgetGroup)
     {
     w->WidgetGroup->AddWidget(this);
     }
@@ -1241,12 +1320,12 @@ void vtkKWEPaintbrushWidget::SetPaintbrushMode( int m )
     == vtkKWEPaintbrushWidget::Select && this->Enabled == 1) ? 1 : 0 );
 
   // turn off the hovering brush if we are in selection mode.
-  vtkKWEPaintbrushRepresentation * rep = static_cast< 
+  vtkKWEPaintbrushRepresentation * rep = static_cast<
     vtkKWEPaintbrushRepresentation * >(this->WidgetRep);
   rep->SetShapeOutlineVisibility( m == vtkKWEPaintbrushWidget::Select ? 0 : 1 );
 
   // Cursor is a hand cursor in selection mode, crosshair in edit mode
-  //this->RequestCursorShape( m == vtkKWEPaintbrushWidget::Select ? 
+  //this->RequestCursorShape( m == vtkKWEPaintbrushWidget::Select ?
   //                        VTK_CURSOR_HAND : VTK_CURSOR_CROSSHAIR);
 
   this->PaintbrushMode = m;
@@ -1256,12 +1335,12 @@ void vtkKWEPaintbrushWidget::SetPaintbrushMode( int m )
 void vtkKWEPaintbrushWidget::SetProcessEvents(int pe)
 {
   this->Superclass::SetProcessEvents(pe);
-  if (vtkKWEPaintbrushRepresentation *rep = 
+  if (vtkKWEPaintbrushRepresentation *rep =
     vtkKWEPaintbrushRepresentation::SafeDownCast(this->WidgetRep))
   {
   // If we aren't receiving any events, don't show the annoying shape outline.
-  rep->SetShapeOutlineVisibility( pe && 
-                                  this->WidgetState != PaintbrushDisabled && 
+  rep->SetShapeOutlineVisibility( pe &&
+                                  this->WidgetState != PaintbrushDisabled &&
                                   this->PaintbrushMode != Select );
   }
 
@@ -1285,7 +1364,7 @@ void vtkKWEPaintbrushWidget::SetCursor(int vtkNotUsed(nteractionstate))
     // Resize cursor
     this->RequestCursorShape( VTK_CURSOR_SIZEALL );
     }
-  
+
   else
     {
     // the default is a crosshair cursor.
@@ -1295,8 +1374,26 @@ void vtkKWEPaintbrushWidget::SetCursor(int vtkNotUsed(nteractionstate))
 }
 
 //----------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::SetWidgetStateToEnabled()
+{
+  if (this->WidgetState == vtkKWEPaintbrushWidget::PaintbrushDisabled)
+    {
+    this->ToggleSelectStateCallback(this);
+    }
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushWidget::SetWidgetStateToDisabled()
+{
+  if (this->WidgetState != vtkKWEPaintbrushWidget::PaintbrushDisabled)
+    {
+    this->ToggleSelectStateCallback(this);
+    }
+}
+
+//----------------------------------------------------------------------
 void vtkKWEPaintbrushWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
   //Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
-  this->Superclass::PrintSelf(os,indent); 
+  this->Superclass::PrintSelf(os,indent);
 }

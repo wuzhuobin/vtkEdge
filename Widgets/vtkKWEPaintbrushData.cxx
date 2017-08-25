@@ -21,12 +21,13 @@
 #include "vtkKWEPaintbrushData.h"
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushData, "$Revision: 742 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushData, "$Revision: 3550 $");
 
 //----------------------------------------------------------------------
 vtkKWEPaintbrushData::vtkKWEPaintbrushData()
 {
   this->Label = 1;
+  this->ComputeDelta = 0;
 }
 
 //----------------------------------------------------------------------

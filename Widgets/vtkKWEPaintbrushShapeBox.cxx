@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushShapeBox.h"
@@ -30,7 +30,7 @@
 
 #define sign(x) ((x<0) ? (-1) : (1))
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushShapeBox, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushShapeBox, "$Revision: 3282 $");
 vtkStandardNewMacro(vtkKWEPaintbrushShapeBox);
 
 //----------------------------------------------------------------------
@@ -47,8 +47,8 @@ vtkKWEPaintbrushShapeBox::~vtkKWEPaintbrushShapeBox()
 }
 
 //----------------------------------------------------------------------
-vtkSmartPointer< vtkPolyData > 
-vtkKWEPaintbrushShapeBox::GetShapePolyData( 
+vtkSmartPointer< vtkPolyData >
+vtkKWEPaintbrushShapeBox::GetShapePolyData(
             double *center, vtkPlane *plane)
 {
   if (plane == NULL)
@@ -65,7 +65,7 @@ vtkKWEPaintbrushShapeBox::GetShapePolyData(
     vtkSmartPointer< vtkPolyData > pd = templateOutline->GetOutput();
     templateOutline->Delete();
     return pd;
-    
+
     }
   else
     {
@@ -83,23 +83,23 @@ vtkKWEPaintbrushShapeBox::GetShapePolyData(
         {
         return NULL;
         }
-      
-      vtkSmartPointer< vtkPolyData > templateOutline 
+
+      vtkSmartPointer< vtkPolyData > templateOutline
                   = vtkSmartPointer< vtkPolyData >::New();
       templateOutline->Allocate(1, 1);
 
       vtkPoints * points = vtkPoints::New();
-      points->InsertNextPoint( center[0], 
-                               center[1] - this->Width[1]/2.0, 
+      points->InsertNextPoint( center[0],
+                               center[1] - this->Width[1]/2.0,
                                center[2] - this->Width[2]/2.0);
-      points->InsertNextPoint( center[0], 
-                               center[1] - this->Width[1]/2.0, 
+      points->InsertNextPoint( center[0],
+                               center[1] - this->Width[1]/2.0,
                                center[2] + this->Width[2]/2.0);
-      points->InsertNextPoint( center[0], 
-                               center[1] + this->Width[1]/2.0, 
+      points->InsertNextPoint( center[0],
+                               center[1] + this->Width[1]/2.0,
                                center[2] + this->Width[2]/2.0);
-      points->InsertNextPoint( center[0], 
-                               center[1] + this->Width[1]/2.0, 
+      points->InsertNextPoint( center[0],
+                               center[1] + this->Width[1]/2.0,
                                center[2] - this->Width[2]/2.0);
       templateOutline->SetPoints(points);
       vtkIdType ptIds[4];
@@ -117,23 +117,23 @@ vtkKWEPaintbrushShapeBox::GetShapePolyData(
         {
         return NULL;
         }
-      
-      vtkSmartPointer< vtkPolyData > templateOutline 
+
+      vtkSmartPointer< vtkPolyData > templateOutline
                   = vtkSmartPointer< vtkPolyData >::New();
       templateOutline->Allocate(1, 1);
 
       vtkPoints * points = vtkPoints::New();
-      points->InsertNextPoint( center[0] - this->Width[0]/2.0, 
-                               center[1], 
+      points->InsertNextPoint( center[0] - this->Width[0]/2.0,
+                               center[1],
                                center[2] - this->Width[2]/2.0);
-      points->InsertNextPoint( center[0] - this->Width[0]/2.0, 
-                               center[1], 
+      points->InsertNextPoint( center[0] - this->Width[0]/2.0,
+                               center[1],
                                center[2] + this->Width[2]/2.0);
-      points->InsertNextPoint( center[0] + this->Width[0]/2.0, 
-                               center[1], 
+      points->InsertNextPoint( center[0] + this->Width[0]/2.0,
+                               center[1],
                                center[2] + this->Width[2]/2.0);
-      points->InsertNextPoint( center[0] + this->Width[0]/2.0, 
-                               center[1], 
+      points->InsertNextPoint( center[0] + this->Width[0]/2.0,
+                               center[1],
                                center[2] - this->Width[2]/2.0);
       templateOutline->SetPoints(points);
       vtkIdType ptIds[4];
@@ -151,8 +151,8 @@ vtkKWEPaintbrushShapeBox::GetShapePolyData(
         {
         return NULL;
         }
-      
-      vtkSmartPointer< vtkPolyData > templateOutline 
+
+      vtkSmartPointer< vtkPolyData > templateOutline
                   = vtkSmartPointer< vtkPolyData >::New();
       templateOutline->Allocate(1, 1);
 
@@ -177,8 +177,8 @@ vtkKWEPaintbrushShapeBox::GetShapePolyData(
 
       return templateOutline;
       }
-    
-    else 
+
+    else
       {
       // TODO intersect cube with arbitrarily oriented plane and return polydata
       vtkErrorMacro( << "Not yet supported" );
@@ -223,7 +223,7 @@ int vtkKWEPaintbrushShapeBoxFillBuffer( vtkKWEPaintbrushShapeBox * self,
   if (self->GetPolarity() == vtkKWEPaintbrushEnums::Draw)
     {
     state = true;
-    } 
+    }
 
   const double r1square = 0.25 * self->GetWidth()[0]*self->GetWidth()[0];
   const double r2square = 0.25 * self->GetWidth()[1]*self->GetWidth()[1];
@@ -238,24 +238,24 @@ int vtkKWEPaintbrushShapeBoxFillBuffer( vtkKWEPaintbrushShapeBox * self,
       for (int i= extent[0]; i<=extent[1]; i++)
         {
         T * np = static_cast< T* >(imageData->GetScalarPointer(i,j,k));
-        
-        double px = (i * 
+
+        double px = (i *
             self->GetSpacing()[0] + self->GetOrigin()[0]) - p[0];
-        double py = (j * 
+        double py = (j *
             self->GetSpacing()[1] + self->GetOrigin()[1]) - p[1];
-        double pz = (k * 
+        double pz = (k *
             self->GetSpacing()[2] + self->GetOrigin()[2]) - p[2];
-        
+
         if ( (px*px/r1square + py*py/r2square + pz*pz/r3square) > 2.0 )
-          {  
+          {
           // Outside the ellipse
           *np = static_cast< T >(0.0);
           continue;
           }
-        
+
         // Normalized distance of the point from the surface of the ellipse.
-        // This is 1.0 at the surface, 0.0 at the center, 2.0 at twice the 
-        // distance from the surface... 
+        // This is 1.0 at the surface, 0.0 at the center, 2.0 at twice the
+        // distance from the surface...
         double distance = sqrt(px*px/r1square + py*py/r2square + pz*pz/r3square);
 
         if (state)
@@ -277,13 +277,13 @@ int vtkKWEPaintbrushShapeBoxFillBuffer( vtkKWEPaintbrushShapeBox * self,
           value = 254.0;
           }
 
-        *np = static_cast< T >(value); 
+        *np = static_cast< T >(value);
         }
       }
     }
-  
+
   return 1;
-}        
+}
 
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushShapeBox::GetGrayscaleData(
@@ -292,17 +292,17 @@ void vtkKWEPaintbrushShapeBox::GetGrayscaleData(
   // Compute the extents of the an image centered about p.
   int extent[6];
   this->GetExtent( extent, p );
-  
+
   imageData->SetSpacing(this->Spacing);
   imageData->SetOrigin(this->Origin);
   imageData->SetExtent(extent);
-  
+
   imageData->SetScalarType(this->GetScalarType());
   imageData->AllocateScalars();
 
   switch (imageData->GetScalarType())
     {
-    vtkTemplateMacro( vtkKWEPaintbrushShapeBoxFillBuffer( 
+    vtkTemplateMacro( vtkKWEPaintbrushShapeBoxFillBuffer(
                 this, imageData, static_cast< VTK_TT >(0), extent, p ));
     }
 }
@@ -323,7 +323,7 @@ void vtkKWEPaintbrushShapeBox::SetWidth( double newWidthX, double newWidthY, dou
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushShapeBox::SetWidth( double newWidth[3] )
 {
-  this->SetWidth( newWidth[0], newWidth[1], newWidth[2] );  
+  this->SetWidth( newWidth[0], newWidth[1], newWidth[2] );
 }
 
 //----------------------------------------------------------------------
@@ -332,23 +332,23 @@ int vtkKWEPaintbrushShapeBox::Resize(double d[3], int ResizeType)
   // If the user specified a constraint on the resize type, use that,
   // otherwise default to whatever the widget told us in the functions'
   // argument.
-  const int resizeType = (this->ResizeConstraint == 
+  const int resizeType = (this->ResizeConstraint ==
       PaintbrushResizeUnConstrained) ? ResizeType : this->ResizeConstraint;
 
-  // Define a minimum size that the shape will take. The shape will not 
+  // Define a minimum size that the shape will take. The shape will not
   // get smaller than this.
   const double minSize = 0.5;
-  
+
   double newWidth[3] = { this->Width[0], this->Width[1], this->Width[2] };
 
   if (resizeType == vtkKWEPaintbrushShape::PaintbrushResizeAnisotropic)
     {
     // non-isotropic resize. This will resize each axis according to the
     // factor specified along each axis.
-    
+
     for (unsigned int i=0; i<3; i++)
       {
-      if (d[i] > 0.0 || this->Width[i] > 0.5) 
+      if (d[i] > 0.0 || this->Width[i] > 0.5)
         {
         newWidth[i] *= (1+d[i]/10.0);
         }
@@ -359,11 +359,11 @@ int vtkKWEPaintbrushShapeBox::Resize(double d[3], int ResizeType)
     {
 
     // Not an AnIsotropic resize.. This will resize each axis by the same
-    // factor. This factor will be the norm of the factor vector specified 
+    // factor. This factor will be the norm of the factor vector specified
     // as the functions' argument
-    
+
     // Calculate the sign.. (grow or shrink)
-    
+
     unsigned int idx = 0;
     double max = fabs(d[0]);
     int signVal;
@@ -404,14 +404,14 @@ int vtkKWEPaintbrushShapeBox::Resize(double d[3], int ResizeType)
 
   // Make sure we aren't smaller than the minimum
   if (newWidth[0] < minSize ||
-      newWidth[1] < minSize || 
+      newWidth[1] < minSize ||
       newWidth[2] < minSize)
     {
-    return 0;    
+    return 0;
     }
-  
+
   // Now change our size to the new size.
-  this->SetWidth( newWidth );  
+  this->SetWidth( newWidth );
   return 1;
 }
 
@@ -431,7 +431,7 @@ void vtkKWEPaintbrushShapeBox::DeepCopy(vtkKWEPaintbrushShape *s)
       this->Width[i] = sb->Width[i];
       }
     }
-  
+
   this->Superclass::DeepCopy(s);
   this->Modified();
 }
@@ -439,7 +439,7 @@ void vtkKWEPaintbrushShapeBox::DeepCopy(vtkKWEPaintbrushShape *s)
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushShapeBox::GetAnnotation(char *s)
 {
-  sprintf(s, "(%0.3g,%0.3g,%0.3g)", 
+  sprintf(s, "(%0.3g,%0.3g,%0.3g)",
       this->Width[0], this->Width[1], this->Width[2]);
 }
 
@@ -491,6 +491,19 @@ void vtkKWEPaintbrushShapeBox::GetExtent( int extent[6], double p[3] )
         {
         extent[2*i+1] = extent[2*i];
         }
+      }
+    }
+
+  // Clip the extents with the ClipExtent
+  for (int i=0; i< 3; i++)
+    {
+    if (extent[2*i] < this->ClipExtent[2*i])
+      {
+      extent[2*i] = this->ClipExtent[2*i];
+      }
+    if (extent[2*i+1] > this->ClipExtent[2*i+1])
+      {
+      extent[2*i+1] = this->ClipExtent[2*i+1];
       }
     }
 }

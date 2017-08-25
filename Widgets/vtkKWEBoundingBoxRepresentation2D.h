@@ -1,24 +1,24 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
-// .NAME vtkKWEBoundingBoxRepresentation2D 
+// .NAME vtkKWEBoundingBoxRepresentation2D
 // .SECTION Description
 
 #ifndef __vtkKWEBoundingBoxRepresentation2D_h
@@ -121,16 +121,16 @@ public:
     EndDefining
   };
   //ETX
-  
+
   // Description:
   // Specify the format to use for labelling the distance. Note that an empty
   // string results in no label, or a format string without a "%" character
   // will not print the distance value.
   vtkSetStringMacro(LabelFormat);
-  vtkGetStringMacro(LabelFormat);  
-  
+  vtkGetStringMacro(LabelFormat);
+
   // Description:
-  // Set the image data on which the widget is placed. 
+  // Set the image data on which the widget is placed.
   virtual void SetImageData( vtkImageData * );
   vtkGetObjectMacro( ImageData, vtkImageData );
 
@@ -151,12 +151,12 @@ public:
 
   // Description:
   // INTERNAL: Do not use.. Must be set by the widget alone.
-  // This serves to fade the representation into the background. When on, 
-  // the representation will but also show up only with the rectangular 
+  // This serves to fade the representation into the background. When on,
+  // the representation will but also show up only with the rectangular
   // bounding box. The handles and the slice actors don't show up anymore.
   vtkSetMacro( Fade, int );
   vtkGetMacro( Fade, int );
-  
+
   // Description:
   // INTERNAL: Do not use.. Must be set by the widget alone.
   vtkSetMacro( ShowSliceScaleBar, int );
@@ -172,30 +172,30 @@ protected:
   // Description:
   // On/Off the visibility of the widget.
   void SetVisibilityInternal( int );
-    
-  void Translate( const double translation[3], 
+
+  void Translate( const double translation[3],
                   const double cursorMotionVector[3] );
   void PositionHandles();
 
-  // Highlight the nth handle. Called with an argument of "-1" will set the 
+  // Highlight the nth handle. Called with an argument of "-1" will set the
   // property to all 4 handles.
   void SetHandleHighlight( int handleIdx, vtkProperty *property );
-  
+
   // Default place the widget according to the bounds of the image actor
   void PlaceWidget();
-  
+
   // User specified bounds to place the widget.
   int PlaceWidgetInternal(double bounds[6]);
 
-  // Cut "PolyData" to produce "BoxPolyData". The cut will be done by using the 
-  // camera parameters. (using the focal point and the normal). 
+  // Cut "PolyData" to produce "BoxPolyData". The cut will be done by using the
+  // camera parameters. (using the focal point and the normal).
   // Returns 1 if "BoxPoints" is different from what it used to be.
   int Cut();
 
   // Compute annotations, if needed.. such as text width, height etc..
   int Annotate();
   int AnnotateScaleBar();
-  
+
   vtkImageActorPointPlacer * PointPlacer;
   vtkPolyData              * PolyData;     // 8 Points
   vtkCollection            * TextMappers;
@@ -225,7 +225,7 @@ protected:
   vtkImageData             * ImageData;
   int                        Fade;
   int                        ID;
-  
+
 private:
   vtkKWEBoundingBoxRepresentation2D(const vtkKWEBoundingBoxRepresentation2D&);  //Not implemented
   void operator=(const vtkKWEBoundingBoxRepresentation2D&);  //Not implemented

@@ -1,25 +1,25 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
-// .NAME vtkKWEPaintbrushHighlightActors - 
+// .NAME vtkKWEPaintbrushHighlightActors -
 // .SECTION Description
 // Can be instantiated only by a vtkObject.
 
@@ -35,7 +35,7 @@ class vtkKWEStencilContourFilter;
 class vtkCollection;
 class vtkKWEPaintbrushDrawing;
 
-class VTKEdge_WIDGETS_EXPORT vtkKWEPaintbrushHighlightActors 
+class VTKEdge_WIDGETS_EXPORT vtkKWEPaintbrushHighlightActors
                                   : public vtkProp3D
 {
   //BTX
@@ -69,12 +69,12 @@ public:
   // Legacy method to support VTK source versions prior to 2007/03/05
   virtual int  RenderTranslucentGeometry(vtkViewport *viewport);
 #endif
-  
+
   // Description:
   // See vtkProp3D.
   virtual void GetActors(vtkPropCollection *);
   virtual double *GetBounds();
-  
+
 protected:
   vtkKWEPaintbrushHighlightActors();
   ~vtkKWEPaintbrushHighlightActors();
@@ -88,11 +88,11 @@ protected:
   vtkActorCollection   * ContourPolyDataActors;
   vtkKWEPaintbrushDrawing * PaintbrushDrawing;
   int                    Extent[6];
-  
+
   // Description:
   // Update and build all the actors according to the drawing.
   virtual void BuildRepresentation();
-  
+
 private:
   vtkKWEPaintbrushHighlightActors(
       const vtkKWEPaintbrushHighlightActors&);  //Not implemented

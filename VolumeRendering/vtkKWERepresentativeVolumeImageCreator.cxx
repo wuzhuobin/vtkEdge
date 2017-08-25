@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -39,7 +39,7 @@
 #include <assert.h>
 
 vtkStandardNewMacro( vtkKWERepresentativeVolumeImageCreator );
-vtkCxxRevisionMacro( vtkKWERepresentativeVolumeImageCreator, "$Revision: 740 $");
+vtkCxxRevisionMacro( vtkKWERepresentativeVolumeImageCreator, "$Revision: 1774 $");
 vtkCxxSetObjectMacro(vtkKWERepresentativeVolumeImageCreator, Input, vtkImageData);
 vtkCxxSetObjectMacro(vtkKWERepresentativeVolumeImageCreator, Property, vtkVolumeProperty);
 
@@ -140,22 +140,22 @@ C[1] = _tmp1*G + _tmp2;                                         \
 C[2] = _tmp1*B + _tmp2;
 
 // ----------------------------------------------------------------------------
-// The only purpose of this class is to be a friend to 
+// The only purpose of this class is to be a friend to
 // vtkKWERepresentativeVolumeImageCreator so that we can access the interal
 // variables without having to expose them as part of the public API
 // ----------------------------------------------------------------------------
-class vtkKWERVICFriend 
+class vtkKWERVICFriend
 {
 public:
   vtkKWERepresentativeVolumeImageCreator *Creator;
-  
+
   vtkImageData *GetInput() {return Creator->InternalInput;};
   vtkVolumeProperty *GetProperty() {return Creator->InternalProperty;};
   float *GetColorTable(int i) {return Creator->ColorTable[i];}
   float *GetOpacityTable(int i) {return Creator->OpacityTable[i];}
   float GetTableOffset(int i) {return Creator->TableOffset[i];}
   float GetTableScale(int i) {return Creator->TableScale[i];}
-  
+
 };
 
 
@@ -172,18 +172,18 @@ void vtkKWERVIC_MIP( T *dataPtr,
   // We need the input image data and the property
   vtkImageData *input = myFriend->GetInput();
   vtkVolumeProperty *property = myFriend->GetProperty();
-  
-  // Find out how many components we have 
+
+  // Find out how many components we have
   int components = input->GetNumberOfScalarComponents();
 
   // Are the components independent?
   int independent = property->GetIndependentComponents();
-  
+
   // What is our volume dimensions? We need this to keep our
   // ray inside the volume
   int dim[3];
   input->GetDimensions(dim);
-  
+
   // Some variables we'll need to compute the final pixel color
   float maxValue[4];
   int c;
@@ -192,12 +192,12 @@ void vtkKWERVIC_MIP( T *dataPtr,
   float tableOffset[4];
   float tableScale[4];
   float weight[4];
-  
+
   // ptr is a pointer to the voxel location
-  T *ptr = dataPtr + components * ( static_cast<int>(voxel[0]) + 
-                                    static_cast<int>(voxel[1]) * dim[0] + 
+  T *ptr = dataPtr + components * ( static_cast<int>(voxel[0]) +
+                                    static_cast<int>(voxel[1]) * dim[0] +
                                     static_cast<int>(voxel[2]) * dim[0] * dim[1] );
-  
+
   // For each component:
   //  - initialize the max value to the first value found
   //  - get the color and opacity tables
@@ -213,10 +213,10 @@ void vtkKWERVIC_MIP( T *dataPtr,
     tableScale[c] = myFriend->GetTableScale(c);
     weight[c] = static_cast<float>(property->GetComponentWeight(c));
     }
-  
+
 
   // Keep stepping until we exit the volume. We'll be conservative and
-  // considering exiting the volume to be passing into or beyong the last 
+  // considering exiting the volume to be passing into or beyong the last
   // voxel in each direction - that avoids boundary conditions in any
   // blending modes that require gradients
   while ( voxel[0] > 1.0 &&
@@ -253,25 +253,25 @@ void vtkKWERVIC_MIP( T *dataPtr,
           }
         }
       }
-    
+
     // Increment to the next voxel
     voxel[0] += rayIncrement[0];
     voxel[1] += rayIncrement[1];
     voxel[2] += rayIncrement[2];
-    
+
     // Move the pointer to this location
-    ptr = dataPtr + components * ( static_cast<int>(voxel[0]) + 
-                                   static_cast<int>(voxel[1]) * dim[0] + 
+    ptr = dataPtr + components * ( static_cast<int>(voxel[0]) +
+                                   static_cast<int>(voxel[1]) * dim[0] +
                                    static_cast<int>(voxel[2]) * dim[0] * dim[1] );
 
     }
-  
+
   // Now compute the color. Exact computation will depend on whether
   // the component are independent or dependend (and if dependent, on
   // whether there are Need to consider each components contribution
   float tmpColor[4] = {0,0,0,0};
   int index;
-  
+
   if ( independent )
     {
     for ( c = 0; c < components; c++ )
@@ -283,7 +283,7 @@ void vtkKWERVIC_MIP( T *dataPtr,
       float g = *(colorTable[c] + 3*index+1);
       float b = *(colorTable[c] + 3*index+2);
       float a = *(opacityTable[c] + index);
-      
+
       // Add it in (multiplied by weight)
       tmpColor[0] += weight[c] * r * a;
       tmpColor[1] += weight[c] * g * a;
@@ -296,7 +296,7 @@ void vtkKWERVIC_MIP( T *dataPtr,
     // Find the index into the table and look up A
     index = static_cast<int>((maxValue[1] + tableOffset[1]) * tableScale[1] + 0.5);
     tmpColor[3] = *(opacityTable[0] + index);
-    
+
     // Find the index into the table and look up RGB
     index = static_cast<int>((maxValue[0] + tableOffset[0]) * tableScale[0] + 0.5);
     tmpColor[0] = *(colorTable[0] + 3*index  ) * tmpColor[3];
@@ -308,7 +308,7 @@ void vtkKWERVIC_MIP( T *dataPtr,
     // Find the index into the table and look up A
     index = static_cast<int>((maxValue[3] + tableOffset[3]) * tableScale[3] + 0.5);
     tmpColor[3] = *(opacityTable[0] + index);
-    
+
     // Use first three components directly as RGB. We know this must be
     // unsigned char (only type allowed in this case) so we'll use that
     // knowledge to convert to a [0,1] range.
@@ -316,14 +316,14 @@ void vtkKWERVIC_MIP( T *dataPtr,
     tmpColor[1] = maxValue[1]/255.0f * tmpColor[3];
     tmpColor[2] = maxValue[2]/255.0f * tmpColor[3];
     }
-  
-  
+
+
   // Check bounds to make sure everything is between [0,1]
   tmpColor[0] = (tmpColor[0] < 0)?(0):((tmpColor[0]>1)?(1):(tmpColor[0]));
   tmpColor[1] = (tmpColor[1] < 0)?(0):((tmpColor[1]>1)?(1):(tmpColor[1]));
   tmpColor[2] = (tmpColor[2] < 0)?(0):((tmpColor[2]>1)?(1):(tmpColor[2]));
   tmpColor[3] = (tmpColor[3] < 0)?(0):((tmpColor[3]>1)?(1):(tmpColor[3]));
-  
+
   // Now convert to unsigned char
   color[0] = static_cast<unsigned char>(tmpColor[0]*255.0 + 0.5);
   color[1] = static_cast<unsigned char>(tmpColor[1]*255.0 + 0.5);
@@ -349,24 +349,24 @@ void vtkKWERVIC_Composite( T *dataPtr,
   input->GetSpacing(spacing);
 
   double avgSpacing = (spacing[0]+spacing[1]+spacing[2])/3.0;
-  
+
   // adjust the aspect
   float aspect[3];
   aspect[0] = static_cast<float>(spacing[0] * 2.0 / avgSpacing);
   aspect[1] = static_cast<float>(spacing[1] * 2.0 / avgSpacing);
   aspect[2] = static_cast<float>(spacing[2] * 2.0 / avgSpacing);
 
-  // Find out how many components we have 
+  // Find out how many components we have
   int components = input->GetNumberOfScalarComponents();
 
   // Are the components independent?
   int independent = property->GetIndependentComponents();
-  
+
   // What is our volume dimensions? We need this to keep our
   // ray inside the volume
   int dim[3];
   input->GetDimensions(dim);
-  
+
   // Some variables we'll need to compute the final pixel color
   int c;
   float *colorTable[4];
@@ -381,12 +381,12 @@ void vtkKWERVIC_Composite( T *dataPtr,
 
   float accumColor[3] = {0,0,0};
   float remainingOpacity = 1.0;
-  
+
   // ptr is a pointer to the voxel location
-  T *ptr = dataPtr + components * ( static_cast<int>(voxel[0]) + 
-                                    static_cast<int>(voxel[1]) * dim[0] + 
+  T *ptr = dataPtr + components * ( static_cast<int>(voxel[0]) +
+                                    static_cast<int>(voxel[1]) * dim[0] +
                                     static_cast<int>(voxel[2]) * dim[0] * dim[1] );
-  
+
   // For each component:
   //  - get the color and opacity tables
   //  - get the offset / scale values to transform scalar
@@ -404,10 +404,10 @@ void vtkKWERVIC_Composite( T *dataPtr,
     specular[c] = static_cast<float>(property->GetSpecular(c));
     specularPower[c] = static_cast<float>(property->GetSpecularPower(c));
     }
-  
-  
+
+
   // Keep stepping until we exit the volume. We'll be conservative and
-  // considering exiting the volume to be passing into or beyong the last 
+  // considering exiting the volume to be passing into or beyong the last
   // voxel in each direction - that avoids boundary conditions in any
   // blending modes that require gradients
   while ( voxel[0] > 1 &&
@@ -418,7 +418,7 @@ void vtkKWERVIC_Composite( T *dataPtr,
           voxel[2] < (dim[2]-2) &&
           remainingOpacity > 0.02 )
     {
-    float tmpColor[4] = {0,0,0,0};      
+    float tmpColor[4] = {0,0,0,0};
     int index;
     if ( independent )
       {
@@ -432,15 +432,15 @@ void vtkKWERVIC_Composite( T *dataPtr,
         float g = *(colorTable[c] + 3*index+1);
         float b = *(colorTable[c] + 3*index+2);
         float a = *(opacityTable[c] + index);
-        
+
         if ( a > 0.0 && property->GetShade() )
           {
           float n[3];
-          vtkKWERVIC_ComputeGradient( n, ptr, voxel, 
+          vtkKWERVIC_ComputeGradient( n, ptr, voxel,
                                       c, dim, components, aspect );
 
           float length = vtkMath::Normalize(n);
-          
+
           if ( length < 1.0 / tableScale[c] )
             {
             tmpColor[0] += weight[c]*a*((ambient[c])*r);
@@ -451,7 +451,7 @@ void vtkKWERVIC_Composite( T *dataPtr,
           else
             {
             float shadedColor[3];
-            vtkKWERVIC_ShadeSample(rayIncrement, n, 
+            vtkKWERVIC_ShadeSample(rayIncrement, n,
                                    ambient[c], diffuse[c],
                                    specular[c],specularPower[c],
                                    r, g, b, shadedColor );
@@ -475,30 +475,30 @@ void vtkKWERVIC_Composite( T *dataPtr,
     else
       {
       // start by getting the opacity from the last component
-      // passed through the lookup table        
+      // passed through the lookup table
       float val;
       c = components-1;
       vtkKWERVIC_Interpolate( val, ptr, voxel, c, dim, components );
       index = static_cast<int>((val + tableOffset[c]) * tableScale[c] + 0.5);
       index = (index<0)?(0):((index>1023)?(1023):(index));
       float r, g, b, a;
-      
+
       // avoid compiler warning
       r = g = b = 0.0;
-      
+
       // initialize alpha
       a = *(opacityTable[0] + index);
-      
+
       if ( a )
         {
         if ( components == 4 )
           {
           vtkKWERVIC_Interpolate( val, ptr, voxel, 0, dim, components );
           r = val/255.0f;
-          
+
           vtkKWERVIC_Interpolate( val, ptr, voxel, 1, dim, components );
           g = val/255.0f;
-          
+
           vtkKWERVIC_Interpolate( val, ptr, voxel, 2, dim, components );
           b = val/255.0f;
           }
@@ -507,7 +507,7 @@ void vtkKWERVIC_Composite( T *dataPtr,
           vtkKWERVIC_Interpolate( val, ptr, voxel, 0, dim, components );
           index = static_cast<int>((val + tableOffset[0]) * tableScale[0] + 0.5);
           index = (index<0)?(0):((index>1023)?(1023):(index));
-          
+
           r = *(colorTable[0] + 3*index);
           g = *(colorTable[0] + 3*index+1);
           b = *(colorTable[0] + 3*index+2);
@@ -528,16 +528,16 @@ void vtkKWERVIC_Composite( T *dataPtr,
         tmpColor[1] = a*g;
         tmpColor[2] = a*b;
         tmpColor[3] = a;
-        
+
         if ( property->GetShade() )
           {
           float n[3];
-          vtkKWERVIC_ComputeGradient( n, ptr, voxel, 
-                                      components-1, dim, 
+          vtkKWERVIC_ComputeGradient( n, ptr, voxel,
+                                      components-1, dim,
                                       components, aspect );
 
           float length = vtkMath::Normalize(n);
-          
+
           if ( length < 1.0 / tableScale[0] )
             {
             tmpColor[0] = r*ambient[0];
@@ -547,7 +547,7 @@ void vtkKWERVIC_Composite( T *dataPtr,
           else
             {
             float shadedColor[3];
-            vtkKWERVIC_ShadeSample(rayIncrement, n, 
+            vtkKWERVIC_ShadeSample(rayIncrement, n,
                                    ambient[0], diffuse[0],
                                    specular[0],specularPower[0],
                                    r, g, b, shadedColor );
@@ -557,33 +557,33 @@ void vtkKWERVIC_Composite( T *dataPtr,
             tmpColor[2] = a*shadedColor[2];
             tmpColor[3] = a;
             }
-          }        
+          }
         }
       }
-    
-    
+
+
     accumColor[0] += tmpColor[0]*remainingOpacity;
     accumColor[1] += tmpColor[1]*remainingOpacity;
     accumColor[2] += tmpColor[2]*remainingOpacity;
     remainingOpacity *= (1.0f - tmpColor[3]);
-    
+
     // Increment to the next voxel
     voxel[0] += rayIncrement[0];
     voxel[1] += rayIncrement[1];
     voxel[2] += rayIncrement[2];
-    
+
     // Move the pointer to this location
-    ptr = dataPtr + components * ( static_cast<int>(voxel[0]) + 
-                                   static_cast<int>(voxel[1]) * dim[0] + 
+    ptr = dataPtr + components * ( static_cast<int>(voxel[0]) +
+                                   static_cast<int>(voxel[1]) * dim[0] +
                                    static_cast<int>(voxel[2]) * dim[0] * dim[1] );
     }
-  
-  
+
+
   // Check bounds to make sure everything is between [0,1]
   accumColor[0] = (accumColor[0] < 0)?(0):((accumColor[0]>1)?(1):(accumColor[0]));
   accumColor[1] = (accumColor[1] < 0)?(0):((accumColor[1]>1)?(1):(accumColor[1]));
   accumColor[2] = (accumColor[2] < 0)?(0):((accumColor[2]>1)?(1):(accumColor[2]));
-  
+
   // Now do the alpha multiplication and convert to unsigned char
   color[0] = static_cast<unsigned char>(accumColor[0]*255.0 + 0.5);
   color[1] = static_cast<unsigned char>(accumColor[1]*255.0 + 0.5);
@@ -591,7 +591,7 @@ void vtkKWERVIC_Composite( T *dataPtr,
 }
 
 // ----------------------------------------------------------------------------
-// This is the threaded function 
+// This is the threaded function
 // ----------------------------------------------------------------------------
 VTK_THREAD_RETURN_TYPE vtkKWERVICGenerateImage( void *arg )
 {
@@ -599,16 +599,16 @@ VTK_THREAD_RETURN_TYPE vtkKWERVICGenerateImage( void *arg )
   vtkMutexLock                            *activeFlagLock;
   int                                     *activeFlag;
   vtkMultiThreader::ThreadInfo            *castedArg;
-  
+
   castedArg = static_cast<vtkMultiThreader::ThreadInfo *>(arg);
   activeFlagLock = castedArg->ActiveFlagLock;
   activeFlag = castedArg->ActiveFlag;
-  
+
   creator = static_cast<vtkKWERepresentativeVolumeImageCreator *>
     (static_cast<vtkMultiThreader::ThreadInfo *>(arg)->UserData);
 
   creator->GenerateImage( activeFlag, activeFlagLock );
-  
+
   return VTK_THREAD_RETURN_VALUE;
 }
 
@@ -626,11 +626,11 @@ vtkKWERepresentativeVolumeImageCreator::vtkKWERepresentativeVolumeImageCreator()
   this->InternalInput          = NULL;
 
   this->VisibleSide = vtkKWERepresentativeVolumeImageCreator::MinusYSideView;
-  
+
   this->Threader = vtkMultiThreader::New();
-  
+
   this->SpawnedThreadID = -1;
-  
+
   this->RepresentativeImage = NULL;
   this->RepresentativeImageIsValidLock = vtkMutexLock::New();
   this->RepresentativeImageIsValid = 0;
@@ -650,12 +650,12 @@ vtkKWERepresentativeVolumeImageCreator::~vtkKWERepresentativeVolumeImageCreator(
   this->SetInput(NULL);
   this->RepresentativeImageIsValidLock->Delete();
   this->Threader->Delete();
-  
+
   if ( this->RepresentativeImage )
     {
     this->RepresentativeImage->Delete();
     }
-  
+
 }
 
 // ----------------------------------------------------------------------------
@@ -668,7 +668,7 @@ void vtkKWERepresentativeVolumeImageCreator::ClearInternalParameters()
     {
     this->InternalInput->UnRegister(this);
     }
-  
+
   this->InternalBlendMode      = -1;
   this->InternalInput          = NULL;
 }
@@ -679,7 +679,7 @@ void vtkKWERepresentativeVolumeImageCreator::ClearInternalParameters()
 void vtkKWERepresentativeVolumeImageCreator::Start()
 {
   // First check if we are already processing - it is an error to try to
-  // process more than one image at a time. 
+  // process more than one image at a time.
   if ( this->IsProcessing() )
     {
     vtkErrorMacro("Cannot start since an image is currently being processed.");
@@ -701,14 +701,14 @@ void vtkKWERepresentativeVolumeImageCreator::Start()
     vtkErrorMacro("You must set the size of the representative image before starting.");
     return;
     }
-  
-  
+
+
   // If we already have a representative image, release it
   if ( this->RepresentativeImage )
     {
     this->RepresentativeImage->Delete();
     }
-  
+
   // Now create one of the right size and type
   this->RepresentativeImage = vtkImageData::New();
   this->RepresentativeImage->SetDimensions( this->RepresentativeImageSize[0],
@@ -717,7 +717,7 @@ void vtkKWERepresentativeVolumeImageCreator::Start()
   this->RepresentativeImage->SetScalarTypeToUnsignedChar();
   this->RepresentativeImage->SetNumberOfScalarComponents(3);
   this->RepresentativeImage->AllocateScalars();
-  
+
   // Keep a separate pointer to the input. We are still sharing the
   // input with the main thread - we'll only be reading it, but the main
   // thread can also only read it while we are processing. The main thread
@@ -725,14 +725,14 @@ void vtkKWERepresentativeVolumeImageCreator::Start()
   // was the input at the time we were last started...)
   this->InternalInput = this->Input;
   this->InternalInput->Register(this);
-  
+
   // For the property, let's make a copy of it. This way we don't
   // have to worry about what the main thread might be doing with
-  // it. 
+  // it.
   this->InternalProperty->DeepCopy(this->Property);
-  
+
   this->InternalBlendMode = this->BlendMode;
-  
+
   // Now spawn the thread
   this->SpawnedThreadID = this->Threader->SpawnThread( vtkKWERVICGenerateImage, this );
 }
@@ -745,11 +745,11 @@ void vtkKWERepresentativeVolumeImageCreator::GenerateImage(int *flag,
 {
   float rayIncrement[3];
   this->ComputeRayIncrement(rayIncrement);
-  
+
   double sampleDistance = this->ComputeSampleDistance(rayIncrement);
   this->UpdateTransferFunctions(sampleDistance);
-  
-  unsigned char *ptr = 
+
+  unsigned char *ptr =
     static_cast<unsigned char *>(this->RepresentativeImage->GetScalarPointer());
 
   int i, j;
@@ -769,7 +769,7 @@ void vtkKWERepresentativeVolumeImageCreator::GenerateImage(int *flag,
         {
         unsigned char color[3];
         this->CastRay(voxel, rayIncrement, color);
-      
+
         ptr[0] = color[0];
         ptr[1] = color[1];
         ptr[2] = color[2];
@@ -777,12 +777,12 @@ void vtkKWERepresentativeVolumeImageCreator::GenerateImage(int *flag,
       ptr+=3;
       }
     }
-  
+
   // The image is done now
   this->RepresentativeImageIsValidLock->Lock();
   this->RepresentativeImageIsValid = 1;
   this->RepresentativeImageIsValidLock->Unlock();
-  
+
   lock->Lock();
   *flag = 0;
   lock->Unlock();
@@ -809,7 +809,7 @@ int vtkKWERepresentativeVolumeImageCreator::IsProcessing()
     {
     return 0;
     }
-  
+
   // Check with the threader
   return this->Threader->IsThreadActive(this->SpawnedThreadID);
 }
@@ -838,23 +838,23 @@ vtkImageData *vtkKWERepresentativeVolumeImageCreator::GetRepresentativeImage()
     vtkErrorMacro("Can't get image while processing");
     return NULL;
     }
-  
+
   if ( !this->IsValid() )
     {
     vtkErrorMacro("Image is not valid");
     return NULL;
     }
-  
+
   return this->RepresentativeImage;
 }
 
 // ----------------------------------------------------------------------------
 // SetRepresentativeImageSize will set the width / height of the representative
-// image. These values must be at least 1 and at most 1024. 
+// image. These values must be at least 1 and at most 1024.
 // ----------------------------------------------------------------------------
 void vtkKWERepresentativeVolumeImageCreator::SetRepresentativeImageSize(int width, int height)
 {
-  if ( width < 1 || 
+  if ( width < 1 ||
        height < 1 ||
        width > 1024 ||
        height > 1024 )
@@ -862,21 +862,21 @@ void vtkKWERepresentativeVolumeImageCreator::SetRepresentativeImageSize(int widt
     vtkErrorMacro("Width and height must be between 1 and 1024!");
     return;
     }
-  
+
   if ( width != this->RepresentativeImageSize[0]  ||
        height != this->RepresentativeImageSize[1] )
     {
     this->RepresentativeImageSize[0] = width;
     this->RepresentativeImageSize[1] = height;
     this->Modified();
-    }  
+    }
 }
 
 // ----------------------------------------------------------------------------
 void vtkKWERepresentativeVolumeImageCreator::ComputeRayIncrement(float rayIncrement[3])
 {
   float inc = 0.5;
-  
+
   switch ( this->VisibleSide )
     {
     case vtkKWERepresentativeVolumeImageCreator::XSideView:
@@ -938,7 +938,7 @@ void vtkKWERepresentativeVolumeImageCreator::ComputeFirstVoxel(int i,
   int imageXAxis   = 0;
   int imageYAxis   = 1;
   double xAxisSign = 1.0;
-  
+
   switch ( this->VisibleSide )
     {
     case vtkKWERepresentativeVolumeImageCreator::XSideView:
@@ -997,25 +997,25 @@ void vtkKWERepresentativeVolumeImageCreator::ComputeFirstVoxel(int i,
     scaleFactor = imageScaleY;
     length = idim[1]-1;
     }
-  
-  
+
+
 
   // convert position into normalized location centered on image center
-  double p1 = 
-    (imageScaleX/scaleFactor)* (static_cast<double>(i) - 
+  double p1 =
+    (imageScaleX/scaleFactor)* (static_cast<double>(i) -
                                 static_cast<double>(idim[0]-1)/2.0)/length;
 
   // flip p1 because X axis runs from right to left
   p1 *= xAxisSign;
-  
-  double p2  = 
-    (imageScaleY/scaleFactor)*(static_cast<double>(j) - 
+
+  double p2  =
+    (imageScaleY/scaleFactor)*(static_cast<double>(j) -
                                static_cast<double>(idim[1]-1)/2.0)/length;
 
   // convert to voxel location
-  voxel[imageXAxis] =  static_cast<float>(p1 * static_cast<double>(vdim[imageXAxis]-5.0) + 
+  voxel[imageXAxis] =  static_cast<float>(p1 * static_cast<double>(vdim[imageXAxis]-5.0) +
                                           static_cast<double>(vdim[imageXAxis]-1)/2.0);
-  voxel[imageYAxis] =  static_cast<float>(p2 * static_cast<double>(vdim[imageYAxis]-5.0) + 
+  voxel[imageYAxis] =  static_cast<float>(p2 * static_cast<double>(vdim[imageYAxis]-5.0) +
                                           static_cast<double>(vdim[imageYAxis]-1)/2.0);
 
   if ( ! (voxel[0] > 1.0 &&
@@ -1035,25 +1035,25 @@ void vtkKWERepresentativeVolumeImageCreator::ComputeFirstVoxel(int i,
 // ----------------------------------------------------------------------------
 void vtkKWERepresentativeVolumeImageCreator::UpdateTransferFunctions(double sampleDistance)
 {
-  int numComponents = this->InternalInput->GetNumberOfScalarComponents();  
+  int numComponents = this->InternalInput->GetNumberOfScalarComponents();
   int independent =  this->InternalProperty->GetIndependentComponents();
-  
+
   int i;
   for (i = 0; i < numComponents; i++ )
     {
     double range[2];
     this->InternalInput->GetPointData()->GetScalars()->GetRange(range, i);
-    
+
     this->TableOffset[i] = static_cast<float>(-range[0]);
     this->TableScale[i] = static_cast<float>(1023.0 / (range[1]-range[0]));
-    
+
     // If we have independent components, we'll get a color and opacity table for each
-    // component and store it in that component's index (i). Otherwise, we have 
+    // component and store it in that component's index (i). Otherwise, we have
     // "dependent" components (LA, or RGBA) and we have at most one color table and
     // exactly one opacity table, and we'll store those in the 0th entry in our
     // ColorTable / OpacityTable.
     int tableIdx = (independent==0)?(0):(i);
-    
+
     if ( independent || ( i == 0 && numComponents == 2) )
       {
       if ( this->InternalProperty->GetColorChannels(tableIdx) == 1 )
@@ -1074,14 +1074,14 @@ void vtkKWERepresentativeVolumeImageCreator::UpdateTransferFunctions(double samp
         cf->GetTable( range[0], range[1], 1024, this->ColorTable[tableIdx] );
         }
       }
-    
+
     if ( independent || ( i == numComponents-1) )
       {
-      this->InternalProperty->GetScalarOpacity(tableIdx)->GetTable( range[0], range[1], 
-                                                               1024, 
+      this->InternalProperty->GetScalarOpacity(tableIdx)->GetTable( range[0], range[1],
+                                                               1024,
                                                                this->OpacityTable[tableIdx] );
-      
-      // If the blend mode is composite, then we'll need to adjust the opacity 
+
+      // If the blend mode is composite, then we'll need to adjust the opacity
       // function for the sample distance
       if ( this->InternalBlendMode == vtkVolumeMapper::COMPOSITE_BLEND )
         {
@@ -1091,7 +1091,7 @@ void vtkKWERepresentativeVolumeImageCreator::UpdateTransferFunctions(double samp
           if ( this->OpacityTable[tableIdx][idx] > 0.0001 )
             {
             this->OpacityTable[tableIdx][idx] = static_cast<float>(
-              1.0-pow(static_cast<double>((1.0 - this->OpacityTable[tableIdx][idx])), 
+              1.0-pow(static_cast<double>((1.0 - this->OpacityTable[tableIdx][idx])),
                       sampleDistance));
             }
           }
@@ -1101,13 +1101,13 @@ void vtkKWERepresentativeVolumeImageCreator::UpdateTransferFunctions(double samp
 
 
 }
-                                                     
+
 // ----------------------------------------------------------------------------
 double vtkKWERepresentativeVolumeImageCreator::ComputeSampleDistance(float rayIncrement[3])
 {
   double spacing[3];
   this->InternalInput->GetSpacing(spacing);
-  
+
   switch ( this->VisibleSide )
     {
     case vtkKWERepresentativeVolumeImageCreator::XSideView:
@@ -1128,18 +1128,18 @@ double vtkKWERepresentativeVolumeImageCreator::ComputeSampleDistance(float rayIn
     }
 
   return 0.0;
-  
+
 }
 
 
 // ----------------------------------------------------------------------------
-void vtkKWERepresentativeVolumeImageCreator::CastRay(float voxel[3], 
-                                                     float rayIncrement[3], 
+void vtkKWERepresentativeVolumeImageCreator::CastRay(float voxel[3],
+                                                     float rayIncrement[3],
                                                      unsigned char color[3])
 {
   int scalarType = this->InternalInput->GetScalarType();
   void *dataPtr = this->InternalInput->GetScalarPointer();
-  
+
   vtkKWERVICFriend *myFriend = new vtkKWERVICFriend;
   myFriend->Creator = this;
 
@@ -1155,7 +1155,7 @@ void vtkKWERepresentativeVolumeImageCreator::CastRay(float voxel[3],
                                           myFriend ) );
         }
       break;
-      
+
     case vtkVolumeMapper::COMPOSITE_BLEND:
       switch ( scalarType )
         {
@@ -1166,14 +1166,14 @@ void vtkKWERepresentativeVolumeImageCreator::CastRay(float voxel[3],
                                                 myFriend ) );
         }
       break;
-      
+
     default:
       color[0] = 255;
       color[1] = 0;
       color[2] = 0;
       break;
     }
-  
+
   delete myFriend;
 }
 

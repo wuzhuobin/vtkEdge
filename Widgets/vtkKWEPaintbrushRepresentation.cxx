@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushRepresentation.h"
@@ -24,6 +24,7 @@
 #include "vtkKWEPaintbrushOperation.h"
 #include "vtkKWEPaintbrushAnnotationRepresentation.h"
 #include "vtkKWEPaintbrushSelectionRepresentation.h"
+#include "vtkKWEPaintbrushData.h"
 #include "vtkCoordinate.h"
 #include "vtkRenderer.h"
 #include "vtkObjectFactory.h"
@@ -34,14 +35,14 @@
 #include "vtkPolyData.h"
 #include "vtkPointPlacer.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushRepresentation, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushRepresentation, "$Revision: 3282 $");
 vtkCxxSetObjectMacro(vtkKWEPaintbrushRepresentation, ShapePlacer, vtkPointPlacer);
 
 //----------------------------------------------------------------------
 vtkKWEPaintbrushRepresentation::vtkKWEPaintbrushRepresentation()
 {
   this->PaintbrushDrawing   = vtkKWEPaintbrushDrawing::New();
-  this->PaintbrushOperation = vtkKWEPaintbrushOperation::New();  
+  this->PaintbrushOperation = vtkKWEPaintbrushOperation::New();
   this->PaintbrushDrawing->SetPaintbrushOperation(this->PaintbrushOperation);
   this->InteractionState    = PaintbrushDisabled;
   this->ShapePlacer         = NULL;
@@ -63,27 +64,27 @@ vtkKWEPaintbrushRepresentation::~vtkKWEPaintbrushRepresentation()
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation::SetPaintbrushOperation( 
+void vtkKWEPaintbrushRepresentation::SetPaintbrushOperation(
                          vtkKWEPaintbrushOperation * filter )
 {
   if (this->PaintbrushOperation != filter)
     {
-    vtkKWEPaintbrushOperation * var = this->PaintbrushOperation;                     
+    vtkKWEPaintbrushOperation * var = this->PaintbrushOperation;
     this->PaintbrushOperation = filter;
-    if (this->PaintbrushOperation) 
-      { 
-      this->PaintbrushOperation->Register(this); 
+    if (this->PaintbrushOperation)
+      {
+      this->PaintbrushOperation->Register(this);
       }
     if (var != NULL)
-      {                                                    
-      var->UnRegister(this);                    
-      }                                                    
-    this->Modified();                                      
+      {
+      var->UnRegister(this);
+      }
+    this->Modified();
     }
 
   if (this->PaintbrushOperation)
     {
-    this->PaintbrushDrawing->SetPaintbrushOperation( 
+    this->PaintbrushDrawing->SetPaintbrushOperation(
         this->PaintbrushOperation );
     }
 }
@@ -127,47 +128,47 @@ int vtkKWEPaintbrushRepresentation::GoToSketch( int n )
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushRepresentation::BeginNewStroke()
 {
-  if (vtkKWEPaintbrushSketch * paintbrushSketch 
+  if (vtkKWEPaintbrushSketch * paintbrushSketch
         = this->PaintbrushDrawing->GetItem(this->GetSketchIndex()))
     {
-    
-    // Give the representation a chance to save some memory. Check if the 
+
+    // Give the representation a chance to save some memory. Check if the
     // stroke cannot go beyond these extents.
     int extents[6];
     this->GetEtchExtents( extents );
 
     if (this->InteractionState == PaintbrushDraw)
-      { 
+      {
       return paintbrushSketch->AddNewStroke(
           vtkKWEPaintbrushEnums::Draw, NULL, extents);
       }
     if (this->InteractionState == PaintbrushErase)
-      { 
+      {
       return paintbrushSketch->AddNewStroke(
           vtkKWEPaintbrushEnums::Erase, NULL, extents);
       }
     }
   return 0;
 }
-  
+
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushRepresentation::UndoStroke()
 {
-  if (vtkKWEPaintbrushSketch * paintbrushSketch 
+  if (vtkKWEPaintbrushSketch * paintbrushSketch
         = this->PaintbrushDrawing->GetItem(this->GetSketchIndex()))
     {
-    return paintbrushSketch->PopStroke(); 
+    return paintbrushSketch->PopStroke();
     }
   return 0;
 }
-  
+
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushRepresentation::RedoStroke()
 {
-  if (vtkKWEPaintbrushSketch * paintbrushSketch 
+  if (vtkKWEPaintbrushSketch * paintbrushSketch
         = this->PaintbrushDrawing->GetItem(this->GetSketchIndex()))
     {
-    return paintbrushSketch->PushStroke(); 
+    return paintbrushSketch->PushStroke();
     }
   return 0;
 }
@@ -175,18 +176,18 @@ int vtkKWEPaintbrushRepresentation::RedoStroke()
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushRepresentation::RemoveLastStroke()
 {
-  if (vtkKWEPaintbrushSketch * paintbrushSketch 
+  if (vtkKWEPaintbrushSketch * paintbrushSketch
         = this->PaintbrushDrawing->GetItem(this->GetSketchIndex()))
     {
-    return paintbrushSketch->DeleteLastStroke(); 
+    return paintbrushSketch->DeleteLastStroke();
     }
   return 0;
 }
- 
+
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushRepresentation::DeepCopy(vtkWidgetRepresentation *rep)
 {
-  vtkKWEPaintbrushRepresentation *r 
+  vtkKWEPaintbrushRepresentation *r
     = vtkKWEPaintbrushRepresentation::SafeDownCast(rep);
   if (this == r || !r)
     {
@@ -207,27 +208,27 @@ void vtkKWEPaintbrushRepresentation::DeepCopy(vtkWidgetRepresentation *rep)
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation::SetPaintbrushDrawing( 
+void vtkKWEPaintbrushRepresentation::SetPaintbrushDrawing(
                        vtkKWEPaintbrushDrawing * drawing )
 {
   if (this->PaintbrushDrawing != drawing)
     {
-    vtkKWEPaintbrushDrawing * var = this->PaintbrushDrawing;                     
+    vtkKWEPaintbrushDrawing * var = this->PaintbrushDrawing;
     this->PaintbrushDrawing = drawing;
-    if (this->PaintbrushDrawing != NULL) 
-      { 
-      this->PaintbrushDrawing->Register(this); 
+    if (this->PaintbrushDrawing != NULL)
+      {
+      this->PaintbrushDrawing->Register(this);
       }
     if (var != NULL)
-      {                                                    
-      var->UnRegister(this);                    
-      }                                                    
+      {
+      var->UnRegister(this);
+      }
 
     if (this->SelectionRepresentation)
       {
       this->SelectionRepresentation->SetPaintbrushDrawing( drawing );
-      }    
-    this->Modified();                                      
+      }
+    this->Modified();
     }
 }
 
@@ -260,7 +261,7 @@ void vtkKWEPaintbrushRepresentation::UnInstallPipeline()
 int vtkKWEPaintbrushRepresentation::IsInsideCanvas(int displaypos[2])
 {
   double displayPos[2], worldPos[3], worldOrient[9];
-  displayPos[0] = displaypos[0];   
+  displayPos[0] = displaypos[0];
   displayPos[1] = displaypos[1];
 
   if ( !this->ShapePlacer->ComputeWorldPosition( this->Renderer,
@@ -277,6 +278,42 @@ void vtkKWEPaintbrushRepresentation::GetEtchExtents( int extents[6] )
 {
   extents[0] = extents[2] = extents[4] = 0;
   extents[1] = extents[3] = extents[5] = -1;
+}
+
+//----------------------------------------------------------------------
+int vtkKWEPaintbrushRepresentation
+::RemoveSketch( vtkKWEPaintbrushSketch * sketch )
+{
+  int n = this->PaintbrushDrawing->GetIndexOfItem(sketch);
+  if (n == -1) // the sketch is not present
+    {
+    return 0;
+    }
+
+  int label = sketch->GetLabel();
+  this->PaintbrushDrawing->RemoveItem(sketch);
+
+  // Now clear the label (KK: Is this really necessary. The next time we render,
+  // aren't we cumulating all the sketches anyway ?)
+  if (this->PaintbrushDrawing->GetRepresentation()
+                    == vtkKWEPaintbrushEnums::Label)
+    {
+    this->PaintbrushDrawing->GetPaintbrushData()->Clear(label);
+    }
+
+  // if the index of the currently active sketch is higher than the one
+  // being deleted, we'll need to decrement the sketch index.
+  if (this->SketchIndex >= n && this->SketchIndex != 0)
+    {
+    --this->SketchIndex;
+    }
+  return 1;
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushRepresentation::AddShapeToCurrentStroke( double p[3] )
+{
+  this->PaintbrushDrawing->AddShapeToCurrentStroke( this->SketchIndex, p );
 }
 
 //----------------------------------------------------------------------

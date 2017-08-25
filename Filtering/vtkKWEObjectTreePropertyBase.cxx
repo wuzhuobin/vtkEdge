@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEObjectTreePropertyBase.h"
@@ -35,7 +35,7 @@
 #include <vtkstd/set>
 #include <vtkstd/string>
 
-vtkCxxRevisionMacro(vtkKWEObjectTreePropertyBase, "$Revision: 702 $");
+vtkCxxRevisionMacro(vtkKWEObjectTreePropertyBase, "$Revision: 1774 $");
 
 vtkInformationKeyMacro(vtkKWEObjectTreePropertyBase, IS_INHERITABLE, Integer);
 
@@ -101,7 +101,7 @@ void vtkKWEObjectTreePropertyBase::SetIsInheritable(bool isInheritable)
 //-----------------------------------------------------------------------------
 void vtkKWEObjectTreePropertyBase::UnsetIsInheritable()
 {
-  this->Attributes->Remove(IS_INHERITABLE()); 
+  this->Attributes->Remove(IS_INHERITABLE());
   this->Modified();
 }
 
@@ -141,7 +141,7 @@ void vtkKWEObjectTreePropertyBase::Serialize(vtkKWESerializer* ser)
 //-----------------------------------------------------------------------------
 int vtkKWEObjectTreePropertyBase::GetNumberOfAttributes()
 {
-  vtkSmartPointer<vtkInformationIterator> attributeIterator = 
+  vtkSmartPointer<vtkInformationIterator> attributeIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   attributeIterator->SetInformation( this->Attributes );
 
@@ -194,7 +194,7 @@ bool AreVectorKeysEqual(vtkInformation* thisInfo, vtkInformation* testInfo,
 bool vtkKWEObjectTreePropertyBase::IsEqualTo(vtkKWEObjectTreePropertyBase *testProperty,
                                              bool canBeSuperset/*=false*/)
 {
-  if (!testProperty) 
+  if (!testProperty)
     {
     return false;  // can't be EqualTo if it doesn't exist!
     }
@@ -206,20 +206,20 @@ bool vtkKWEObjectTreePropertyBase::IsEqualTo(vtkKWEObjectTreePropertyBase *testP
 
   int myNumAttributes = this->GetNumberOfAttributes();
   int testNumAttributes = testProperty->GetNumberOfAttributes();
-  if (myNumAttributes < testNumAttributes || 
+  if (myNumAttributes < testNumAttributes ||
     (myNumAttributes > testNumAttributes && !canBeSuperset))
     {
-    // if the number of attributes doesn't match, then we can't be equal... 
+    // if the number of attributes doesn't match, then we can't be equal...
     // unless "this" Property has more and it can be a superset of the property
     // we are comparing ourselves to
     return false;
     }
 
   // test to see if the attributes match; at this point we know we either have
-  // the same number of attributes or "this" has more but ok if it is a 
-  // superset.  Thus just test every attribute in the testProperty to see if 
+  // the same number of attributes or "this" has more but ok if it is a
+  // superset.  Thus just test every attribute in the testProperty to see if
   // there is a matching attribute in "this" Property... if so, then they match
-  vtkSmartPointer<vtkInformationIterator> attributeIterator = 
+  vtkSmartPointer<vtkInformationIterator> attributeIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   attributeIterator->SetInformation( testProperty->Attributes );
   for (attributeIterator->InitTraversal(); !attributeIterator->IsDoneWithTraversal();
@@ -253,7 +253,7 @@ bool vtkKWEObjectTreePropertyBase::IsEqualTo(vtkKWEObjectTreePropertyBase *testP
     else if (key->IsA("vtkInformationStringKey"))
       {
       vtkInformationStringKey *stringKey = static_cast<vtkInformationStringKey*>(key);
-      if (!this->Attributes->Has(stringKey) || 
+      if (!this->Attributes->Has(stringKey) ||
         strcmp(this->Attributes->Get(stringKey), testProperty->Attributes->Get(stringKey)))
         {
         return false;
@@ -262,16 +262,16 @@ bool vtkKWEObjectTreePropertyBase::IsEqualTo(vtkKWEObjectTreePropertyBase *testP
     else if (key->IsA("vtkInformationIntegerVectorKey"))
       {
       if (!AreVectorKeysEqual<vtkInformationIntegerVectorKey, int>(
-        this->Attributes, testProperty->Attributes, 
+        this->Attributes, testProperty->Attributes,
         static_cast<vtkInformationIntegerVectorKey*>(key)))
         {
         return false;
         }
-      }    
+      }
     else if (key->IsA("vtkInformationDoubleVectorKey"))
       {
       if (!AreVectorKeysEqual<vtkInformationDoubleVectorKey, double>(
-        this->Attributes, testProperty->Attributes, 
+        this->Attributes, testProperty->Attributes,
         static_cast<vtkInformationDoubleVectorKey*>(key)))
         {
         return false;

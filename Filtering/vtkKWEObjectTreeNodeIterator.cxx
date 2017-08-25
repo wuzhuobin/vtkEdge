@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -28,7 +28,7 @@
 #include <vtkstd/stack>
 #include <vtkstd/queue>
 
-vtkCxxRevisionMacro(vtkKWEObjectTreeNodeIterator, "$Revision: 686 $");
+vtkCxxRevisionMacro(vtkKWEObjectTreeNodeIterator, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEObjectTreeNodeIterator);
 
 vtkCxxSetObjectMacro(vtkKWEObjectTreeNodeIterator, BaseNode, vtkKWEObjectTreeNodeBase);
@@ -70,7 +70,7 @@ private:
   typedef struct
     {
     vtkWeakPointer<vtkKWEObjectTreeNodeBase> Node;
-    int Depth;  // 0 = base, 1 = children, 2 = grandchildren, etc.  
+    int Depth;  // 0 = base, 1 = children, 2 = grandchildren, etc.
     } NodeInfo;
 
   vtkstd::stack< NodeInfo > Stack;
@@ -240,7 +240,7 @@ void vtkKWEObjectTreeNodeIterator::GoToNextNode()
     this->Internals->Clear();
     return;
     }
-  
+
   vtkKWEObjectTreeNodeBase *candidateNode;
   while (!this->CurrentNode)
     {
@@ -260,8 +260,8 @@ void vtkKWEObjectTreeNodeIterator::GoToNextNode()
       }
     // node has to exist (non-NULL) and match the PatternNode (if set) to be
     // the CurrentNode; othersie, "throw it away" and keep looking
-    if (candidateNode && 
-      (!this->PatternNode || candidateNode->IsEqualTo(this->PatternNode, 
+    if (candidateNode &&
+      (!this->PatternNode || candidateNode->IsEqualTo(this->PatternNode,
                              false, true, this->ConsiderInheritedProperties)))
       {
       this->CurrentNode = candidateNode;
@@ -271,7 +271,7 @@ void vtkKWEObjectTreeNodeIterator::GoToNextNode()
 
 //-----------------------------------------------------------------------------
 bool vtkKWEObjectTreeNodeIterator::IsDoneWithTraversal()
-{  
+{
   return this->CurrentNode ? false : true;
 }
 
@@ -310,7 +310,7 @@ void vtkKWEObjectTreeNodeIterator::PrintSelf(ostream& os, vtkIndent indent)
 
   os << indent << "TraversalMode: " << this->GetTraversalModeAsString() << "\n";
   os << indent << "IncludeBaseNode: " << (this->IncludeBaseNode ? "On\n" : "Off\n");
-  os << indent << "ConsiderInheritedProperties: " << 
+  os << indent << "ConsiderInheritedProperties: " <<
     (this->ConsiderInheritedProperties ? "On\n" : "Off\n");
   os << indent << "MaximumTraversalDepth: " << this->MaximumTraversalDepth << "\n";
 }

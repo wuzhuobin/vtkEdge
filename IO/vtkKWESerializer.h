@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWESerializer - Abstract superclass of input and output archivers
@@ -24,12 +24,12 @@
 // a collection of objects to/from an io stream. The serializers can work
 // with vtkKWESerializableObject and its subclasses, or vtkObjects in general
 // that have a subclass of vtkKWESerializationHelper registered with
-// vtkKWESerializationHelperMap. It can walk a object graph and 
-// serialize/deserialize all objects contained in it. Circular references are 
+// vtkKWESerializationHelperMap. It can walk a object graph and
+// serialize/deserialize all objects contained in it. Circular references are
 // supported.
 // In order to (most easily) add serialization support to your class, subclass
 // from vtkKWESerializableObject and re-implement its Serialize() method using
-// methods available in the serializer.  Otherwise create a subclass 
+// methods available in the serializer.  Otherwise create a subclass
 // vtkKWESerializationHelper and register it with the serialization manager
 // See vtkKWESerializableObject for details.
 // .SECTION See Also
@@ -57,11 +57,11 @@ public:
   // This method returns true if the serializer is an output
   // serializer (writer)
   virtual bool IsWriting() = 0;
-  
+
   // Description:
   // Serializes a single integer.
   virtual void Serialize(const char* name, int& val) = 0;
-  
+
   // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, int*& val, unsigned int& length) = 0;
@@ -69,7 +69,7 @@ public:
   // Description:
   // Serializes a single unsigned long.
   virtual void Serialize(const char* name, unsigned long& val) = 0;
-  
+
  // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, unsigned long*& val, unsigned int& length) = 0;
@@ -89,7 +89,7 @@ public:
   // Description:
   // Serializes a single double.
   virtual void Serialize(const char* name, double& val) = 0;
-  
+
   // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, double*& val, unsigned int& length) = 0;
@@ -105,30 +105,30 @@ public:
   // Description:
   // Serializes a vtkObject.
   virtual void Serialize(const char* name, vtkObject*& obj, bool weakPtr = false) = 0;
-  
+
   // Description:
   // Serializes a vtkInformationObject. Note that only keys registered
   // with the vtkKWEInformationKeyMap are restored.
   virtual void Serialize(const char* name, vtkInformation* info) = 0;
-  
+
   // Description:
   // Serializes a vector of vtkObjects.
-  virtual void Serialize(const char* name, 
-    vtkstd::vector<vtkSmartPointer<vtkObject> >& objs, 
+  virtual void Serialize(const char* name,
+    vtkstd::vector<vtkSmartPointer<vtkObject> >& objs,
     bool weakPtr = false) = 0;
 
   // Description:
   // Serializes a map from int to vector of vtkObjects.
-  virtual void Serialize(const char* name, 
+  virtual void Serialize(const char* name,
     vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > >& objs) = 0;
-  
+
   // Description:
   // Set/Get the archive version. Make sure to set the version before
   // writing to an archive. When reading an archive, the version is read
   // from the input stream.
   vtkSetMacro(ArchiveVersion, unsigned int);
   vtkGetMacro(ArchiveVersion, unsigned int);
-  
+
   // Description:
   // Helper function to make is easier to write containers of sub-classes
   // of vtkObject. For example:
@@ -167,7 +167,7 @@ public:
   static void FromBase(
     vtkstd::vector<vtkSmartPointer<vtkObject> >& from, Container& to)
     {
-    vtkstd::vector<vtkSmartPointer<vtkObject> >::iterator iter = 
+    vtkstd::vector<vtkSmartPointer<vtkObject> >::iterator iter =
       from.begin();
     for(; iter != from.end(); iter++)
       {
@@ -191,7 +191,7 @@ public:
     ToBase(vtkstd::map<int, Container>& from)
     {
     vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > > retVal;
-    typename vtkstd::map<int, Container>::iterator iter = 
+    typename vtkstd::map<int, Container>::iterator iter =
       from.begin();
     for(; iter != from.end(); iter++)
       {
@@ -207,7 +207,7 @@ public:
   // vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > > map;
   // ser->Serialize("Associations", map);
   // vtkKWESerializer::FromBase<vtkConceptualModelItem,Container>(map, this->Internal->Associations);
-  // \endcode  
+  // \endcode
   // The container must support forward iteration, begin(), end(), and
   // push_back.
   template <typename T, typename Container>

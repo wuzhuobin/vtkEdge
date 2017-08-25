@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -40,14 +40,14 @@ class vtkImageStencilData;
 #if defined(VTK_TYPE_USE___INT64)
   #define vtkitkTemplateMacro___INT64 \
     vtkTemplateMacroCase_si64(VTK___INT64, __int64, call);
-#else 
-  #define vtkitkTemplateMacro___INT64 
+#else
+  #define vtkitkTemplateMacro___INT64
 #endif
 
 #if defined(VTK_TYPE_USE___INT64) && defined(VTK_TYPE_CONVERT_UI64_TO_DOUBLE)
   #define vtkitkTemplateMacro___UINT64 \
     vtkTemplateMacroCase_ui64(VTK_UNSIGNED___INT64, unsigned __int64, call);
-#else 
+#else
   #define vtkitkTemplateMacro___UINT64
 #endif
 
@@ -73,8 +73,8 @@ class vtkImageStencilData;
 // .NAME vtkKWEITKImage
 // .SECTION Description
 // This class provides seamless conversion from VTK to ITK images and vice
-// versa. Specifically, you can set an ITK image (itk::Image< T >) and get 
-// the corresponding VTK image (vtkImageData), or a binarized stencil image 
+// versa. Specifically, you can set an ITK image (itk::Image< T >) and get
+// the corresponding VTK image (vtkImageData), or a binarized stencil image
 // (vtkImageStencilData). You can also go the other way around.
 // .SECTION See Also
 class VTKEdge_WIDGETS_EXPORT vtkKWEITKImage : public vtkObject
@@ -94,14 +94,14 @@ public:
   void             SetImage( vtkImageStencilData *    );
 
   // Description:
-  // Get an image as a ITK (untemplated or templated and implicitly casted) / 
+  // Get an image as a ITK (untemplated or templated and implicitly casted) /
   // VTK / VTK binarized image.
   vtkImageData                          * GetVTKImage();
   vtkImageStencilData                   * GetVTKImageStencilData();
   itk::ImageBase< 3 >                   * GetITKImage();
-  template< class T > itk::Image<T, 3>  * GetITKImage( T ) 
+  template< class T > itk::Image<T, 3>  * GetITKImage( T )
     { return this->InternalGetITKImage(static_cast<T>(0)); }
-  
+
   // Return the pixel type using ITK enums.
   ITKScalarPixelType GetITKScalarPixelType();
 
@@ -115,16 +115,16 @@ protected:
   // Description:
   // Get a binary stencil from an image. All pixels >= threshold are
   // considered within the stencil.
-  static void GetStencilFromImage( vtkImageData *, 
+  static void GetStencilFromImage( vtkImageData *,
                                    vtkImageStencilData *, double thresold=127.5 );
 
   // Description:
-  // Construct an unsigned char vtkImageData from a stencil. 
-  static void GetImageFromStencil( vtkImageData *, 
+  // Construct an unsigned char vtkImageData from a stencil.
+  static void GetImageFromStencil( vtkImageData *,
                                    vtkImageStencilData *,
-                                   unsigned char inVal=255, 
+                                   unsigned char inVal=255,
                                    unsigned char outVal=0);
-    
+
   enum InputType
     {
     VTK_IMAGE_INPUT = 0,
@@ -136,7 +136,7 @@ protected:
   typedef itk::ImageBase< 3 >                    ImageBaseType;
   typedef ImageBaseType::Pointer                 ImagePointer;
   typedef ImageBaseType::ConstPointer            ImageConstPointer;
-    
+
 private:
   vtkKWEITKImage(const vtkKWEITKImage&);   // Not implemented.
   void operator=(const vtkKWEITKImage&);  // Not implemented.
@@ -145,15 +145,15 @@ private:
   itk::ProcessObject::Pointer            ItkToVtkExporter;
   itk::ProcessObject::Pointer            VtkToItkExporter;
   itk::ProcessObject::Pointer            ItkToItkCastor;
-  
+
   vtkSmartPointer< vtkImageStencilData > VtkImageStencil;
   vtkSmartPointer< vtkImageData >        VtkImage;
   itk::ImageBase<3>::Pointer             ItkImage;
   vtkTimeStamp                           VtkImageStencilTime;
   vtkTimeStamp                           VtkImageTime;
   vtkTimeStamp                           ItkImageTime;
-  
-  
+
+
   /** \class ItkToItkCastor
    *  This helper class will take care of casting an ITK image to one of type
    * TPixel. */
@@ -162,13 +162,13 @@ private:
   public:
     typedef itk::Image< TPixel, 3 >       InputImageType;
     typedef itk::Image< TOutputPixel, 3 > OutputImageType;
-    typedef itk::CastImageFilter< InputImageType, 
+    typedef itk::CastImageFilter< InputImageType,
                                   OutputImageType > CastFilterType;
-    static itk::Image<TOutputPixel, 3> * Cast( 
-                     itk::ImageBase<3> * imageBase, 
+    static itk::Image<TOutputPixel, 3> * Cast(
+                     itk::ImageBase<3> * imageBase,
                      itk::ProcessObject::Pointer & castor )
       {
-      if (InputImageType * image = 
+      if (InputImageType * image =
             dynamic_cast< InputImageType * >( imageBase ))
         {
         typedef typename CastFilterType::Pointer CastFilterPointer;
@@ -182,8 +182,8 @@ private:
       return NULL;
       }
   };
-  
-  template<class T> itk::Image<T, 3>  * InternalGetITKImage( T ) 
+
+  template<class T> itk::Image<T, 3>  * InternalGetITKImage( T )
     {
     if (itk::Image<T, 3> * i = ItkToItkCast< unsigned char,  T >::Cast( this->GetITKImage(), this->ItkToItkCastor )) return i;
     if (itk::Image<T, 3> * i = ItkToItkCast< char,           T >::Cast( this->GetITKImage(), this->ItkToItkCastor )) return i;

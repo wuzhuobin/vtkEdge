@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -34,12 +34,12 @@ class vtkPointPlacer;
 class vtkKWEPaintbrushSketch;
 class vtkKWEPaintbrushSelectionWidget;
 
-class VTKEdge_WIDGETS_EXPORT vtkKWEPaintbrushSelectionRepresentation 
+class VTKEdge_WIDGETS_EXPORT vtkKWEPaintbrushSelectionRepresentation
                                        : public vtkWidgetRepresentation
 {
   //BTX
   friend class vtkKWEPaintbrushSelectionWidget;
-  //ETX                                                          
+  //ETX
 public:
   // Description:
   // Standard VTK methods.
@@ -48,7 +48,7 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   //BTX -- States the representation can set itself into
-  enum 
+  enum
     {
     PaintbrushRequestSketchSelect,
     PaintbrushSketchSelect,
@@ -70,9 +70,9 @@ public:
   vtkGetObjectMacro( PaintbrushDrawing, vtkKWEPaintbrushDrawing );
 
   // Descirption:
-  // Set / get the Point Placer. The point placer is responsible for 
-  // converting display coordinates into world coordinates according 
-  // to some constraints, and for validating world positions. 
+  // Set / get the Point Placer. The point placer is responsible for
+  // converting display coordinates into world coordinates according
+  // to some constraints, and for validating world positions.
   // By writing an appopriate point placer, you can disable/enable selection
   // on regions in world space.
   void SetPointPlacer( vtkPointPlacer * );
@@ -81,15 +81,15 @@ public:
   // Descirption:
   // Deep copy.. synchronizes states etc..
   virtual void DeepCopy(vtkWidgetRepresentation *);
-  
+
   // Description:
   // Check if display point is inside the sketch "s".
-  virtual int DisplayPositionIsInside( vtkKWEPaintbrushSketch *s, 
+  virtual int DisplayPositionIsInside( vtkKWEPaintbrushSketch *s,
                                        double displayPos[2]);
 
   // Description:
   // Check if world point is inside the sketch "s".
-  virtual int WorldPositionIsInside( vtkKWEPaintbrushSketch *s, 
+  virtual int WorldPositionIsInside( vtkKWEPaintbrushSketch *s,
                                      double worldPos[3]);
 
   // Description:
@@ -128,13 +128,13 @@ public:
 
   // Description:
   // Merge the selected sketches.
-  // You may specify a sketch, from the drawing, to merge into. If NULL, the 
+  // You may specify a sketch, from the drawing, to merge into. If NULL, the
   // first selected sketch will contain the merge.
   // By default sketches merged are removed. The removeSketches ivar can be
   // used to control this.
   virtual int MergeSelectedSketches( vtkKWEPaintbrushSketch *mergedSketch = NULL,
                                      int removeSketches = 1 );
-  
+
 protected:
   vtkKWEPaintbrushSelectionRepresentation();
   ~vtkKWEPaintbrushSelectionRepresentation();
@@ -146,17 +146,17 @@ protected:
   // Description:
   // Drag and drop merge support. Returns 1 if successful.
   virtual int DragAndDropMerge();
-  
+
   vtkKWEPaintbrushDrawing        *PaintbrushDrawing;
 
   // Description:
-  // The point placer determines the world coordinate based on screen 
+  // The point placer determines the world coordinate based on screen
   // coordinate and allows you to set constraints too.
   vtkPointPlacer             * PointPlacer;
-  
+
   // Description:
   // Bookkeeping of the last display position.
-  int    LastDisplayPosition[2]; 
+  int    LastDisplayPosition[2];
 
   // Description:
   // The sketch just selected.
@@ -169,7 +169,7 @@ protected:
   int                   PrevInteractionState;
   double                DragBeginPoint[3], DragEndPoint[3];
   vtkKWEPaintbrushSketch * DragAndDropDestination;
-  
+
 private:
   vtkKWEPaintbrushSelectionRepresentation(const vtkKWEPaintbrushSelectionRepresentation&);  //Not implemented
   void operator=(const vtkKWEPaintbrushSelectionRepresentation&);  //Not implemented

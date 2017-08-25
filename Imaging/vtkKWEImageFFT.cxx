@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEImageFFT.h"
@@ -27,7 +27,7 @@
 
 #include <math.h>
 
-vtkCxxRevisionMacro(vtkKWEImageFFT, "$Revision: 588 $");
+vtkCxxRevisionMacro(vtkKWEImageFFT, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEImageFFT);
 
 // Description:
@@ -109,9 +109,9 @@ void vtkKWEImageFFTExecute(vtkKWEImageFFT *self,
   self->PermuteExtent(outExt, outMin0,outMax0,outMin1,outMax1,outMin2,outMax2);
   self->PermuteIncrements(inData->GetIncrements(), inInc0, inInc1, inInc2);
   self->PermuteIncrements(outData->GetIncrements(), outInc0, outInc1, outInc2);
-  
+
   inSize0 = inMax0 - inMin0 + 1;
-  
+
   // Input has to have real components at least.
   numberOfComponents = inData->GetNumberOfScalarComponents();
   if (numberOfComponents < 1)
@@ -137,7 +137,7 @@ void vtkKWEImageFFTExecute(vtkKWEImageFFT *self,
     outPtr1 = outPtr2;
     for (idx1 = outMin1; !self->AbortExecute && idx1 <= outMax1; ++idx1)
       {
-      if (!id) 
+      if (!id)
         {
         if (!(count%target))
           {
@@ -159,7 +159,7 @@ void vtkKWEImageFFTExecute(vtkKWEImageFFT *self,
         inPtr0 += inInc0;
         ++pComplex;
         }
-      
+
       // Call the method that performs the fft
       ::ExecuteFft(inComplex, outComplex, inSize0);
 
@@ -179,7 +179,7 @@ void vtkKWEImageFFTExecute(vtkKWEImageFFT *self,
     inPtr2 += inInc2;
     outPtr2 += outInc2;
     }
-    
+
   delete [] inComplex;
   delete [] outComplex;
 }
@@ -201,7 +201,7 @@ void vtkKWEImageFFT::ThreadedExecute(vtkImageData *inData, vtkImageData *outData
 
   inPtr = inData->GetScalarPointerForExtent(inExt);
   outPtr = outData->GetScalarPointerForExtent(outExt);
-  
+
   // this filter expects that the output be doubles.
   if (outData->GetScalarType() != VTK_DOUBLE)
     {
@@ -210,7 +210,7 @@ void vtkKWEImageFFT::ThreadedExecute(vtkImageData *inData, vtkImageData *outData
     }
 
   // this filter expects input to have 1 or two components
-  if (outData->GetNumberOfScalarComponents() != 1 && 
+  if (outData->GetNumberOfScalarComponents() != 1 &&
       outData->GetNumberOfScalarComponents() != 2)
     {
     vtkErrorMacro(<< "Execute: Cannot handle more than 2 components");
@@ -220,9 +220,9 @@ void vtkKWEImageFFT::ThreadedExecute(vtkImageData *inData, vtkImageData *outData
   // choose which templated function to call.
   switch (inData->GetScalarType())
     {
-    vtkTemplateMacro(vtkKWEImageFFTExecute(this, inData, inExt, 
+    vtkTemplateMacro(vtkKWEImageFFTExecute(this, inData, inExt,
                                         static_cast<VTK_TT *>(inPtr), outData,
-                                        outExt, 
+                                        outExt,
                                         static_cast<double *>(outPtr),
                                         threadId));
     default:
@@ -238,9 +238,9 @@ void vtkKWEImageFFT::ThreadedExecute(vtkImageData *inData, vtkImageData *outData
 // This method needs to be called num times.  Results must not overlap for
 // consistent starting extent.  Subclass can override this method.
 // This method returns the number of peices resulting from a successful split.
-// This can be from 1 to "total".  
+// This can be from 1 to "total".
 // If 1 is returned, the extent cannot be split.
-int vtkKWEImageFFT::SplitExtent(int splitExt[6], int startExt[6], 
+int vtkKWEImageFFT::SplitExtent(int splitExt[6], int startExt[6],
                              int num, int total)
 {
   int splitAxis;
@@ -248,7 +248,7 @@ int vtkKWEImageFFT::SplitExtent(int splitExt[6], int startExt[6],
 
   vtkDebugMacro("SplitExtent: ( " << startExt[0] << ", " << startExt[1] << ", "
                 << startExt[2] << ", " << startExt[3] << ", "
-                << startExt[4] << ", " << startExt[5] << "), " 
+                << startExt[4] << ", " << startExt[5] << "), "
                 << num << " of " << total);
 
   // start with same extent
@@ -274,14 +274,14 @@ int vtkKWEImageFFT::SplitExtent(int splitExt[6], int startExt[6],
     {
     total = max - min + 1;
     }
-  
+
   if (num >= total)
     {
-    vtkDebugMacro("  SplitRequest (" << num 
+    vtkDebugMacro("  SplitRequest (" << num
                   << ") larger than total: " << total);
     return total;
     }
-  
+
   // determine the extent of the piece
   splitExt[splitAxis*2] = min + (max - min + 1)*num/total;
   if (num == total - 1)
@@ -292,7 +292,7 @@ int vtkKWEImageFFT::SplitExtent(int splitExt[6], int startExt[6],
     {
     splitExt[splitAxis*2+1] = (min-1) + (max - min + 1)*(num+1)/total;
     }
-  
+
   vtkDebugMacro("  Split Piece: ( " <<splitExt[0]<< ", " <<splitExt[1]<< ", "
                 << splitExt[2] << ", " << splitExt[3] << ", "
                 << splitExt[4] << ", " << splitExt[5] << ")");
@@ -305,7 +305,7 @@ void vtkKWEImageFFT::SetNumberOfThreads(int _arg)
   vtkErrorMacro(<< "CUDA is only thread safe per device (Use a different device per thread).");
 }
 
-  
+
 
 
 

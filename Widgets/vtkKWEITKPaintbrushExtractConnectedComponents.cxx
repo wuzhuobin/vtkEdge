@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEITKPaintbrushExtractConnectedComponents.h"
@@ -43,11 +43,11 @@
 #include "itkVTKImageToImageFilter.h"
 #include "itkImageToVTKImageFilter.h"
 #include "itkBinaryDilateImageFilter.h"
-#include "itkBinaryBallStructuringElement.h" 
+#include "itkBinaryBallStructuringElement.h"
 #include "itkImage.h"
 #include "itkImageRegionIterator.h"
 
-vtkCxxRevisionMacro(vtkKWEITKPaintbrushExtractConnectedComponents, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEITKPaintbrushExtractConnectedComponents, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEITKPaintbrushExtractConnectedComponents);
 
 //----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
 {
   vtkInformation *info = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                              info->Get(vtkDataObject::DATA_OBJECT()));
   vtkKWEPaintbrushDrawing *outputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -88,32 +88,32 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
   // Sanity check.
   if (this->SketchIndex >= inputDrawing->GetNumberOfItems())
     {
-    vtkErrorMacro( << "sketch" 
+    vtkErrorMacro( << "sketch"
         << this->SketchIndex << " isnt present in the drawing.");
     return 0;
     }
-  
+
   outputDrawing->SetRepresentation( inputDrawing->GetRepresentation() );
   outputDrawing->SetImageData( inputDrawing->GetImageData() );
   outputDrawing->SetPaintbrushOperation( inputDrawing->GetPaintbrushOperation() );
-  outputDrawing->GetPaintbrushPropertyManager()->SetHighlightType( 
+  outputDrawing->GetPaintbrushPropertyManager()->SetHighlightType(
       inputDrawing->GetPaintbrushPropertyManager()->GetHighlightType() );
 
   // This is the image on which we will run the connected components algorithm
-  vtkSmartPointer< vtkImageData > inputImage 
+  vtkSmartPointer< vtkImageData > inputImage
     = vtkSmartPointer< vtkImageData >::New();
   inputDrawing->GetItem(this->SketchIndex)->GetPaintbrushData()->
       GetPaintbrushDataAsImageData( inputImage );
 
-  vtkSmartPointer< vtkImageData > inputBinaryImage 
+  vtkSmartPointer< vtkImageData > inputBinaryImage
           = vtkSmartPointer< vtkImageData >::New();
 
   if (inputDrawing->GetRepresentation() == vtkKWEPaintbrushEnums::Grayscale)
     {
     // Threshold the image at 127.5 if it came from a grayscale representation.
-    // We want to make sure that the connected components algorithm runs on a 
+    // We want to make sure that the connected components algorithm runs on a
     // binary image.
-    vtkSmartPointer< vtkImageThreshold > threshold = 
+    vtkSmartPointer< vtkImageThreshold > threshold =
       vtkSmartPointer< vtkImageThreshold >::New();
     threshold->SetInput( inputImage );
     threshold->SetInValue(255.0);
@@ -126,18 +126,18 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
     {
     inputBinaryImage->ShallowCopy( inputImage );
     }
-  
+
   typedef itk::Image< unsigned char, 3 > ImageType;
   typedef itk::ConnectedComponentImageFilter< ImageType, ImageType > FilterType;
 
   FilterType::Pointer connectedComponentsFilter = FilterType::New();
-  
+
   // Use face and edge connectivity. (26 connectivity in 3D).
   connectedComponentsFilter->FullyConnectedOn();
 
   // Connect the pipeline.
   typedef itk::VTKImageToImageFilter< ImageType >  VTK2ITKConverter;
-  typedef itk::ImageToVTKImageFilter< ImageType >  ITK2VTKConverter; 
+  typedef itk::ImageToVTKImageFilter< ImageType >  ITK2VTKConverter;
   VTK2ITKConverter::Pointer inputConverter = VTK2ITKConverter::New();
   ITK2VTKConverter::Pointer outputConverter = ITK2VTKConverter::New();
   inputConverter->SetInput( inputBinaryImage );
@@ -164,7 +164,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
   // Find the bounding box of each of the segments. We will do that so as to
   // save some memory allocating N sketches of the whole extent.
   int *sketchExtents = new int[6*nSegments];
-  this->ComputeSegmentExtents( nSegments, 
+  this->ComputeSegmentExtents( nSegments,
       sketchExtents, outputConverter->GetOutput() );
 
   // Now extract each connected component out into a vtkKWEPaintbrushSketch.
@@ -175,17 +175,17 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
     inputDrawing->GetImageData()->GetExtent(extent);
 
     // Extract segmentN into an imageData.
-    vtkSmartPointer< vtkImageData > segmentN 
+    vtkSmartPointer< vtkImageData > segmentN
       = vtkSmartPointer< vtkImageData >::New();
     segmentN->SetExtent( sketchExtents + 6*(n-1) );
     segmentN->SetScalarTypeToUnsignedChar();
     segmentN->SetOrigin( inputDrawing->GetImageData()->GetOrigin() );
     segmentN->SetSpacing( inputDrawing->GetImageData()->GetSpacing() );
     segmentN->AllocateScalars();
-      
+
     if (inputDrawing->GetRepresentation() == vtkKWEPaintbrushEnums::Grayscale)
       {
-        
+
       // Extract object N from the output of the connected components algo
       ImageType::Pointer image = ImageType::New();
       image->SetRegions(connectedComponentsFilter->GetOutput()
@@ -193,7 +193,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
       image->Allocate();
       typedef itk::ImageRegionConstIterator< ImageType > ConstIteratorType;
       typedef itk::ImageRegionIterator< ImageType > IteratorType;
-      ConstIteratorType cit( connectedComponentsFilter->GetOutput(), 
+      ConstIteratorType cit( connectedComponentsFilter->GetOutput(),
               connectedComponentsFilter->GetOutput()->GetBufferedRegion());
       IteratorType it( image, image->GetBufferedRegion());
       while (!it.IsAtEnd())
@@ -206,13 +206,13 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
 
       // Dilate the object, so we can copy over the transition region as well.
       // We will dilate with a 5x5x5 structuring element.
-      typedef itk::BinaryBallStructuringElement< 
+      typedef itk::BinaryBallStructuringElement<
                       unsigned char, 3 > StructuringElementType;
-      typedef itk::BinaryDilateImageFilter< 
+      typedef itk::BinaryDilateImageFilter<
         ImageType, ImageType, StructuringElementType > DilateFilterType;
       DilateFilterType::Pointer dilate = DilateFilterType::New();
       dilate->SetInput( image );
-    
+
       StructuringElementType  structuringElement;
       structuringElement.SetRadius( 2 );  // 5x5 structuring element
       structuringElement.CreateStructuringElement();
@@ -229,7 +229,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
       cout << "Finished dilating" << endl;
 
       // Now do the copy of both the object and the transition region.
-      // For the object, we need to look in the extracted segment, for the 
+      // For the object, we need to look in the extracted segment, for the
       // transition region, we need to look in the dilation. Within these
       // regions we will copy the grayscale values from the original image.
       // Outside these we will set the values to 0.
@@ -244,17 +244,17 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
           outputConverter->GetOutput(), segmentN->GetExtent());
       vtkImageIterator< unsigned char > it2( segmentN, segmentN->GetExtent() );
       vtkImageIterator< unsigned char > it3( inputImage, segmentN->GetExtent() );
-      vtkImageIterator< unsigned char > it4( 
+      vtkImageIterator< unsigned char > it4(
           dilatedConverter->GetOutput(), segmentN->GetExtent() );
 
       while( !it2.IsAtEnd() )
-        { 
-        unsigned char *inSI    = it1.BeginSpan();  
+        {
+        unsigned char *inSI    = it1.BeginSpan();
         unsigned char *inSIEnd = it1.EndSpan();
         unsigned char *inSI2   = it2.BeginSpan();
         unsigned char *inSI3   = it3.BeginSpan();
         unsigned char *inSI4   = it3.BeginSpan();
-        while (inSI != inSIEnd) 
+        while (inSI != inSIEnd)
           {
           unsigned char inputDrawingVal = *inSI3;
           if (*inSI == (unsigned char)n)
@@ -265,7 +265,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
             {
             *inSI2 = inputDrawingVal; // Within the transition region
             }
-          else 
+          else
             {
             *inSI2 = 0; // Outside.
             }
@@ -289,16 +289,16 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
       vtkImageIterator< unsigned char > it2( segmentN, segmentN->GetExtent() );
 
       while( !it2.IsAtEnd() )
-        { 
-        unsigned char *inSI    = it1.BeginSpan();  
+        {
+        unsigned char *inSI    = it1.BeginSpan();
         unsigned char *inSIEnd = it1.EndSpan();
         unsigned char *inSI2   = it2.BeginSpan();
-        while (inSI != inSIEnd) 
+        while (inSI != inSIEnd)
           {
           *inSI2 = ((*inSI == (unsigned char)n) ? 255 : 0);
           ++inSI;
           ++inSI2;
-          }      
+          }
         it1.NextSpan();
         it2.NextSpan();
         }
@@ -309,12 +309,12 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
     vtkKWEPaintbrushSketch *sketchN = outputDrawing->AddItem();
     vtkKWEPaintbrushData * data;
 
-    // Convert this vtkImageData that represents the segment into 
+    // Convert this vtkImageData that represents the segment into
     // a vtkKWEPaintbrushData.
     if (inputDrawing->GetRepresentation() == vtkKWEPaintbrushEnums::Binary)
       {
       vtkKWEPaintbrushStencilData *sdata = vtkKWEPaintbrushStencilData::New();
-      vtkKWEPaintbrushUtilities::GetStencilFromImage< 
+      vtkKWEPaintbrushUtilities::GetStencilFromImage<
         vtkKWEPaintbrushUtilities::vtkFunctorGreaterThan >(
           segmentN, sdata->GetImageStencilData(), 127.5 );
       data = sdata;
@@ -332,7 +332,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents
       }
 
     // Copy over some default properties from the input drawing.
-    vtkKWEPaintbrushProperty *inputProperty = 
+    vtkKWEPaintbrushProperty *inputProperty =
       inputDrawing->GetItem(this->SketchIndex)->GetPaintbrushProperty();
     vtkKWEPaintbrushProperty *sketchNProperty = sketchN->GetPaintbrushProperty();
     sketchNProperty->SetHighlightColor( inputProperty->GetHighlightColor() );
@@ -372,7 +372,7 @@ void vtkKWEITKPaintbrushExtractConnectedComponents::RequestInformation (
 {
   vtkInformation *info = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                              info->Get(vtkDataObject::DATA_OBJECT()));
 
   // set the extent
@@ -412,8 +412,8 @@ ProcessRequest(vtkInformation* request,
 
 //----------------------------------------------------------------------------
 int vtkKWEITKPaintbrushExtractConnectedComponents::RequestDataObject(
-  vtkInformation*, 
-  vtkInformationVector** inputVector , 
+  vtkInformation*,
+  vtkInformationVector** inputVector ,
   vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
@@ -422,7 +422,7 @@ int vtkKWEITKPaintbrushExtractConnectedComponents::RequestDataObject(
     return 0;
     }
   vtkDataObject *input = inInfo->Get(vtkDataObject::DATA_OBJECT());
-  
+
   if (input)
     {
     // for each output
@@ -430,8 +430,8 @@ int vtkKWEITKPaintbrushExtractConnectedComponents::RequestDataObject(
       {
       vtkInformation* info = outputVector->GetInformationObject(i);
       vtkDataObject *output = info->Get(vtkDataObject::DATA_OBJECT());
-    
-      if (!output || !output->IsA(input->GetClassName())) 
+
+      if (!output || !output->IsA(input->GetClassName()))
         {
         vtkDataObject* newOutput = input->NewInstance();
         newOutput->SetPipelineInformation(info);
@@ -475,10 +475,10 @@ void vtkKWEITKPaintbrushExtractConnectedComponents
   int ijk[3] = { extent[0], extent[2], extent[4] };
 
   while( !it.IsAtEnd() )
-    { 
-    unsigned char *inSI    = it.BeginSpan();  
+    {
+    unsigned char *inSI    = it.BeginSpan();
     unsigned char *inSIEnd = it.EndSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
       for (int i = 1; i <= nSegments; i++)
         {
@@ -497,8 +497,8 @@ void vtkKWEITKPaintbrushExtractConnectedComponents
       ++ijk[0];
 
       // Find out our structured coordinate in the image.
-      }      
-    it.NextSpan();  
+      }
+    it.NextSpan();
 
     if (ijk[0] > extent[1])
       {
@@ -518,6 +518,6 @@ void vtkKWEITKPaintbrushExtractConnectedComponents
     cout << e[offset] <<" " <<
       e[offset + 1] << " " << e[offset + 2] << " " << e[offset + 3] << " " << e[offset + 4] << " " << e[offset + 5] << endl;
     }
-   
+
 }
 

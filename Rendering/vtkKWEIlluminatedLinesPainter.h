@@ -1,32 +1,32 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEIlluminatedLinesPainter - painter that paints lines.
 // .SECTION Description
 // This painter tries to paint lines efficiently. Request to Render
-// any other primitive are ignored and not passed to the delegate painter, 
-// if any. This painter cannot handle cell colors/normals. If they are 
-// present the request is passed on to the Delegate painter. If this 
+// any other primitive are ignored and not passed to the delegate painter,
+// if any. This painter cannot handle cell colors/normals. If they are
+// present the request is passed on to the Delegate painter. If this
 // class is able to render the primitive, the render request is not
 // propagated to the delegate painter.
-// 
+//
 
 #ifndef __vtkKWEIlluminatedLinesPainter_h
 #define __vtkKWEIlluminatedLinesPainter_h
@@ -52,7 +52,7 @@ public:
   // Description:
   // Release any graphics resources that are being consumed by this painter.
   // The parameter window could be used to determine which graphic
-  // resources to release. 
+  // resources to release.
   // The call is propagated to the delegate painter, if any.
   virtual void ReleaseGraphicsResources(vtkWindow *);
 
@@ -97,7 +97,7 @@ protected:
   vtkWeakPointer<vtkWindow> LastRenderWindow;
   vtkShaderProgram2* Program;
   vtkShader2* FragmentShader;
-  
+
 private:
   vtkKWEIlluminatedLinesPainter(const vtkKWEIlluminatedLinesPainter&); // Not implemented.
   void operator=(const vtkKWEIlluminatedLinesPainter&); // Not implemented.

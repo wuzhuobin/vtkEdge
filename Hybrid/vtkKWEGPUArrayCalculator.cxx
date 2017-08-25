@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
+// 
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   Alternatively, you may see: 
+// 
+//   http://www.vtkedge.org/vtkedge/project/license.html
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -43,7 +43,7 @@
 #include "vtkgl.h"
 #include "vtkKWEDataArrayStreamer.h"
 #include <vtkstd/vector>
-#include "vtkKWEDataTransferHelper.h"
+#include "vtkDataTransferHelper.h"
 #include "vtkFrameBufferObject.h"
 #include "vtkTextureObject.h"
 #include <assert.h>
@@ -52,7 +52,7 @@
 
 //#define VTKKWE_GPU_ARRAY_CALCULATOR_DEBUG // display debug info
 
-vtkCxxRevisionMacro(vtkKWEGPUArrayCalculator, "$Revision: 710 $");
+vtkCxxRevisionMacro(vtkKWEGPUArrayCalculator, "$Revision: 1973 $");
 vtkStandardNewMacro(vtkKWEGPUArrayCalculator);
 
 // ----------------------------------------------------------------------------
@@ -92,14 +92,14 @@ void vtkKWEGPUArrayCalculator::SetContext(vtkRenderWindow* context)
     {
       vtkOpenGLExtensionManager *mgr=vtkOpenGLExtensionManager::New();
       mgr->SetRenderWindow(this->Context);
-      
+
       // We need shader support, PBO, FBO, multitexturing, draw buffers,
       // NPOT textures, float textures
-      
+
       // GL_ARB_draw_buffers requires at least OpenGL>=1.3
       // (multitexturing is part of OpenGL 1.3)
       bool gl13=mgr->ExtensionSupported("GL_VERSION_1_3")==1;
-      
+
       if(!gl13)
         {
           // give up
@@ -110,33 +110,33 @@ void vtkKWEGPUArrayCalculator::SetContext(vtkRenderWindow* context)
           bool gl15=mgr->ExtensionSupported("GL_VERSION_1_5")==1;
           bool gl20=mgr->ExtensionSupported("GL_VERSION_2_0")==1;
           bool gl21=mgr->ExtensionSupported("GL_VERSION_2_1")==1;
-          
+
           bool vbo=gl15 ||
             mgr->ExtensionSupported("GL_ARB_vertex_buffer_object")==1;
-          
+
           bool pbo=vbo &&
             (gl21 || mgr->ExtensionSupported("GL_ARB_pixel_buffer_object")==1);
-          
+
           bool drawbuffers=gl20 ||
             mgr->ExtensionSupported("GL_ARB_draw_buffers")==1;
           bool npot=gl20 ||
             mgr->ExtensionSupported("GL_ARB_texture_non_power_of_two")==1;
-          
+
           bool shading_language_100=gl20 ||
             mgr->ExtensionSupported("GL_ARB_shading_language_100");
           bool shader_objects=gl20 ||
             mgr->ExtensionSupported("GL_ARB_shader_objects");
-          
+
           bool fragment_shader=gl20 ||
             mgr->ExtensionSupported("GL_ARB_fragment_shader");
           bool fbo=mgr->ExtensionSupported("GL_EXT_framebuffer_object" )==1;
-          
+
           bool texture_float=mgr->ExtensionSupported("GL_ARB_texture_float")==1;
-          
+
           this->SupportedByHardware=pbo && drawbuffers && npot &&
             shading_language_100 && shader_objects && fragment_shader && fbo &&
             texture_float;
-          
+
           if(this->SupportedByHardware)
             {
               mgr->LoadSupportedExtension("GL_VERSION_1_3");
@@ -311,7 +311,7 @@ void vtkKWEGPUArrayCalculator::Calibrate()
       // or if we reach the maximum number of tries.
       this->CalibrationDone=(speedFactor>=0.9 && speedFactor<=1.1)
         || iteration>=maxIterations;
-      
+
       if(!this->CalibrationDone)
         {
           if(speedFactor<1.0)
@@ -355,20 +355,20 @@ void vtkKWEGPUArrayCalculator::SimulateGPUComputation(vtkFloatArray *values)
                                            /accumulatedTupleSize);
   streamer->SetNumberOfTuples(numTuples);
 
-  vtkKWEDataTransferHelper *bus=vtkKWEDataTransferHelper::New();
+  vtkDataTransferHelper *bus=vtkDataTransferHelper::New();
   bus->SetContext(this->Context);
   bus->SetMinTextureDimension(2);
   bus->SetArray(values);
   bus->SetShaderSupportsTextureInt(false);
 
-  vtkKWEDataTransferHelper *resultBus=vtkKWEDataTransferHelper::New();
+  vtkDataTransferHelper *resultBus=vtkDataTransferHelper::New();
   resultBus->SetContext(this->Context);
   resultBus->SetMinTextureDimension(2);
   resultBus->SetArray(values);
   resultBus->SetShaderSupportsTextureInt(false);
 
   streamer->SetTupleSize(maxTupleSize);
-  
+
   streamer->Begin();
   vtkIdType dims[2];
   bool firstIteration=true;
@@ -409,7 +409,7 @@ void vtkKWEGPUArrayCalculator::SimulateGPUComputation(vtkFloatArray *values)
           fbo->SetContext(vtkOpenGLRenderWindow::SafeDownCast(this->Context));
           fbo->SetColorBuffer(0,resultPlane);
         }
-         
+
       vtkgl::ActiveTexture(vtkgl::TEXTURE0);
       // code to upload texture here.
       bus->SetArray(values);
@@ -421,7 +421,7 @@ void vtkKWEGPUArrayCalculator::SimulateGPUComputation(vtkFloatArray *values)
       int component=0;
       bus->Upload(1,&component);
       bus->GetTexture()->Bind();
-     
+
       // Run GPU computation by drawing a quad
       fbo->Start(fboDims[0],fboDims[1],false);
       //      fbo->RenderQuad(0,dims[0]-1,0,dims[1]-1);
@@ -441,7 +441,7 @@ void vtkKWEGPUArrayCalculator::SimulateGPUComputation(vtkFloatArray *values)
     {
       fbo->Delete(); // do unbind and restore GL resources.
     }
-  
+
   streamer->Delete();
   bus->Delete();
   resultBus->Delete();
@@ -470,7 +470,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
   int attributeDataType = 0; // 0 for point data, 1 for cell data
   vtkIdType i;
   int j;
-  
+
   vtkDataSetAttributes* inFD = 0;
   vtkDataSetAttributes* outFD = 0;
   vtkDataArray* currentArray;
@@ -523,7 +523,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
       numTuples = graphInput->GetNumberOfEdges();
       }
     }
-  
+
   if (numTuples < 1)
     {
     vtkDebugMacro("Empty data.");
@@ -544,7 +544,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
       // CPU flavor.
       return this->Superclass::RequestData(request,inputVector,outputVector);
     }
-  
+
   for (i = 0; i < this->NumberOfScalarArrays; i++)
     {
     currentArray = inFD->GetArray(this->ScalarArrayNames[i]);
@@ -650,7 +650,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
     {
       return 0;
     }
-  
+
   // output allocation.
   if(this->FunctionParserToGLSL->GetResultDimension()==3)
     {
@@ -743,7 +743,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
         }
       ++j;
     }
-  
+
   // add the size of the output (component is always float):
   if(resultType==1)
     {
@@ -799,7 +799,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
   shader->SetContext(prog->GetContext());
   prog->GetShaders()->AddItem(shader);
   shader->Delete();
-  
+
   prog->Build();
   if(prog->GetLastBuildStatus()!=VTK_SHADER_PROGRAM2_LINK_SUCCEEDED)
     {
@@ -821,27 +821,27 @@ int vtkKWEGPUArrayCalculator::RequestData(
                                            /accumulatedTupleSize);
   streamer->SetNumberOfTuples(numTuples);
 
-  vtkstd::vector<vtkKWEDataTransferHelper *> *buses=
-    new vtkstd::vector<vtkKWEDataTransferHelper *>(this->FunctionParserToGLSL->GetNumberOfUsedScalarVariables()+this->FunctionParserToGLSL->GetNumberOfUsedVectorVariables());
+  vtkstd::vector<vtkDataTransferHelper *> *buses=
+    new vtkstd::vector<vtkDataTransferHelper *>(this->FunctionParserToGLSL->GetNumberOfUsedScalarVariables()+this->FunctionParserToGLSL->GetNumberOfUsedVectorVariables());
 
   size_t busIndex=0;
   size_t numberOfBuses=buses->size();
   while(busIndex<numberOfBuses)
     {
-      (*buses)[busIndex]=vtkKWEDataTransferHelper::New();
+      (*buses)[busIndex]=vtkDataTransferHelper::New();
       (*buses)[busIndex]->SetContext(this->Context);
       (*buses)[busIndex]->SetMinTextureDimension(2);
       ++busIndex;
     }
 
-  vtkKWEDataTransferHelper *resultBus=vtkKWEDataTransferHelper::New();
+  vtkDataTransferHelper *resultBus=vtkDataTransferHelper::New();
   resultBus->SetContext(this->Context);
   resultBus->SetArray(resultArray);
   resultBus->SetShaderSupportsTextureInt(false);
   resultBus->SetMinTextureDimension(2);
 
   streamer->SetTupleSize(maxTupleSize);
-  
+
 
 
   streamer->Begin();
@@ -870,7 +870,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
           vtkTextureObject *resultPlane=vtkTextureObject::New();
           resultPlane->SetContext(this->Context);
           resultPlane->Create2D(static_cast<unsigned int>(dims[0]),
-                                static_cast<unsigned int>(dims[1]), 
+                                static_cast<unsigned int>(dims[1]),
                                 this->FunctionParserToGLSL->GetResultDimension(),
                                 VTK_FLOAT,false);
           resultBus->SetTexture(resultPlane);
@@ -903,7 +903,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
                     prog->GetUniformVariables()->SetUniformi(this->FunctionParserToGLSL->GetGLSLScalarName(j)->c_str(),1,&textureUnit);
                     }
                   // code to upload texture here.
-                  vtkKWEDataTransferHelper *d=(*buses)[textureUnit];
+                  vtkDataTransferHelper *d=(*buses)[textureUnit];
                   d->SetArray(currentArray);
                   d->SetCPUExtent(0,static_cast<int>(numTuples-1),0,0,0,0);
                   d->SetGPUExtent(static_cast<int>(cursor),
@@ -940,7 +940,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
                     prog->GetUniformVariables()->SetUniformi(this->FunctionParserToGLSL->GetGLSLVectorName(j)->c_str(),1,&textureUnit);
                     }
                   // code to upload texture here.
-                  vtkKWEDataTransferHelper *d=(*buses)[textureUnit];
+                  vtkDataTransferHelper *d=(*buses)[textureUnit];
                   d->SetArray(currentArray);
                   d->SetCPUExtent(0,static_cast<int>(numTuples-1),0,0,0,0);
                   d->SetGPUExtent(static_cast<int>(cursor),
@@ -960,19 +960,19 @@ int vtkKWEGPUArrayCalculator::RequestData(
             }
           ++j;
         }
-      
+
       // Run GPU computation by drawing a quad
       prog->Use();
       if(!prog->IsValid())
         {
         vtkErrorMacro(<<" validation of the program failed: "<<prog->GetLastValidateLog());
         }
-      
+
       fbo->Start(fboDims[0],fboDims[1],false);
       fbo->RenderQuad(0,static_cast<int>(dims[0]-1),0,
                       static_cast<int>(dims[1]-1));
       prog->Restore();
-      
+
       // Get the result of the GPU, by downloading the texture.
       resultBus->SetCPUExtent(0,static_cast<int>(numTuples-1),0,0,0,0);
       resultBus->SetGPUExtent(static_cast<int>(cursor),
@@ -994,7 +994,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
     prog->ReleaseGraphicsResources();
     prog->Delete(); // do unbind and restore GL resources.
     }
-  
+
   streamer->Delete();
 
   busIndex=0;
@@ -1006,7 +1006,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
   delete buses;
 
   resultBus->Delete();
-  
+
   if(resultPoints)
     {
     if(psInput)
@@ -1051,7 +1051,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
     {
     dsOutput->CopyStructure(dsInput);
     dsOutput->CopyAttributes(dsInput);
-    
+
     resultArray->SetName(this->ResultArrayName);
     outFD->AddArray(resultArray);
     if (resultType == 0)
@@ -1062,7 +1062,7 @@ int vtkKWEGPUArrayCalculator::RequestData(
       {
       outFD->SetActiveVectors(this->ResultArrayName);
       }
-    
+
     resultArray->Delete();
     }
 
@@ -1079,13 +1079,13 @@ void vtkKWEGPUArrayCalculator::SetFunction(const char* function)
     }
 
   this->Modified();
-  
+
   if (this->Function)
     {
     delete [] this->Function;
     this->Function = NULL;
     }
-  
+
   if (function)
     {
     this->Function = new char[strlen(function)+1];
@@ -1129,6 +1129,6 @@ void vtkKWEGPUArrayCalculator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  os << indent << "Max GPU Memory Size In Bytes: " 
+  os << indent << "Max GPU Memory Size In Bytes: "
      << this->MaxGPUMemorySizeInBytes << endl;
 }

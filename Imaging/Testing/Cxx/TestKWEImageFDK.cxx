@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkColorTransferFunction.h"
@@ -53,13 +53,13 @@ int TestKWEImageFDK(int argc, char *argv[])
   vtkRenderWindow *renWin = vtkRenderWindow::New();
   iren->SetRenderWindow(renWin);
   renWin->Delete();
-  
+
   vtkRenderer *renderer = vtkRenderer::New();
   renWin->AddRenderer(renderer);
 
   char *fname=
     vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/SheppLoganProjections.mhd");
-  
+
   vtkMetaImageReader *reader = vtkMetaImageReader::New();
   reader->SetFileName(fname);
   reader->Update();
@@ -88,7 +88,7 @@ int TestKWEImageFDK(int argc, char *argv[])
   scale->SetInputConnection(reader->GetOutputPort());
   scale->SetOutputScalarTypeToUnsignedChar();
 
-  vtkPiecewiseFunction * opacityTransferFunction = 
+  vtkPiecewiseFunction * opacityTransferFunction =
     vtkPiecewiseFunction::New();
   opacityTransferFunction->AddPoint(20, 0.0);
   opacityTransferFunction->AddPoint(255, 0.2);
@@ -102,10 +102,10 @@ int TestKWEImageFDK(int argc, char *argv[])
   colorTransferFunction->AddRGBPoint(255.0, 0.0, 0.2, 0.0);
 
 
-  vtkVolumeRayCastCompositeFunction * compositeFunction1 = 
+  vtkVolumeRayCastCompositeFunction * compositeFunction1 =
     vtkVolumeRayCastCompositeFunction::New();
 
-  vtkVolumeRayCastMapper * volumeMapper = 
+  vtkVolumeRayCastMapper * volumeMapper =
     vtkVolumeRayCastMapper::New();
 
   vtkVolumeProperty * volumeProperty = vtkVolumeProperty::New();

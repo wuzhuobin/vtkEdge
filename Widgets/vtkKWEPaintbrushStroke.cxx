@@ -29,7 +29,7 @@
 #include "vtkKWEPaintbrushOperation.h"
 #include "vtkKWEPaintbrushShape.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushStroke, "$Revision: 746 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushStroke, "$Revision: 3550 $");
 vtkStandardNewMacro(vtkKWEPaintbrushStroke);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushStroke,PaintbrushOperation,
                                       vtkKWEPaintbrushOperation);
@@ -163,6 +163,7 @@ int vtkKWEPaintbrushStroke::AddShapeAtPosition( double p[3],
   // Get the paintbrush data filtered through the operation. This allows us 
   // to support in-place smart filters etc..
   vtkKWEPaintbrushEnums::OperationType op;
+  // This operation may change the value of op.
   this->PaintbrushOperation->GetPaintbrushData(data, p, op);
 
   if( op == vtkKWEPaintbrushEnums::Replace )  
@@ -183,15 +184,20 @@ int vtkKWEPaintbrushStroke::AddShapeAtPosition( double p[3],
        (this->Internals->State == vtkKWEPaintbrushEnums::Erase &&
         op == vtkKWEPaintbrushEnums::Subtract) )
     {
-    this->PaintbrushData->Add(data); // TODO Was InternalAdd before.. check
     if (auxData1)
       {
+      // Enable delta computation for the first time to compute detlas w.r.t
+      // what's already there for the Undo/Redo stuff
+      auxData1->SetComputeDelta(1); 
+
       auxData1->Add(data);
+      auxData1->SetComputeDelta(0); 
       }
     if (auxData2)
       {
       auxData2->Add(data);
       }
+    this->PaintbrushData->Add(data); // TODO Was InternalAdd before.. check
     }
   else if(  (this->Internals->State == vtkKWEPaintbrushEnums::Erase &&
         op == vtkKWEPaintbrushEnums::Add)  
@@ -212,15 +218,20 @@ int vtkKWEPaintbrushStroke::AddShapeAtPosition( double p[3],
     //   grayscaleData not stencilData
     if (vtkKWEPaintbrushStencilData::SafeDownCast(this->PaintbrushData))
       {
-      this->PaintbrushData->Add(data); 
       if (auxData1)
         {
+        // Enable delta computation for the first time to compute detlas w.r.t
+        // what's already there for the Undo/Redo stuff
+        auxData1->SetComputeDelta(1); 
+
         auxData1->Subtract(data);
+        auxData1->SetComputeDelta(0);
         }
       if (auxData2)
         {
         auxData2->Subtract(data);
         }
+      this->PaintbrushData->Add(data); 
       }
     else
       {
@@ -288,8 +299,10 @@ void vtkKWEPaintbrushStroke::Allocate()
 
   if (this->GetState() == vtkKWEPaintbrushEnums::Erase)
     {
-    // Start with an inverted buffer for a Minkowski "min"
-    this->PaintbrushData->Allocate(255.0); 
+    // Start with an inverted buffer for a Minkowski "min" if we are
+    // using grayscale data.
+    this->PaintbrushData->Allocate( 
+      this->Representation == vtkKWEPaintbrushEnums::Grayscale ? 255.0 : 0.0);
     }
   else
     {

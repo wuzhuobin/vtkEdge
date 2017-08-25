@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -54,6 +54,8 @@ SET(KIT_SRCS
   vtkKWEPaintbrushStroke.cxx
   vtkKWEPaintbrushUtilities.cxx
   vtkKWEPaintbrushWidget.cxx
+  vtkKWEPaintbrushWidgetCallbackMapper.cxx
+  vtkKWELightPaintbrushWidgetCallbackMapper.cxx
   vtkKWEPaintbrushTesting.cxx
   vtkKWEStencilContourFilter.cxx
   vtkKWEVoxelAlignedImageActorPointPlacer.cxx
@@ -87,7 +89,7 @@ ENDIF(VTKEdge_USE_ITK)
 # --------------------------------------------------------------------------
 # Include dirs
 #
-# If we are in a tree that includes the ITK source dir already, then 
+# If we are in a tree that includes the ITK source dir already, then
 # we need to explicitly set the ITK include paths. We could let the
 # super-project takes care of it (since it is the one that bundles us
 # with ITK), but including ITK paths can bring many extra-paths that could
@@ -126,13 +128,13 @@ set(KIT_SRCS ${KIT_SRCS} "${PROJECT_BINARY_DIR}/vtkKWEPaintbrushEnums.h")
 # --------------------------------------------------------------------------
 # Build the library
 #
-set(KIT_LIBS vtkWidgets 
-             vtkRendering 
-             vtkFiltering 
-             vtkCommon 
+set(KIT_LIBS vtkWidgets
+             vtkRendering
+             vtkFiltering
+             vtkCommon
              vtkImaging )
 IF(VTKEdge_USE_ITK)
-  set (KIT_LIBS ${KIT_LIBS} ITKCommon ITKBasicFilters ) 
+  set (KIT_LIBS ${KIT_LIBS} ITKCommon ITKBasicFilters )
 ENDIF(VTKEdge_USE_ITK)
 add_library(vtkKWEWidgets ${KIT_SRCS})
 target_link_libraries(vtkKWEWidgets ${KIT_LIBS})
@@ -154,8 +156,25 @@ if(NOT VTKEdge_INSTALL_NO_LIBRARIES)
     )
 endif(NOT VTKEdge_INSTALL_NO_LIBRARIES)
 
+IF(VTKEdge_USE_ITK)
+  SET(KIT_HEADERS
+      itkConfidenceConnectedMiniPipelineFilter.h
+      itkConfidenceConnectedMiniPipelineFilter.txx
+      itkImageToVTKImageFilter.h
+      itkImageToVTKImageFilter.txx
+      itkVTKImageToImageFilter.h
+      itkVTKImageToImageFilter.txx
+      vtkKWEITKFilterModuleBase.h
+      vtkKWEITKFilterModule.h
+      vtkKWEITKFilterModuleStencilOutput.h
+      vtkKWEITKFilterModuleStencilOutput.txx
+      vtkKWEITKPaintbrushFilterModule.h)
+ENDIF(VTKEdge_USE_ITK)
+
 if(NOT VTKEdge_INSTALL_NO_DEVELOPMENT)
   install_files(${VTKEdge_INSTALL_INCLUDE_DIR} .h ${KIT_SRCS})
+  # Need to install header and .txx files without corresponding .cxx
+  install(FILES ${KIT_HEADERS} DESTINATION include/${PROJECT_NAME})
 endif(NOT VTKEdge_INSTALL_NO_DEVELOPMENT)
 
 # -----------------------------------------------------------------------------

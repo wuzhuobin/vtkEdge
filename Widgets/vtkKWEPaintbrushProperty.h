@@ -1,25 +1,25 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
-// .NAME vtkKWEPaintbrushProperty 
+// .NAME vtkKWEPaintbrushProperty
 // .SECTION Description
 
 #ifndef __vtkKWEPaintbrushProperty_h
@@ -48,12 +48,12 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
-  // A drawing is always associated with a paintbrush sketch. A 
-  // vtkKWEPaintbrushSketch upon creation will automatically be assigned a 
-  // default property internally. You can, using this method, query the sketch 
+  // A drawing is always associated with a paintbrush sketch. A
+  // vtkKWEPaintbrushSketch upon creation will automatically be assigned a
+  // default property internally. You can, using this method, query the sketch
   // to which this property is assigned.
   vtkGetObjectMacro( PaintbrushSketch, vtkKWEPaintbrushSketch );
-  
+
   // Description:
   // Set a unique identifier string. This may be rendered as annotations etc.
   vtkSetStringMacro( Identifier );
@@ -64,7 +64,13 @@ public:
   // transparent.
   void SetOpacity( double o );
   double GetOpacity();
-  
+
+  // Description:
+  // Set the visibility of the sketch
+  vtkSetMacro( Visibility, int );
+  vtkGetMacro( Visibility, int );
+  vtkBooleanMacro( Visibility, int );
+
   // Description:
   // Set/Get the width of a Line. The width is expressed in screen units.
   // This is only implemented for OpenGL. The default is 1.0.
@@ -84,11 +90,11 @@ public:
   // Set the color of the property. Colors are for now, auto assigned to give
   // the most pleasing appearance, and as far as possible ensure that colors
   // for each segmentation are unique. The moment you start assign a color to
-  // any property in a drawing the property manager will stop autoassigning 
+  // any property in a drawing the property manager will stop autoassigning
   // "quasi-unique" colors. Note that the values are normalized to [0-1].
   void SetColor(double rgb[3]);
-  
-  // Description: 
+
+  // Description:
   // Return this object's modified time.
   virtual unsigned long GetMTime();
 
@@ -102,21 +108,21 @@ public:
   //ETX
 
   // Description:
-  // Three highlight modes are allowed. 
-  // 1. Stippled inverted highlight looks better when you have an overlay, as 
-  //    with vtkKWEPaintbrushRepresentation2D. 
-  // 2. ThickHighlight looks better when you render the brushdata as contour 
+  // Three highlight modes are allowed.
+  // 1. Stippled inverted highlight looks better when you have an overlay, as
+  //    with vtkKWEPaintbrushRepresentation2D.
+  // 2. ThickHighlight looks better when you render the brushdata as contour
   //    as is done in vtkKWEPaintbrushRepresentationGrayscale2D
   // 3. Color Highlighting of the edges looks nice on both. Just make sure
-  //    that you don't assign the same color as the highlight assigned color 
-  //    to the sketches you draw or you'll have trouble making out that its 
+  //    that you don't assign the same color as the highlight assigned color
+  //    to the sketches you draw or you'll have trouble making out that its
   //    highlighted. Yellow is the default color Highlight.
   // ColorHighlight is the default HighlightType.
   vtkSetMacro( HighlightType, int );
   vtkGetMacro( HighlightType, int );
 
   // Description:
-  // Factor by which the highlighted lines should thicken when a sketch is 
+  // Factor by which the highlighted lines should thicken when a sketch is
   // highlighted. Default is 2.0 (ie. the lines will appear twice as thick
   // if highlighted). Note that this applies only if our highlight mode is
   // ThickHighlight.
@@ -136,11 +142,11 @@ public:
 
 
   // Description:
-  // Sketches can be deemed immutable or mutable. An immutable sketch cannot 
+  // Sketches can be deemed immutable or mutable. An immutable sketch cannot
   // be modified by *user* edits. By default all sketches are mutable.
   void SetMutable( int );
-  vtkGetMacro( Mutable, int );
-  
+  virtual int GetMutable();
+
 protected:
   static vtkKWEPaintbrushProperty *New( vtkKWEPaintbrushSketch * );
   static vtkKWEPaintbrushProperty *New();
@@ -151,24 +157,27 @@ protected:
   // Highlight ?
   void SetHighlight( int );
   vtkBooleanMacro ( Highlight, int );
-  
+
   // Get the internal property.
   vtkGetObjectMacro( Property, vtkProperty );
   vtkProperty * Property;
 
   // Description:
-  // Has the user specified a color. If this is true, the property manager will 
-  // stop autoassigning "quasi-unique" colors. 
+  // Has the user specified a color. If this is true, the property manager will
+  // stop autoassigning "quasi-unique" colors.
   bool HasUserSpecifiedColorOverride();
-    
+
   // Description:
   void SetColorInternal( double rgb[3] );
+
+  // Description:
+  void SetInteractionEnabled(int i);
 
 private:
   vtkKWEPaintbrushProperty(const vtkKWEPaintbrushProperty&);  // Not implemented.
   void operator=(const vtkKWEPaintbrushProperty&);  // Not implemented.
-  
-  vtkKWEPaintbrushSketch * PaintbrushSketch; 
+
+  vtkKWEPaintbrushSketch * PaintbrushSketch;
   int                   Mutable;
   char                * Identifier;
   bool                  UserSpecifiedColorOverride;
@@ -177,9 +186,11 @@ private:
   int                   HighlightType;
   double                HighlightThickness;
   double                Color[3];
+  int                   Visibility;
+  int                   InteractionEnabled;
 
   // Used when HighlightType is ColorHighlight
-  double                HighlightColor[3]; 
+  double                HighlightColor[3];
 };
 
 #endif

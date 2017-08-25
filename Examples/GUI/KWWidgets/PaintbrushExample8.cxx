@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // This example loads a file IBSRData.mha and a label map IBSRLabelMap.mha.
@@ -45,13 +45,13 @@ class PaintbrushExample8Labels
 {
 public:
   class Annotation
-    { 
+    {
     public:
       Annotation() {};
       Annotation(const std::string &l, unsigned char r, unsigned char g, unsigned char b )
         { label = l; R = r; G = g; B = b; }
       bool operator!=(const Annotation &a) const { return a.label != this->label; }
-      std::string label; unsigned char R, G, B; 
+      std::string label; unsigned char R, G, B;
     };
   std::map< unsigned short, Annotation > LabelMap;
 };
@@ -138,29 +138,29 @@ int my_example( int , char *[],
   vtkImageData  * imageData  = example->GetInput();
 
   vtkKWEWidgetGroup *set = vtkKWEWidgetGroup::New();
-  
+
   for (int i = 0; i < 3; i++)
     {
     vtkKWEPaintbrushWidget *w = vtkKWEPaintbrushWidget::New();
     w->SetInteractor( example->GetNthRenderWidget(i)->
                       GetRenderWindow()->GetInteractor());
-    vtkKWEPaintbrushRepresentation2D * rep = 
+    vtkKWEPaintbrushRepresentation2D * rep =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(w->GetRepresentation());
     if (rep)
       {
       vtkImageActor * imageActor = example->GetNthImageActor(i);
       rep->SetImageActor(imageActor);
       rep->SetImageData(imageData);
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
           imageData->GetSpacing() );
-      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+      rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
           imageData->GetOrigin() );
       }
 
-    // This will simply cause the method 
-    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Edit ) or 
-    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select ) 
-    // to be invoked based on which radio button is depressed.  
+    // This will simply cause the method
+    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Edit ) or
+    //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select )
+    // to be invoked based on which radio button is depressed.
     example->SetSelectEditCallbackMethod( MySelectEditCallbackMethod );
     example->AddSelectEditCallback(w);
 
@@ -170,33 +170,33 @@ int my_example( int , char *[],
 
   // Now read in an initial segmentation.
 
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(
       set->GetNthWidget(0)->GetRepresentation());
-  
+
   vtkKWEPaintbrushDrawing * drawing = rep->GetPaintbrushDrawing();
   drawing->InitializeData();
-  
+
   // Clear the drawing and start on a clean slate. The drawing would have
   // automatically created an empty sketch for us, so we can start drawing
-  // right away. We will wipe it all off. 
-  drawing->RemoveAllItems(); 
+  // right away. We will wipe it all off.
+  drawing->RemoveAllItems();
 
   // Read the label map
   vtkMetaImageReader * reader = vtkMetaImageReader::New();
   reader->SetFileName( vtkKWMyWindow::ExpandFilename("IBSRLabelMap.mha").c_str() );
   reader->Update();
-  
+
   // Create a binary sketch for each label in the label map.
 
-  for (std::map< unsigned short, AnnotationType >::const_iterator cit = 
+  for (std::map< unsigned short, AnnotationType >::const_iterator cit =
       MyLabels.LabelMap.begin(); cit != MyLabels.LabelMap.end(); ++cit)
     {
 
     // Note the use of the functor to check the label in the label map.
 
     vtkKWEPaintbrushStencilData *stencilData = vtkKWEPaintbrushStencilData::New();
-    vtkKWEPaintbrushUtilities::GetStencilFromImage< 
+    vtkKWEPaintbrushUtilities::GetStencilFromImage<
       vtkKWEPaintbrushUtilities::vtkFunctorEqualTo >(
         reader->GetOutput(), stencilData->GetImageStencilData(), cit->first);
 
@@ -208,23 +208,23 @@ int my_example( int , char *[],
     // you navigate through your maze of sketches. 62 segmentations can sure
     // get you lost pretty easily.
     sketch->GetPaintbrushProperty()->SetIdentifier(cit->second.label.c_str());
-    
+
     // Assign a nice color to the sketch.
     double sketchColor[3] = { (double)(cit->second.R)/255.0,
                               (double)(cit->second.G)/255.0,
                               (double)(cit->second.B)/255.0 };
     sketch->GetPaintbrushProperty()->SetColor( sketchColor );
     sketch->Delete();
-    
+
     }
 
   reader->Delete();
-  
+
   // Now set the drawing on all representations.
-  
+
   for (unsigned int i = 0; i < set->GetNumberOfWidgets(); i++)
     {
-    vtkKWEPaintbrushRepresentation2D * repr = 
+    vtkKWEPaintbrushRepresentation2D * repr =
       vtkKWEPaintbrushRepresentation2D::SafeDownCast(
         set->GetNthWidget(i)->GetRepresentation());
     repr->SetPaintbrushDrawing( drawing );
@@ -235,7 +235,7 @@ int my_example( int , char *[],
   int res = example->Run();
 
 
-  // Save out each of the resulting segmentations. We will write out each 
+  // Save out each of the resulting segmentations. We will write out each
   // sketch in the drawing as a seperate file.
 /*
   for (int i = 0; i < drawing->GetNumberOfItems(); i++)

@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -27,7 +27,7 @@ endif(NOT VTKEdge_SOURCE_DIR)
 if(NOT KWWidgets_SOURCE_DIR)
   find_package(KWWidgets REQUIRED)
   if(NOT KWWidgets_FOUND)
-    message(FATAL_ERROR 
+    message(FATAL_ERROR
      "KWWidgets is required to build the Paintbrush examples. Plase specify KWWidgets_DIR")
   endif(NOT KWWidgets_FOUND)
   include(${KWWidgets_USE_FILE})
@@ -37,7 +37,7 @@ if (VTKEdge_USE_ITK)
   if(NOT ITK_SOURCE_DIR)
     find_package(ITK REQUIRED)
     if(NOT ITK_FOUND)
-      message(FATAL_ERROR 
+      message(FATAL_ERROR
        "ITK is required to build the Paintbrush examples. Plase specify ITK_DIR")
     endif(NOT ITK_FOUND)
     include(${ITK_USE_FILE})
@@ -96,7 +96,7 @@ foreach(cxx_name ${cxx_names})
   endif(WIN32 AND NOT BORLAND AND NOT CYGWIN)
 
   add_executable(${exe} WIN32 ${cxx_name}.cxx ${RC_FILENAME})
-  target_link_libraries(${exe} 
+  target_link_libraries(${exe}
     KWMyWindowLib ${KWWidgets_LIBRARIES} ${VTKEdge_LIBRARIES})
   install_targets(${VTKEdge_INSTALL_BIN_DIR} ${exe})
 endforeach(cxx_name)
@@ -111,7 +111,7 @@ if(ITK_FOUND OR ITK_SOURCE_DIR)
   endforeach(cxx_name)
 endif(ITK_FOUND OR ITK_SOURCE_DIR)
 
-# If needed, copy the Tcl/Tk support files required at run-time 
+# If needed, copy the Tcl/Tk support files required at run-time
 # to initialize Tcl/Tk. This is only triggered if VTK was built
 # against a Tcl/Tk static library.
 

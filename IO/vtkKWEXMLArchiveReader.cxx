@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEXMLArchiveReader.h"
@@ -30,6 +30,7 @@
 #include "vtkInformationObjectBaseKey.h"
 #include "vtkInformationObjectBaseVectorKey.h"
 #include "vtkInformationKeyVectorKey.h"
+#include "vtkInformationStringVectorKey.h"
 #include "vtkInstantiator.h"
 #include "vtkKWEInformationKeyMap.h"
 #include "vtkKWESerializableObject.h"
@@ -44,7 +45,7 @@
 #include <vtksys/SystemTools.hxx>
 #include <vtksys/ios/sstream>
 
-vtkCxxRevisionMacro(vtkKWEXMLArchiveReader, "$Revision: 833 $");
+vtkCxxRevisionMacro(vtkKWEXMLArchiveReader, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEXMLArchiveReader);
 
 vtkCxxSetObjectMacro(vtkKWEXMLArchiveReader, RootElement, vtkKWEXMLElement);
@@ -52,7 +53,7 @@ vtkCxxSetObjectMacro(vtkKWEXMLArchiveReader, RootElement, vtkKWEXMLElement);
 struct vtkKWEXMLArchiveReaderInternals
 {
   vtkstd::map<int, vtkKWEXMLElement*> IdToElement;
-  
+
   vtkKWEXMLElement* FindElement(int id)
   {
     vtkstd::map<int, vtkKWEXMLElement*>::iterator iter =
@@ -63,9 +64,9 @@ struct vtkKWEXMLArchiveReaderInternals
       }
     return 0;
   }
-  
+
   vtkstd::map<int, vtkObject*> IdToObject;
-  
+
   vtkObject* FindObject(int id)
   {
     vtkstd::map<int, vtkObject*>::iterator iter = this->IdToObject.find(id);
@@ -75,22 +76,22 @@ struct vtkKWEXMLArchiveReaderInternals
       }
     return 0;
   }
-  
+
   vtkKWEXMLElement* Top()
     {
     return this->Stack.front();
     }
-    
+
   void Push(vtkKWEXMLElement* elem)
     {
     this->Stack.push_front(elem);
     }
-    
+
   void Pop()
     {
     this->Stack.pop_front();
     }
-    
+
   vtkstd::list<vtkKWEXMLElement*> Stack;
 
   // Stack to hold all the serializable objects; to support a weakPtr
@@ -118,7 +119,7 @@ vtkKWEXMLArchiveReader::~vtkKWEXMLArchiveReader()
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLArchiveReader::Serialize(istream& str, const char*, 
+void vtkKWEXMLArchiveReader::Serialize(istream& str, const char*,
                                        vtkstd::vector<vtkSmartPointer<vtkObject> >& objs)
 {
   delete this->Internal;
@@ -132,7 +133,7 @@ void vtkKWEXMLArchiveReader::Serialize(istream& str, const char*,
 
 //----------------------------------------------------------------------------
 void vtkKWEXMLArchiveReader::Serialize(vtkKWEXMLElement *rootElement,
-                                       const char*, 
+                                       const char*,
                                        vtkstd::vector<vtkSmartPointer<vtkObject> >& objs)
 {
   delete this->Internal;
@@ -156,18 +157,18 @@ void vtkKWEXMLArchiveReader::Serialize(vtkstd::vector<vtkSmartPointer<vtkObject>
       this->Internal->IdToElement[id] = elem;
       }
     }
-    
+
   unsigned int version;
   if (this->RootElement->GetScalarAttribute("version", &version))
     {
     this->SetArchiveVersion(version);
     }
-  
+
   this->Internal->Push(this->RootElement);
   this->Internal->ObjectStack.clear(); // just to be sure
   this->Serialize("RootObjects", objs);
   this->Internal->Pop();
-  
+
   delete this->Internal;
   this->Internal = 0;
 }
@@ -175,6 +176,12 @@ void vtkKWEXMLArchiveReader::Serialize(vtkstd::vector<vtkSmartPointer<vtkObject>
 //----------------------------------------------------------------------------
 vtkObject* vtkKWEXMLArchiveReader::ReadObject(int id, bool weakPtr)
 {
+  // There will never be an object with id 0
+  if (id == 0)
+    {
+    return 0;
+    }
+
   vtkObject* obj = this->Internal->FindObject(id);
   if (obj)
     {
@@ -184,7 +191,7 @@ vtkObject* vtkKWEXMLArchiveReader::ReadObject(int id, bool weakPtr)
       }
     return obj;
     }
-    
+
   vtkKWEXMLElement* elem = this->Internal->FindElement(id);
   if (!elem)
     {
@@ -210,7 +217,7 @@ vtkObject* vtkKWEXMLArchiveReader::ReadObject(int id, bool weakPtr)
     }
   this->Internal->IdToObject[id] = obj;
   this->Internal->Push(elem);
-  vtkKWESerializableObject *serializableObject = 
+  vtkKWESerializableObject *serializableObject =
     vtkKWESerializableObject::SafeDownCast(obj);
   if (serializableObject)
     {
@@ -232,7 +239,7 @@ vtkObject* vtkKWEXMLArchiveReader::ReadObject(int id, bool weakPtr)
 //----------------------------------------------------------------------------
 int vtkKWEXMLArchiveReader::ParseStream(istream& str)
 {
-  vtkSmartPointer<vtkKWEXMLParser> parser = 
+  vtkSmartPointer<vtkKWEXMLParser> parser =
     vtkSmartPointer<vtkKWEXMLParser>::New();
   parser->SetStream(&str);
   int result = parser->Parse();
@@ -257,13 +264,13 @@ vtkKWEXMLElement* BaseSerialize(vtkKWEXMLArchiveReaderInternals* internal,
     vtkGenericWarningMacro("Serialize cannot be called outside serialization");
     return 0;
     }
-  
+
   return root->FindNestedElementByName(name);
 }
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLArchiveReader::Serialize(const char* name, 
+void vtkKWEXMLArchiveReader::Serialize(const char* name,
                                        vtkstd::vector<vtkSmartPointer<vtkObject> >& objs,
                                        bool vtkNotUsed(weakPtr)/*=false*/)
 {
@@ -286,7 +293,7 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name,
         {
         objs.push_back(obj);
         // ReadObject incremented the ReferenceCount (weakPtr = false), or
-        // created the object (ReferenceCount = 1); we then stuff it in the 
+        // created the object (ReferenceCount = 1); we then stuff it in the
         // vector , which is where we were trying to get it but has the
         // side effect of further incrementing the ReferenceCount.  To prevent
         // a leak we need to decerment the ReferenceCount.
@@ -297,7 +304,7 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name,
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLArchiveReader::Serialize(const char* name, 
+void vtkKWEXMLArchiveReader::Serialize(const char* name,
                                        vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > >& map)
 {
   map.clear();
@@ -330,7 +337,7 @@ void SerializeScalarKey(vtkInformation* info, KeyType* key, vtkKWEXMLElement* el
     info->Set(key, val);
     }
 }
-    
+
 //----------------------------------------------------------------------------
 template <typename KeyType, typename ValueType>
 void SerializeVectorKey(vtkInformation* info, KeyType* key, vtkKWEXMLElement* elem)
@@ -349,6 +356,42 @@ void SerializeVectorKey(vtkInformation* info, KeyType* key, vtkKWEXMLElement* el
       }
     delete[] vals;
     }
+}
+
+//----------------------------------------------------------------------------
+void SerializeStringVectorKey(vtkInformation* info,
+          vtkInformationStringVectorKey* key, vtkKWEXMLElement* elem)
+{
+  int length = 0;
+  if (!elem->GetScalarAttribute("length", &length) || length <= 0)
+    {
+    return;
+    }
+
+  const char* values = elem->GetAttribute("values");
+  if (!values)
+    {
+    return;
+    }
+
+  int* lengths = new int[length];
+  if (!elem->GetVectorAttribute("lengths", length, lengths))
+    {
+    delete[] lengths;
+    return;
+    }
+
+  vtkstd::string valuesStr(values);
+  size_t currentPos = 0;
+  for (int i = 0; i < length; ++i)
+    {
+    size_t strLength = static_cast<size_t>(lengths[i]);
+    vtkstd::string tmpStr = valuesStr.substr(currentPos, strLength);
+    currentPos += strLength + 1; // skip over the semi-colon separator
+
+    key->Set(info, tmpStr.c_str(), i);
+    }
+  delete[] lengths;
 }
 
 //----------------------------------------------------------------------------
@@ -381,7 +424,7 @@ void SerializeKeyVectorKey(vtkInformation* info,
       vtkKWEInformationKeyMap::FindKey(keyName.c_str());
     if (tmpKey)
       {
-      info->Append(key, tmpKey); 
+      info->Append(key, tmpKey);
       }
     else
       {
@@ -422,18 +465,18 @@ void vtkKWEXMLArchiveReader::Serialize(vtkKWEXMLElement* elem, vtkInformation* i
 
     if (key->IsA("vtkInformationIntegerKey"))
       {
-      SerializeScalarKey<vtkInformationIntegerKey, int>(info, 
+      SerializeScalarKey<vtkInformationIntegerKey, int>(info,
         static_cast<vtkInformationIntegerKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationDoubleKey"))
       {
-      SerializeScalarKey<vtkInformationDoubleKey, double>(info, 
-        static_cast<vtkInformationDoubleKey*>(key), keyElem);      
+      SerializeScalarKey<vtkInformationDoubleKey, double>(info,
+        static_cast<vtkInformationDoubleKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationIdTypeKey"))
       {
-      SerializeScalarKey<vtkInformationIdTypeKey, vtkIdType>(info, 
-        static_cast<vtkInformationIdTypeKey*>(key), keyElem);      
+      SerializeScalarKey<vtkInformationIdTypeKey, vtkIdType>(info,
+        static_cast<vtkInformationIdTypeKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationStringKey"))
       {
@@ -445,18 +488,23 @@ void vtkKWEXMLArchiveReader::Serialize(vtkKWEXMLElement* elem, vtkInformation* i
       }
     else if (key->IsA("vtkInformationDoubleVectorKey"))
       {
-      SerializeVectorKey<vtkInformationDoubleVectorKey, double>(info, 
-        static_cast<vtkInformationDoubleVectorKey*>(key), keyElem);      
+      SerializeVectorKey<vtkInformationDoubleVectorKey, double>(info,
+        static_cast<vtkInformationDoubleVectorKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationIntegerVectorKey"))
       {
-      SerializeVectorKey<vtkInformationIntegerVectorKey, int>(info, 
-        static_cast<vtkInformationIntegerVectorKey*>(key), keyElem);      
+      SerializeVectorKey<vtkInformationIntegerVectorKey, int>(info,
+        static_cast<vtkInformationIntegerVectorKey*>(key), keyElem);
+      }
+    else if (key->IsA("vtkInformationStringVectorKey"))
+      {
+      SerializeStringVectorKey(info,
+        static_cast<vtkInformationStringVectorKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationKeyVectorKey"))
       {
-      SerializeKeyVectorKey(info, 
-        static_cast<vtkInformationKeyVectorKey*>(key), keyElem);      
+      SerializeKeyVectorKey(info,
+        static_cast<vtkInformationKeyVectorKey*>(key), keyElem);
       }
     else if (key->IsA("vtkInformationObjectBaseKey"))
       {
@@ -464,14 +512,13 @@ void vtkKWEXMLArchiveReader::Serialize(vtkKWEXMLElement* elem, vtkInformation* i
       if (keyElem->GetScalarAttribute("to_id", &id))
         {
         vtkObject *obj = this->ReadObject(id, false);
+        info->Set(static_cast<vtkInformationObjectBaseKey*>(key), obj);
         if(obj)
           {
-          info->Set(static_cast<vtkInformationObjectBaseKey*>(key), obj);
-
           // ReadObject incremented the ReferenceCount (weakPtr = false), or
-          // created the object (ReferenceCount = 1); we then stuff it in the 
-          // information object, which is where we were trying to get it but 
-          // has the side effect of further incrementing the ReferenceCount.  
+          // created the object (ReferenceCount = 1); we then stuff it in the
+          // information object, which is where we were trying to get it but
+          // has the side effect of further incrementing the ReferenceCount.
           // To prevent a leak we need to decrment the ReferenceCount.
           obj->UnRegister(0);
           }
@@ -491,14 +538,13 @@ void vtkKWEXMLArchiveReader::Serialize(vtkKWEXMLElement* elem, vtkInformation* i
           for (unsigned int k = 0; k < length; ++k)
             {
             vtkObject *obj = this->ReadObject(ids[k], false);
+            vecKey->Set(info, obj, k);
             if(obj)
               {
-              vecKey->Set(info, obj, k);
-
               // ReadObject incremented the ReferenceCount (weakPtr = false), or
-              // created the object (ReferenceCount = 1); we then stuff it in the 
-              // information object, which is where we were trying to get it but 
-              // has the side effect of further incrementing the ReferenceCount.  
+              // created the object (ReferenceCount = 1); we then stuff it in the
+              // information object, which is where we were trying to get it but
+              // has the side effect of further incrementing the ReferenceCount.
               // To prevent a leak we need to decrment the ReferenceCount.
               obj->UnRegister(0);
               }
@@ -539,13 +585,13 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name, int& val)
     {
     return;
     }
-    
+
   elem->GetScalarAttribute("value", &val);
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLArchiveReader::Serialize(const char* name, 
-                                       int*& val, 
+void vtkKWEXMLArchiveReader::Serialize(const char* name,
+                                       int*& val,
                                        unsigned int& length)
 {
   vtkKWEXMLElement* elem = BaseSerialize(this->Internal, name);
@@ -575,13 +621,13 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name, unsigned long& val)
     {
     return;
     }
-    
+
   elem->GetScalarAttribute("value", &val);
 }
 
 //----------------------------------------------------------------------------
 void vtkKWEXMLArchiveReader::Serialize(const char* name,
-                                       unsigned long*& val, 
+                                       unsigned long*& val,
                                        unsigned int& length)
 {
   vtkKWEXMLElement* elem = BaseSerialize(this->Internal, name);
@@ -612,7 +658,7 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name, vtkIdType& val)
     {
     return;
     }
-    
+
   elem->GetScalarAttribute("value", &val);
 }
 
@@ -648,7 +694,7 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name, double& val)
     {
     return;
     }
-    
+
   elem->GetScalarAttribute("value", &val);
 }
 
@@ -701,7 +747,7 @@ void vtkKWEXMLArchiveReader::Serialize(const char* name, vtkstd::string& str)
     {
     return;
     }
-  
+
   const char* val = elem->GetAttribute("value");
   if (val)
     {

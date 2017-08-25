@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
+// 
+//   Alternatively, you may see: 
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   http://www.vtkedge.org/vtkedge/project/license.html
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+// 
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEGPUImageAlgorithmDriver.h"
@@ -25,9 +25,9 @@
 #include "vtkImageData.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
-#include "vtkKWEDataTransferHelper.h"
+#include "vtkDataTransferHelper.h"
 #include "vtkKWEExtentCalculator.h"
-#include "vtkKWEStructuredExtent.h"
+#include "vtkStructuredExtent.h"
 #include "vtkTextureObject.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLRenderWindow.h"
@@ -58,7 +58,7 @@ private:
   struct vtkPipeItem
     {
     vtkSmartPointer<vtkKWEGPUImageAlgorithmDriver::vtkBuses> UpBuses;
-    vtkSmartPointer<vtkKWEDataTransferHelper> Downbus;
+    vtkSmartPointer<vtkDataTransferHelper> Downbus;
     };
 
   vtkstd::list<vtkPipeItem> InPipe;
@@ -91,7 +91,7 @@ private:
 
       // release the bus.
       item.UpBuses = NULL;
-     
+
       START_LOG();
       // Note that Download() is not going to be called unless result == true
       // i.e. this->AbortFlag == false.
@@ -149,7 +149,7 @@ public:
 
 
   bool Push(
-    vtkKWEGPUImageAlgorithmDriver::vtkBuses* up_buses, vtkKWEDataTransferHelper* down_bus)
+    vtkKWEGPUImageAlgorithmDriver::vtkBuses* up_buses, vtkDataTransferHelper* down_bus)
     {
     vtkPipeItem item;
     item.UpBuses= up_buses;
@@ -160,7 +160,7 @@ public:
 
   void Flush()
     {
-    while (this->InPipe.size() > 0 || this->ExecutePipe.size() > 0 || 
+    while (this->InPipe.size() > 0 || this->ExecutePipe.size() > 0 ||
       this->DownloadPipe.size() > 0 || this->DownloadPipe2.size() > 0)
       {
       this->Chug();
@@ -202,7 +202,7 @@ void vtkKWEGPUImageAlgorithmDriver::vtkBuses::SetNumberOfConnections(
 }
 
 //----------------------------------------------------------------------------
-vtkKWEDataTransferHelper* vtkKWEGPUImageAlgorithmDriver::vtkBuses::GetBus(
+vtkDataTransferHelper* vtkKWEGPUImageAlgorithmDriver::vtkBuses::GetBus(
   unsigned int port, unsigned int conn)
 {
   if (port < this->Buses.size())
@@ -217,7 +217,7 @@ vtkKWEDataTransferHelper* vtkKWEGPUImageAlgorithmDriver::vtkBuses::GetBus(
 
 //----------------------------------------------------------------------------
 void vtkKWEGPUImageAlgorithmDriver::vtkBuses::SetBus(
-  unsigned int port, unsigned int conn, vtkKWEDataTransferHelper* bus)
+  unsigned int port, unsigned int conn, vtkDataTransferHelper* bus)
 {
   if (port < this->Buses.size())
     {
@@ -229,7 +229,7 @@ void vtkKWEGPUImageAlgorithmDriver::vtkBuses::SetBus(
 }
 
 //----------------------------------------------------------------------------
-vtkCxxRevisionMacro(vtkKWEGPUImageAlgorithmDriver, "$Revision: 706 $");
+vtkCxxRevisionMacro(vtkKWEGPUImageAlgorithmDriver, "$Revision: 1973 $");
 //----------------------------------------------------------------------------
 vtkKWEGPUImageAlgorithmDriver::vtkKWEGPUImageAlgorithmDriver()
 {
@@ -287,7 +287,7 @@ vtkRenderWindow* vtkKWEGPUImageAlgorithmDriver::GetContext()
       vtkInformation* inInfo = inputVector[port]->GetInformationObject(conn);
       int input_update_extent[6];
       if (!this->MapOutputExtentToInput(input_update_extent,
-          port, conn, inputVector[port]->GetInformationObject(conn), 
+          port, conn, inputVector[port]->GetInformationObject(conn),
           update_ext))
         {
         // don't know why the subclass said we cannot handle this case. So abort.
@@ -298,8 +298,8 @@ vtkRenderWindow* vtkKWEGPUImageAlgorithmDriver::GetContext()
       inInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), whole_extent);
 
       // clamp extent_to_upload to the input extents.
-      vtkKWEStructuredExtent::Clamp(input_update_extent, whole_extent);
-      inInfo->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), 
+      vtkStructuredExtent::Clamp(input_update_extent, whole_extent);
+      inInfo->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),
         input_update_extent, 6);
       }
     }
@@ -309,7 +309,7 @@ vtkRenderWindow* vtkKWEGPUImageAlgorithmDriver::GetContext()
 
 //----------------------------------------------------------------------------
 bool vtkKWEGPUImageAlgorithmDriver::SetupOutputTexture(
-  ExtentTypes chunkType, vtkKWEDataTransferHelper* down_bus)
+  ExtentTypes chunkType, vtkDataTransferHelper* down_bus)
 {
   vtkDataArray* outputArray = down_bus->GetArray();
 
@@ -318,7 +318,7 @@ bool vtkKWEGPUImageAlgorithmDriver::SetupOutputTexture(
   int extent[6];
   down_bus->GetGPUExtent(extent);
   int dims[3];
-  vtkKWEStructuredExtent::GetDimensions(extent, dims);
+  vtkStructuredExtent::GetDimensions(extent, dims);
   switch (chunkType)
     {
   case XY_PLANE:
@@ -362,7 +362,7 @@ bool vtkKWEGPUImageAlgorithmDriver::SetupOutputTexture(
 }
 
 //----------------------------------------------------------------------------
-vtkKWEGPUImageAlgorithmDriver::vtkBuses* 
+vtkKWEGPUImageAlgorithmDriver::vtkBuses*
 vtkKWEGPUImageAlgorithmDriver::Upload(
   vtkKWEExtentCalculator* extentCalculator,
   vtkInformationVector** inputVector,
@@ -392,7 +392,7 @@ vtkKWEGPUImageAlgorithmDriver::Upload(
         // Give subclass an opportunity to map output extent to input for this port.
         int extent_to_upload[6];
         int min_tex_dims = this->MapOutputExtentToInput(extent_to_upload,
-          port, conn, inputVector[port]->GetInformationObject(conn), 
+          port, conn, inputVector[port]->GetInformationObject(conn),
           extentCalculator->GetOutChunkExtent());
         if (min_tex_dims <= 0)
           {
@@ -401,23 +401,23 @@ vtkKWEGPUImageAlgorithmDriver::Upload(
 
         if (min_tex_dims < 1 || min_tex_dims > 3)
           {
-          vtkWarningMacro("Forcing minimum texture dimensionality () to 2 (instead of " 
+          vtkWarningMacro("Forcing minimum texture dimensionality () to 2 (instead of "
             << min_tex_dims << " )");
           min_tex_dims = 2;
           }
 
         // clamp extent_to_upload to the input extents.
-        vtkKWEStructuredExtent::Clamp(extent_to_upload, input->GetExtent());
+        vtkStructuredExtent::Clamp(extent_to_upload, input->GetExtent());
 
         // up_bus is used to upload the result from the GPU.
-        vtkSmartPointer<vtkKWEDataTransferHelper> up_bus = 
-          vtkSmartPointer<vtkKWEDataTransferHelper>::New();
+        vtkSmartPointer<vtkDataTransferHelper> up_bus =
+          vtkSmartPointer<vtkDataTransferHelper>::New();
         up_bus->SetContext(this->Context);
         up_bus->SetCPUExtent(input->GetExtent());
         up_bus->SetGPUExtent(extent_to_upload);
-        //cout << "Upload CPUExtent: " << 
+        //cout << "Upload CPUExtent: " <<
         //  PRINTEXT(up_bus->GetCPUExtent()) << endl;
-        cout << "Upload GPUExtent: " << 
+        cout << "Upload GPUExtent: " <<
           PRINTEXT(up_bus->GetGPUExtent()) << endl;
 
         //up_bus->SetMinTextureDimension(min_tex_dims);
@@ -500,19 +500,19 @@ int vtkKWEGPUImageAlgorithmDriver::RequestData(vtkInformation* request,
       }
 
     // down_bus is used to download the result from the GPU.
-    vtkSmartPointer<vtkKWEDataTransferHelper> down_bus = 
-      vtkSmartPointer<vtkKWEDataTransferHelper>::New();
+    vtkSmartPointer<vtkDataTransferHelper> down_bus =
+      vtkSmartPointer<vtkDataTransferHelper>::New();
     down_bus->SetContext(this->Context);
     down_bus->SetCPUExtent(output->GetExtent());
     int down_ext[6];
     extentCalculator->GetOutChunkExtent(down_ext);
-    vtkKWEStructuredExtent::Clamp(down_ext, output->GetExtent());
+    vtkStructuredExtent::Clamp(down_ext, output->GetExtent());
     down_bus->SetGPUExtent(down_ext);
     down_bus->SetArray(output->GetPointData()->GetScalars());
 
-    //cout << "Download CPUExtent: " << 
+    //cout << "Download CPUExtent: " <<
     //  PRINTEXT(down_bus->GetCPUExtent()) << endl;
-    //cout << "Download GPUExtent: " << 
+    //cout << "Download GPUExtent: " <<
     //  PRINTEXT(down_bus->GetGPUExtent()) << endl;
     if (!this->SetupOutputTexture(chunkType, down_bus))
       {
@@ -545,10 +545,10 @@ int vtkKWEGPUImageAlgorithmDriver::RequestData(vtkInformation* request,
 
 //----------------------------------------------------------------------------
 bool vtkKWEGPUImageAlgorithmDriver::ComputeTCoordsRange(
-  double tcoords[6], 
+  double tcoords[6],
   const int inputExt[6], const int outputExt[6])
 {
-  if (!vtkKWEStructuredExtent::Smaller(outputExt, inputExt))
+  if (!vtkStructuredExtent::Smaller(outputExt, inputExt))
     {
     vtkErrorMacro("Cannot handle cases where output extent is larger than input.");
     return false;
@@ -558,19 +558,19 @@ bool vtkKWEGPUImageAlgorithmDriver::ComputeTCoordsRange(
   tcoords[1] = tcoords[3] = tcoords[5] = 1.0;
 
   int indims[3];
-  vtkKWEStructuredExtent::GetDimensions(inputExt, indims);
+  vtkStructuredExtent::GetDimensions(inputExt, indims);
 
   int outdims[3];
-  vtkKWEStructuredExtent::GetDimensions(outputExt, outdims);
+  vtkStructuredExtent::GetDimensions(outputExt, outdims);
 
   tcoords[0] = (outputExt[0] - inputExt[0])/static_cast<double>(indims[0]);
-  tcoords[1] = tcoords[0] + outdims[0]/static_cast<double>(indims[0]); 
+  tcoords[1] = tcoords[0] + outdims[0]/static_cast<double>(indims[0]);
 
   tcoords[2] = (outputExt[2] - inputExt[2])/static_cast<double>(indims[1]);
-  tcoords[3] = tcoords[2] + outdims[1]/static_cast<double>(indims[1]); 
+  tcoords[3] = tcoords[2] + outdims[1]/static_cast<double>(indims[1]);
 
   tcoords[4] = (outputExt[4] - inputExt[4])/static_cast<double>(indims[2]);
-  tcoords[5] = tcoords[4] + outdims[2]/static_cast<double>(indims[2]); 
+  tcoords[5] = tcoords[4] + outdims[2]/static_cast<double>(indims[2]);
   return true;
 }
 

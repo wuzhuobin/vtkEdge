@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushPropertyManager.h"
@@ -28,7 +28,7 @@
 #include "vtkObjectFactory.h"
 
 //----------------------------------------------------------------------------
-vtkCxxRevisionMacro(vtkKWEPaintbrushPropertyManager, "$Revision: 810 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushPropertyManager, "$Revision: 3416 $");
 
 //----------------------------------------------------------------------------
 vtkKWEPaintbrushPropertyManager* vtkKWEPaintbrushPropertyManager::New()
@@ -56,7 +56,7 @@ vtkKWEPaintbrushPropertyManager::vtkKWEPaintbrushPropertyManager()
 {
   this->PaintbrushDrawing = NULL;
   this->HighlightType = vtkKWEPaintbrushProperty::ColorHighlight;
-  
+
   this->Colors[ ColorType( 1.0, 0.4, 0.4, 0  )] = 0;
   this->Colors[ ColorType( 0.4, 1.0, 0.4, 1  )] = 0;
   this->Colors[ ColorType( 0.4, 0.4, 1.0, 2  )] = 0;
@@ -80,7 +80,7 @@ vtkKWEPaintbrushPropertyManager::vtkKWEPaintbrushPropertyManager()
   this->Colors[ ColorType( 0.3, 0.9, 1.0, 20  )] = 0;
 
   // Clear our fast lookup label map to color table. Clearly we need to do this
-  // only if we are using a UCHAR label map, since that's the only case when 
+  // only if we are using a UCHAR label map, since that's the only case when
   // fast lookup is exercised.
   if (vtkKWEPaintbrushEnums::GetLabelType() == VTK_UNSIGNED_CHAR)
     {
@@ -103,8 +103,8 @@ vtkKWEPaintbrushPropertyManager::~vtkKWEPaintbrushPropertyManager()
 //----------------------------------------------------------------------------
 void vtkKWEPaintbrushPropertyManager::Initialize()
 {
-  for( ColorsMapType::iterator iter = Colors.begin(); 
-            iter != Colors.end(); ++iter ) iter->second = 0;  
+  for( ColorsMapType::iterator iter = Colors.begin();
+            iter != Colors.end(); ++iter ) iter->second = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -117,11 +117,11 @@ void vtkKWEPaintbrushPropertyManager::AddUsedColor( vtkProperty * p )
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEPaintbrushPropertyManager::AddUsedColor( const ColorType &c ) 
+void vtkKWEPaintbrushPropertyManager::AddUsedColor( const ColorType &c )
 {
   if (c.R > 0.0 || c.G > 0.0 || c.B > 0.0)
     {
-    for( ColorsMapType::iterator iter = Colors.begin(); 
+    for( ColorsMapType::iterator iter = Colors.begin();
                          iter != Colors.end(); ++iter )
       {
       if (iter->first == c) ++iter->second;
@@ -134,11 +134,11 @@ vtkKWEPaintbrushPropertyManager::ColorType vtkKWEPaintbrushPropertyManager::Requ
 {
   unsigned int minVal = VTK_INT_MAX;
   ColorType c(0.0,0.0,0.0,0);
-  for( ColorsMapType::iterator iter = Colors.begin(); 
+  for( ColorsMapType::iterator iter = Colors.begin();
                          iter != Colors.end(); ++iter )
     {
-    if (iter->second < minVal) 
-      { 
+    if (iter->second < minVal)
+      {
       c = iter->first;
       minVal = iter->second;
       }
@@ -168,12 +168,12 @@ RequestColorForSketch( vtkKWEPaintbrushSketch *s )
     // Give this sketch a nice color and put it in our table.
     this->SketchToColorMap[s] = ColorType( 1.0, 0.4, 0.4, 0  );
     this->SketchToColorMap[s] = RequestColor();
-    double rgb[3] = { this->SketchToColorMap[s].R, 
+    double rgb[3] = { this->SketchToColorMap[s].R,
                       this->SketchToColorMap[s].G,
                       this->SketchToColorMap[s].B };
     s->GetPaintbrushProperty()->SetColorInternal( rgb );
     }
-  
+
   return s->GetPaintbrushProperty();
 }
 
@@ -182,8 +182,8 @@ void vtkKWEPaintbrushPropertyManager::Update()
 {
   // Remove unused sketches from our map.
 
-  for( SketchToColorMapType::iterator iter = 
-       this->SketchToColorMap.begin(); iter != 
+  for( SketchToColorMapType::iterator iter =
+       this->SketchToColorMap.begin(); iter !=
            this->SketchToColorMap.end(); )
     {
     SketchToColorMapType::iterator iter2 = iter;
@@ -196,18 +196,18 @@ void vtkKWEPaintbrushPropertyManager::Update()
       this->SketchToColorMap.erase(iter2);
       }
     }
-  
+
   // Now create new colors for the sketches that aren't in the map. These
   // are most likely new sketches. Try to assign unique colors. If unique
   // isn't possible, at least assign the least used colors.
-  
+
   for (int n = 0; n < this->PaintbrushDrawing->GetNumberOfItems(); n++)
     {
     vtkKWEPaintbrushSketch * s = this->PaintbrushDrawing->GetItem(n);
-    if (this->SketchToColorMap.find(s) 
+    if (this->SketchToColorMap.find(s)
           == this->SketchToColorMap.end())
       {
-      // This sketch isn't in our table. Put it in the table and give it a 
+      // This sketch isn't in our table. Put it in the table and give it a
       // nice color.
       this->RequestColorForSketch(s);
       }
@@ -231,8 +231,9 @@ void vtkKWEPaintbrushPropertyManager::UpdateLabelToColorMap()
         vtkKWEPaintbrushSketch * s = this->PaintbrushDrawing->GetItem(n);
         s->GetPaintbrushProperty()->GetColor(
             this->LabelToColorMapUC[s->GetLabel()]);
-        this->LabelToOpacityMapUC[s->GetLabel()] 
-          = s->GetPaintbrushProperty()->GetOpacity();
+        this->LabelToOpacityMapUC[s->GetLabel()]
+          = s->GetPaintbrushProperty()->GetVisibility() ?
+              s->GetPaintbrushProperty()->GetOpacity() : 0.0;
         }
       }
     else
@@ -243,11 +244,35 @@ void vtkKWEPaintbrushPropertyManager::UpdateLabelToColorMap()
         {
         vtkKWEPaintbrushSketch * s = this->PaintbrushDrawing->GetItem(n);
         s->GetPaintbrushProperty()->GetColor(rgb);
-        double opacity = s->GetPaintbrushProperty()->GetOpacity();
-        this->LabelToColorMap[s->GetLabel()] 
+        double opacity = s->GetPaintbrushProperty()->GetVisibility() ?
+              s->GetPaintbrushProperty()->GetOpacity() : 0.0;
+        this->LabelToColorMap[s->GetLabel()]
           = vtkKWEPaintbrushLabelMapColor(rgb, opacity);
         }
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkKWEPaintbrushPropertyManager
+::GrabFocus( vtkKWEPaintbrushSketch *sketch )
+{
+  const int nSketches = this->PaintbrushDrawing->GetNumberOfItems();
+  for (int n = 0; n < nSketches; n++)
+    {
+    vtkKWEPaintbrushSketch * s = this->PaintbrushDrawing->GetItem(n);
+    s->GetPaintbrushProperty()->SetInteractionEnabled(s == sketch);
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkKWEPaintbrushPropertyManager::ReleaseFocus()
+{
+  const int nSketches = this->PaintbrushDrawing->GetNumberOfItems();
+  for (int n = 0; n < nSketches; n++)
+    {
+    vtkKWEPaintbrushSketch * s = this->PaintbrushDrawing->GetItem(n);
+    s->GetPaintbrushProperty()->SetInteractionEnabled(1);
     }
 }
 

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushMergeSketches.h"
@@ -35,7 +35,7 @@
 #include "vtkKWEPaintbrushProperty.h"
 #include "vtkKWEPaintbrushPropertyManager.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushMergeSketches, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushMergeSketches, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushMergeSketches);
 
 //----------------------------------------------------------------------------
@@ -65,7 +65,7 @@ int vtkKWEPaintbrushMergeSketches
 {
   vtkInformation *info = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                              info->Get(vtkDataObject::DATA_OBJECT()));
   vtkKWEPaintbrushDrawing *outputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -73,11 +73,11 @@ int vtkKWEPaintbrushMergeSketches
   outputDrawing->SetRepresentation( inputDrawing->GetRepresentation() );
   outputDrawing->SetImageData( inputDrawing->GetImageData() );
   outputDrawing->SetPaintbrushOperation( inputDrawing->GetPaintbrushOperation() );
-  outputDrawing->InitializeData(); 
+  outputDrawing->InitializeData();
   outputDrawing->RemoveAllItems();
-  outputDrawing->GetPaintbrushPropertyManager()->SetHighlightType( 
+  outputDrawing->GetPaintbrushPropertyManager()->SetHighlightType(
       inputDrawing->GetPaintbrushPropertyManager()->GetHighlightType() );
-  
+
   // Sanity check.
   if (inputDrawing->GetNumberOfItems() == 0)
     {
@@ -91,7 +91,7 @@ int vtkKWEPaintbrushMergeSketches
     outputDrawing->AddItem( inputDrawing->GetItem(0) );
     return 1;
     }
-  
+
   // The output data
   vtkKWEPaintbrushData * data = NULL;
 
@@ -121,13 +121,13 @@ int vtkKWEPaintbrushMergeSketches
   data->Delete();
 
   // Copy over some default properties from the input drawing.
-  vtkKWEPaintbrushProperty *inputProperty = 
+  vtkKWEPaintbrushProperty *inputProperty =
     inputDrawing->GetItem(0)->GetPaintbrushProperty();
   vtkKWEPaintbrushProperty *outputProperty = sketch->GetPaintbrushProperty();
   outputProperty->SetHighlightColor( inputProperty->GetHighlightColor() );
   outputProperty->SetHighlightType( inputProperty->GetHighlightType() );
   outputProperty->SetOpacity( inputProperty->GetOpacity() );
-  
+
   return 1;
 }
 
@@ -156,7 +156,7 @@ void vtkKWEPaintbrushMergeSketches::RequestInformation (
 {
   vtkInformation *info = inputVector[0]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *inputDrawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                              info->Get(vtkDataObject::DATA_OBJECT()));
 
   // set the extent
@@ -196,8 +196,8 @@ ProcessRequest(vtkInformation* request,
 
 //----------------------------------------------------------------------------
 int vtkKWEPaintbrushMergeSketches::RequestDataObject(
-  vtkInformation*, 
-  vtkInformationVector** inputVector , 
+  vtkInformation*,
+  vtkInformationVector** inputVector ,
   vtkInformationVector* outputVector)
 {
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
@@ -206,7 +206,7 @@ int vtkKWEPaintbrushMergeSketches::RequestDataObject(
     return 0;
     }
   vtkDataObject *input = inInfo->Get(vtkDataObject::DATA_OBJECT());
-  
+
   if (input)
     {
     // for each output
@@ -214,8 +214,8 @@ int vtkKWEPaintbrushMergeSketches::RequestDataObject(
       {
       vtkInformation* info = outputVector->GetInformationObject(i);
       vtkDataObject *output = info->Get(vtkDataObject::DATA_OBJECT());
-    
-      if (!output || !output->IsA(input->GetClassName())) 
+
+      if (!output || !output->IsA(input->GetClassName()))
         {
         vtkDataObject* newOutput = input->NewInstance();
         newOutput->SetPipelineInformation(info);

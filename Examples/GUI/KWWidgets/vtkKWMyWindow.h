@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -115,10 +115,10 @@ KWLIBS_CREATE_EXAMPLE_MACRO
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #define KWLIBS_CREATE_EXAMPLE KWLIBS_CREATE_WINDOWS_EXAMPLE
-#else 
+#else
 #define KWLIBS_CREATE_EXAMPLE KWLIBS_CREATE_UNIX_EXAMPLE
 #endif
-//ETX 
+//ETX
 
 class vtkImageViewer2;
 class vtkImageReader2;
@@ -150,13 +150,17 @@ public:
   virtual void SetSliceFromScaleCallback0(double value);
   virtual void SetSliceFromScaleCallback1(double value);
   virtual void SetSliceFromScaleCallback2(double value);
-  void RenderWidgetSelectionChangedCallback( 
+  void RenderWidgetSelectionChangedCallback(
       const char * title, vtkKWSelectionFrame * );
 
   // Description:
   // Filename of the data to be loaded.
   vtkSetStringMacro( Filename );
   vtkGetStringMacro( Filename );
+
+  // Description:
+  // Get the Window class
+  vtkGetObjectMacro( Window, vtkKWWindow );
 
   // Description:
   // Default is a single render window. However you can display
@@ -178,7 +182,7 @@ public:
   vtkImageActor * GetCoronalImageActor()  { return this->GetNthImageActor(1); }
   vtkImageActor * GetSagittalImageActor() { return this->GetNthImageActor(2); }
   vtkImageActor * GetNthImageActor( int i );
-  
+
   // Description:
   // Set/Get the input image data that the actors are showing. This may be
   // set explicitly as below, or may be supplied via a user-argument to the
@@ -190,7 +194,7 @@ public:
   // Description:
   // Internally used to display a top level dialog with code
   //BTX
-  void CreateInfo( 
+  void CreateInfo(
     vtksys_stl::string name, vtkKWApplication * app );
 
   // Description:
@@ -214,28 +218,39 @@ public:
   // with path.
   static vtksys_stl::string ExpandFilename( const char * s );
   //ETX
-  
-  void SetApplication( vtkKWApplication * a ); 
-  vtkKWApplication *GetApplication() { return this->Application; } 
+
+  void SetApplication( vtkKWApplication * a );
+  vtkKWApplication *GetApplication() { return this->Application; }
 
   // Description:
-  // Easy way to tie the Select and edit mode callbacks to the paintbrush 
+  // Easy way to tie the Select and edit mode callbacks to the paintbrush
   // widget whenever the radio button is depressed. Basically this will simply
-  // cause the method 
+  // cause the method
   //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Edit )     or
-  //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select ) 
+  //   w->SetPaintbrushMode( vtkKWEPaintbrushWidget::Select )
   // to be invoked based on which radio button is depressed.
   void AddSelectEditCallback( vtkKWEPaintbrushWidget * w );
 
   //BTX
   typedef void (*SelectEditCallbackMethodType)( vtkKWEPaintbrushWidget *, int editMode );
   void SetSelectEditCallbackMethod( SelectEditCallbackMethodType );
-  //ETX 
+  //ETX
 
   // Description
   // INTERNAL - do not use.
   void SelectEditCallback();
+
+  // Description:
+  // Callbacks for the examples to plug things into
+  void AddSketchCallback() 
+    { this->AddSketchCallbackMethod(this->CallData); };
   
+  //BTX
+  // User specified callbacks
+  void (*AddSketchCallbackMethod)(void*);
+  void *CallData;
+  //ETX
+
 protected:
   vtkKWMyWindow();
   ~vtkKWMyWindow();

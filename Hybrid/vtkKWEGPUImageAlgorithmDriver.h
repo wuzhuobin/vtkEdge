@@ -1,24 +1,24 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
+//  
+//   http://www.vtkedge.org/vtkedge/project/license.html
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
-// .NAME vtkKWEGPUImageAlgorithmDriver 
+// .NAME vtkKWEGPUImageAlgorithmDriver
 // .SECTION Description
 // vtkKWEGPUImageAlgorithmDriver is a the driver for all image processing
 // algorithms that use the GPU to do the work.
@@ -37,7 +37,7 @@
 
 //ETX
 class vtkRenderWindow;
-class vtkKWEDataTransferHelper;
+class vtkDataTransferHelper;
 class vtkKWEExtentCalculator;
 
 class VTKEdge_HYBRID_EXPORT vtkKWEGPUImageAlgorithmDriver : public vtkImageAlgorithm
@@ -71,8 +71,8 @@ protected:
   // The method should return how the streamer should break up extents.
   // This is not much different from the split mode specified on
   // vtkExtentTranslator.
-  virtual ExtentTypes GetSplitMode(vtkInformation* request, 
-    vtkInformationVector** inputVector, 
+  virtual ExtentTypes GetSplitMode(vtkInformation* request,
+    vtkInformationVector** inputVector,
     vtkInformationVector* outputVector) = 0;
 
   // Description:
@@ -82,7 +82,7 @@ protected:
   // minimum dimensionality of the texture created for the corresponding input.
   // Returns value 0 (or less) indicates error.
   virtual int MapOutputExtentToInput(int input_extent[6],
-    int port, int connection, 
+    int port, int connection,
     vtkInformation* inInfo, const int output_extent[6]) = 0;
 
 
@@ -90,22 +90,22 @@ protected:
   // Gives the subclasses an opportunity to do some initialization before the
   // looping begins.
   virtual bool InitializeExecution(
-    vtkInformation* vtkNotUsed(request), 
-    vtkInformationVector** vtkNotUsed(inputVector), 
+    vtkInformation* vtkNotUsed(request),
+    vtkInformationVector** vtkNotUsed(inputVector),
     vtkInformationVector* vtkNotUsed(outputVector)) {return true;}
 
   // Description:
   // Actual execution method.
   virtual bool Execute(vtkBuses* upBuses,
-    vtkKWEDataTransferHelper* downBus) = 0;
+    vtkDataTransferHelper* downBus) = 0;
   virtual void Execute() { this->Superclass::Execute(); }
 
   // Description:
   // Gives the subclasses an opportunity to do some cleanup after the
   // looping ends.
   virtual bool FinalizeExecution(
-    vtkInformation* vtkNotUsed(request), 
-    vtkInformationVector** vtkNotUsed(inputVector), 
+    vtkInformation* vtkNotUsed(request),
+    vtkInformationVector** vtkNotUsed(inputVector),
     vtkInformationVector* vtkNotUsed(outputVector)) {return true;}
 
   // Description:
@@ -122,7 +122,7 @@ protected:
     vtkInformationVector **inputVector,
     vtkInformationVector *outputVector);
 
-  bool ComputeTCoordsRange(double tcoords[6], 
+  bool ComputeTCoordsRange(double tcoords[6],
     const int inputExt[6], const int outputExt[6]);
 
   vtkWeakPointer<vtkRenderWindow> Context;
@@ -141,7 +141,7 @@ private:
     vtkInformationVector** inputVector,
     vtkPipe& pipe);
 
-  bool SetupOutputTexture(ExtentTypes chunkType, vtkKWEDataTransferHelper* down_bus);
+  bool SetupOutputTexture(ExtentTypes chunkType, vtkDataTransferHelper* down_bus);
 //ETX
 };
 
@@ -154,14 +154,14 @@ public:
 
   void SetNumberOfPorts(unsigned int num);
   void SetNumberOfConnections(unsigned int port, unsigned int num);
-  vtkKWEDataTransferHelper* GetBus(unsigned int port, unsigned int conn);
-  void SetBus(unsigned int port, unsigned int conn, vtkKWEDataTransferHelper* bus);
+  vtkDataTransferHelper* GetBus(unsigned int port, unsigned int conn);
+  void SetBus(unsigned int port, unsigned int conn, vtkDataTransferHelper* bus);
 
 private:
   vtkBuses() { }
   virtual ~vtkBuses() { }
 
-  typedef vtkstd::vector<vtkSmartPointer<vtkKWEDataTransferHelper> > XferHelperVector;
+  typedef vtkstd::vector<vtkSmartPointer<vtkDataTransferHelper> > XferHelperVector;
   typedef vtkstd::vector<XferHelperVector> VectorOfXferHelperVector;
 
   VectorOfXferHelperVector Buses;

@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -83,7 +83,7 @@ MARK_AS_ADVANCED(CUDA_COMPILER CUDA_RT_LIBRARY CUDA_FFT_LIBRARY CUDA_INCLUDE_DIR
 
 ## Find Cuda SDK.
 
-FIND_LIBRARY(CUDA_CUTIL_LIBRARY 
+FIND_LIBRARY(CUDA_CUTIL_LIBRARY
   NAMES cutil64.lib cutil32.lib cutil
   PATHS "C:/Program Files (x86)/NVIDIA Corporation/NVIDIA CUDA SDK/common/lib/"
   "C:/Program Files/NVIDIA Corporation/NVIDIA CUDA SDK/common/lib"
@@ -104,7 +104,7 @@ MARK_AS_ADVANCED(CUDA_CUTIL_LIBRARY CUDA_CUTIL_INCLUDE_DIR)
 
 SET (CUDA_CUTIL_LIBRARIES CACHE INTERNAL "Libraries to link agains Cuda cutil.")
 IF (CUDA_CUTIL_FOUND)
-  SET (CUDA_CUTIL_LIBRARIES 
+  SET (CUDA_CUTIL_LIBRARIES
       ${CUDA_LIBRARIES}
       ${CUDA_CUTIL_LIBRARY})
 ENDIF (CUDA_CUTIL_FOUND)
@@ -131,7 +131,7 @@ MACRO (CUDA_COMPILE outfiles)
     GET_FILENAME_COMPONENT(infile ${iter} ABSOLUTE)
     ADD_CUSTOM_COMMAND(
       OUTPUT ${outfile}
-      COMMAND ${CUDA_COMPILER} ${extra_args} 
+      COMMAND ${CUDA_COMPILER} ${extra_args}
         -o ${outfile}
         -cuda
         ${infile}
@@ -139,4 +139,4 @@ MACRO (CUDA_COMPILE outfiles)
       COMMENT "Processing CUDA file")
     SET (${outfiles} ${${outfiles}} ${outfile})
   ENDFOREACH (iter)
-ENDMACRO (CUDA_COMPILE outfiles) 
+ENDMACRO (CUDA_COMPILE outfiles)

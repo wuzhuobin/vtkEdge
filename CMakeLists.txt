@@ -1,27 +1,27 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
 
 # -----------------------------------------------------------------------------
-# Set the minimum required cmake version. Setting here to 2.4, but really 
+# Set the minimum required cmake version. Setting here to 2.4, but really
 # 2.7 is required for testing with bullseye coverage. Will change to 2.8 once
 # it is officially released
 # -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ project(VTKEdge)
 
 # -----------------------------------------------------------------------------
 # Set cmake policy CMP0003 to NEW. This means cmake will not break up linked
-# libraries into separate linker search paths and library names. 
+# libraries into separate linker search paths and library names.
 # -----------------------------------------------------------------------------
 if(COMMAND CMAKE_POLICY)
   cmake_policy(SET CMP0003 NEW)
@@ -162,10 +162,10 @@ include(${VTK_USE_FILE})
 
 
 # -----------------------------------------------------------------------------
-# Find ITK - it is an optional package that if present allows the usage of 
+# Find ITK - it is an optional package that if present allows the usage of
 #            complex paintbrush operations in Widgets/ such as flood fill
 #            paintbrushes etc.
-# If you are using VTKEdge as a subproject within your project, and you want 
+# If you are using VTKEdge as a subproject within your project, and you want
 # to enable/disable the use of ITK, just set VTKEdge_USE_ITK_DEFAULT from your
 # top level directory
 # -----------------------------------------------------------------------------
@@ -173,7 +173,7 @@ SET(default_val 0)
 IF(DEFINED VTKEdge_USE_ITK_DEFAULT)
   SET(default_val ${VTKEdge_USE_ITK_DEFAULT})
 ENDIF(DEFINED VTKEdge_USE_ITK_DEFAULT)
-OPTION(VTKEdge_USE_ITK 
+OPTION(VTKEdge_USE_ITK
   "Build filtered brush widgets that require ITK" ${default_val})
 MARK_AS_ADVANCED(VTKEdge_USE_ITK)
 IF(VTKEdge_USE_ITK)
@@ -228,7 +228,6 @@ find_path(VTK_DATA_ROOT VTKData.readme
 set(VTKEdge_AVAILABLE_KITS
   Common
   Filtering
-  Graphics
   Hybrid
   Imaging
   IO
@@ -260,31 +259,13 @@ endforeach(kit)
 
 set(include_paths ${include_paths} ${PROJECT_BINARY_DIR})
 
-set(VTKEdge_INCLUDE_PATH ${include_paths} CACHE INTERNAL 
+set(VTKEdge_INCLUDE_PATH ${include_paths} CACHE INTERNAL
   "Include paths for VTKEdge")
 
-set(VTKEdge_LIBRARIES ${libraries} CACHE INTERNAL 
+set(VTKEdge_LIBRARIES ${libraries} CACHE INTERNAL
   "Libraries for VTKEdge")
 
 include_directories(${VTKEdge_INCLUDE_PATH})
-
-find_package(DirectX QUIET)
-if(DirectX_FOUND)
- set(VTKEdge_USE_DIRECTX 1)
-endif(DirectX_FOUND)
-
-find_package(ApplicationServices)
-find_package(IOKit)
-if(ApplicationServices_FOUND AND IOKit_FOUND)
- set(VTKEdge_USE_CORE_GRAPHICS 1)
-endif(ApplicationServices_FOUND AND IOKit_FOUND)
-
-if(VTK_USE_X)
- option(VTKEdge_USE_NVCONTROL "Use NVIDIAs X server extension NVCONTROL." OFF)
- if(VTKEdge_USE_NVCONTROL)
-  find_package(NVCtrlLib)
- endif(VTKEdge_USE_NVCONTROL)
-endif(VTK_USE_X)
 
 # Find the VTK_VERSION_DATE. The widgets have code so as to deal with changes
 # in VTK both before and after the Depth peeling compatibility changes.
@@ -314,7 +295,7 @@ configure_file(
   )
 
 if(NOT VTKEdge_INSTALL_NO_DEVELOPMENT)
-  install_files(${VTKEdge_INSTALL_INCLUDE_DIR} FILES 
+  install_files(${VTKEdge_INSTALL_INCLUDE_DIR} FILES
     ${VTKEdge_BINARY_DIR}/VTKEdgeConfigure.h)
 endif(NOT VTKEdge_INSTALL_NO_DEVELOPMENT)
 
@@ -325,6 +306,31 @@ configure_file(${VTKEdge_CMAKE_DIR}/CTestCustom.cmake.in
                ${PROJECT_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
 # -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+if(BUILD_TESTING)
+  make_directory(${PROJECT_BINARY_DIR}/Testing/Temporary)
+endif(BUILD_TESTING)
+
+# Leave this option ON by default. It helps to catch floating point math
+# exceptions early on nightly dashboard runs.
+option(VTKEdge_TESTING_USE_FPE "VTKEdge tests call vtkFloatingPointExceptions::Enable()" ON)
+mark_as_advanced(VTKEdge_TESTING_USE_FPE)
+set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN)
+if(VTKEdge_TESTING_USE_FPE)
+  set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN "${CMAKE_TESTDRIVER_BEFORE_TESTMAIN}
+    vtkFloatingPointExceptions::Enable();\n")
+endif()
+set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN "${CMAKE_TESTDRIVER_BEFORE_TESTMAIN}
+    try {")
+SET(CMAKE_TESTDRIVER_AFTER_TESTMAIN "    }
+    catch(vtkstd::exception& e)
+      {
+      fprintf(stderr, \"Test driver caught exception: [%s]\\n\", e.what());
+      result = -1;
+      }")
+
+# -----------------------------------------------------------------------------
 # Add each kit's directory
 # DO NOT DEFINE ANY OPTION AFTER THIS SECTION THAT COULD BE USED
 # BY A KIT (add_subdirectory is executed *now*)
@@ -332,13 +338,6 @@ configure_file(${VTKEdge_CMAKE_DIR}/CTestCustom.cmake.in
 foreach(kit ${VTKEdge_ENABLED_KITS})
   add_subdirectory(${kit})
 endforeach(kit)
-
-# -----------------------------------------------------------------------------
-# Testing
-# -----------------------------------------------------------------------------
-if(BUILD_TESTING)
-  make_directory(${PROJECT_BINARY_DIR}/Testing/Temporary)
-endif(BUILD_TESTING)
 
 # -----------------------------------------------------------------------------
 # Build the examples if they are turned on

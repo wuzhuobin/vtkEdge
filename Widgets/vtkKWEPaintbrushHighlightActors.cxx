@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushHighlightActors.h"
@@ -33,12 +33,12 @@
 #include "vtkMapperCollection.h"
 #include "vtkImageStencilData.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushHighlightActors, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushHighlightActors, "$Revision: 1774 $");
 vtkCxxSetObjectMacro(vtkKWEPaintbrushHighlightActors, PaintbrushDrawing, vtkKWEPaintbrushDrawing);
 
 //----------------------------------------------------------------------------
 // We've hidden the New() method from users by making it protected. So we've
-// got to provide the implementation ourself instead of using 
+// got to provide the implementation ourself instead of using
 // vtkStandardNewMacro.
 vtkKWEPaintbrushHighlightActors* vtkKWEPaintbrushHighlightActors::New()
 {
@@ -82,7 +82,7 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
 
   vtkKWEStencilContourFilter * cf;
   vtkCollectionSimpleIterator ait;
-  
+
   const int nSketches = this->PaintbrushDrawing->GetNumberOfItems();
 
   // Create new actors for newly highlighted sketches.
@@ -90,7 +90,7 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
   for (int i = 0; i < nSketches; i++)
     {
     vtkKWEPaintbrushSketch * sketch = this->PaintbrushDrawing->GetItem(i);
-    
+
     // If the sketch isn't highlighted, don't even bother.
     if (sketch->GetPaintbrushProperty()->GetHighlight() == 0)
       {
@@ -102,8 +102,8 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
       {
       vtkImageStencilData * stencil = mask->GetImageStencilData();
       bool found = false;
-      
-      for ( this->ContourFilters->InitTraversal(ait); 
+
+      for ( this->ContourFilters->InitTraversal(ait);
              (cf=static_cast< vtkKWEStencilContourFilter * >(
                 this->ContourFilters->GetNextItemAsObject(ait))); )
         {
@@ -113,7 +113,7 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
           break;
           }
         }
-      
+
       if (!found)
         {
         vtkKWEStencilContourFilter * contourFilter = vtkKWEStencilContourFilter::New();
@@ -122,13 +122,13 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
 
         contourFilter->SetInput(stencil);
         contourFilter->SetExtent(this->Extent);
-        contourFilter->Update();        
+        contourFilter->Update();
         mapper->SetInput(contourFilter->GetOutput());
         mapper->SetResolveCoincidentTopologyToPolygonOffset();
         mapper->ScalarVisibilityOff();
         actor->SetMapper(mapper);
         actor->SetProperty( sketch->GetPaintbrushProperty()->GetProperty() );
-        
+
         this->ContourPolyDataActors->AddItem(actor);
         this->ContourPolyDataMappers->AddItem(mapper);
         this->ContourFilters->AddItem(contourFilter);
@@ -140,16 +140,16 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
       }
     }
 
-  // Now remove actors that correspond to sketches that have been removed or 
+  // Now remove actors that correspond to sketches that have been removed or
   // unhighlighted.
-  
+
   std::vector< int > indicesToRemove;
   int j = 0;
-  for ( this->ContourFilters->InitTraversal(ait); 
+  for ( this->ContourFilters->InitTraversal(ait);
          (cf=static_cast< vtkKWEStencilContourFilter * >(
             this->ContourFilters->GetNextItemAsObject(ait))); j++)
     {
-    bool found = false;    
+    bool found = false;
     for (int i = 0; i < nSketches; i++)
       {
       vtkKWEPaintbrushSketch * sketch = this->PaintbrushDrawing->GetItem(i);
@@ -173,9 +173,9 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
       indicesToRemove.push_back(j);
       }
     }
-    
-    
-  for (std::vector< int >::const_iterator it = indicesToRemove.begin(); 
+
+
+  for (std::vector< int >::const_iterator it = indicesToRemove.begin();
          it != indicesToRemove.end(); ++it)
     {
     int indexToRemove = *it;
@@ -185,9 +185,9 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
     this->ContourPolyDataMappers->RemoveItem( indexToRemove );
     this->ContourFilters->RemoveItem( indexToRemove );
     }
-    
-  
-  for ( this->ContourFilters->InitTraversal(ait); 
+
+
+  for ( this->ContourFilters->InitTraversal(ait);
          (cf=static_cast< vtkKWEStencilContourFilter * >(
             this->ContourFilters->GetNextItemAsObject(ait))); )
     {
@@ -195,7 +195,7 @@ void vtkKWEPaintbrushHighlightActors::BuildRepresentation()
     cf->Update();
     }
 }
-     
+
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushHighlightActors::RenderOpaqueGeometry(vtkViewport *viewport)
 {
@@ -203,12 +203,12 @@ int vtkKWEPaintbrushHighlightActors::RenderOpaqueGeometry(vtkViewport *viewport)
   int count = 0;
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     count += ac->RenderOpaqueGeometry(viewport);
     }
-    
+
   return count;
 }
 
@@ -220,12 +220,12 @@ int vtkKWEPaintbrushHighlightActors
   int count = 0;
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     count += ac->RenderTranslucentPolygonalGeometry(viewport);
     }
-    
+
   return count;
 }
 
@@ -235,12 +235,12 @@ int vtkKWEPaintbrushHighlightActors::HasTranslucentPolygonalGeometry()
   int result = 0;
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     result |= ac->HasTranslucentPolygonalGeometry();
     }
-    
+
   return result;
 }
 
@@ -254,26 +254,26 @@ RenderTranslucentGeometry(vtkViewport *viewport)
   int count = 0;
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     count += ac->RenderTranslucentGeometry(viewport);
     }
-    
+
   return count;
 }
-#endif 
+#endif
 
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushHighlightActors::GetActors( vtkPropCollection * pc )
 {
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     ac->GetActors(pc);
-    }  
+    }
 }
 
 //----------------------------------------------------------------------
@@ -282,17 +282,17 @@ double* vtkKWEPaintbrushHighlightActors::GetBounds()
   double bounds[6];
   vtkActor *ac;
   vtkCollectionSimpleIterator ait;
-  for ( this->ContourPolyDataActors->InitTraversal(ait); 
+  for ( this->ContourPolyDataActors->InitTraversal(ait);
          (ac=this->ContourPolyDataActors->GetNextActor(ait));)
     {
     ac->GetBounds(bounds);
     for (int i=0; i<3; i++)
       {
-      this->Bounds[2*i+1] = (bounds[2*i+1]>this->Bounds[2*i+1]) ? 
+      this->Bounds[2*i+1] = (bounds[2*i+1]>this->Bounds[2*i+1]) ?
                              (bounds[2*i+1]):(this->Bounds[2*i+1]);
-      this->Bounds[2*i]   = (bounds[2*i]<this->Bounds[2*i]) ? 
+      this->Bounds[2*i]   = (bounds[2*i]<this->Bounds[2*i]) ?
                              (bounds[2*i]):(this->Bounds[2*i]);
-      }  
+      }
     }
   return this->Bounds;
 }

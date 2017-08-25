@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushBlend.h"
@@ -41,7 +41,7 @@
 typedef unsigned char VTKColorType [3];
 
 //----------------------------------------------------------------------------
-vtkCxxRevisionMacro(vtkKWEPaintbrushBlend, "$Revision: 815 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushBlend, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushBlend);
 
 //----------------------------------------------------------------------------
@@ -86,13 +86,13 @@ int vtkKWEPaintbrushBlend::RequestUpdateExtent(
   vtkInformation *inInfo0 = inputVector[0]->GetInformationObject(0);
   vtkInformation *inInfo1 = inputVector[1]->GetInformationObject(0);
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
-  
+
   // default input extents will be that of output extent
   int inExt[6];
   outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),inExt);
   inInfo0->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),inExt,6);
   inInfo1->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),inExt,6);
- 
+
   return 1;
 }
 
@@ -104,7 +104,7 @@ int vtkKWEPaintbrushBlend::RequestData(
 {
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
 
-  vtkImageData *input = vtkImageData::SafeDownCast(  
+  vtkImageData *input = vtkImageData::SafeDownCast(
           inInfo->Get(vtkDataObject::DATA_OBJECT()));
   if (!input || ! this->GetPaintbrushDrawing())
     {
@@ -112,7 +112,7 @@ int vtkKWEPaintbrushBlend::RequestData(
     }
 
   vtkInformation *info = inputVector[1]->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *drawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *drawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                      info->Get(vtkDataObject::DATA_OBJECT()));
 
   // Attempt to assign a (possibly unique) color for each sketch in the drawing
@@ -122,18 +122,18 @@ int vtkKWEPaintbrushBlend::RequestData(
     {
     // Preprocess and store all the labels.
     }
- 
+
   return this->Superclass::RequestData(request,inputVector,outputVector);
 }
 
 //----------------------------------------------------------------------------
-// This templated function blends a stencil that represents a sketch from a 
+// This templated function blends a stencil that represents a sketch from a
 // drawing into the overlaid image. This method is specific to the case when
 // the overlaid image has data type of CHAR
 template <class T>
 void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
-                                    vtkKWEPaintbrushBlend *vtkNotUsed(self), 
-                                    int extent[6], 
+                                    vtkKWEPaintbrushBlend *vtkNotUsed(self),
+                                    int extent[6],
                                     vtkImageData *inData, T *,
                                     vtkImageData *outData, T *,
                                     double opacity, unsigned char color[3])
@@ -152,7 +152,7 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the stencil extents 
+  // Check the stencil extents
   stencil->GetExtent(stencilExtent);
 
   stencilExtent[0] = (stencilExtent[0] < extent[0]) ? extent[0] : stencilExtent[0];
@@ -175,33 +175,33 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
 
         r1 = (r1 < stencilExtent[0]) ? stencilExtent[0] : r1;
         r2 = (r2 > stencilExtent[1]) ? stencilExtent[1] : r2;
-        
+
         if (r1 <= r2 )  // sanity check
-          { 
+          {
           T *beginInPtr  =
             static_cast<T *>(inData->GetScalarPointer(r1, idxY, idxZ));
           T *beginOutPtr =
             static_cast<T *>(outData->GetScalarPointer(r1, idxY, idxZ));
           T *endOutPtr   =
             static_cast<T *>(outData->GetScalarPointer(r2, idxY, idxZ));
-          
+
           while (beginOutPtr <= endOutPtr)
             {
 
             if (outC >= 3 && inC >= 4)
-              { 
+              {
               // RGB(A) blended with RGBA
-                
+
               // multiply to get a number in the range [0,65280]
               // where 65280 = 255*256 = range of beginInPtr[3] * range of o
               r = static_cast<unsigned short>(beginInPtr[3]*o);
               f = static_cast<unsigned short>(65280 - r);
-              
+
               v0 = beginInPtr[0]*f + color[0]*r;
               v1 = beginInPtr[1]*f + color[1]*r;
               v2 = beginInPtr[2]*f + color[2]*r;
 
-              
+
               // do some math tricks to achieve division by 65280:
               // this is not an approximation, it gives exactly the
               // same result as an integer division by 65280
@@ -212,11 +212,11 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
               beginOutPtr[2] =
                 static_cast<T>((v2 + (v2 >> 8) + (v2 >> 16) + 1) >> 16);
               }
-                
+
             else if (outC >= 3 && inC == 3)
-              { 
+              {
               // RGB(A) blended with RGB
-              
+
               // the bit-shift achieves a division by 256
               beginOutPtr[0] =
                 static_cast<T>((beginInPtr[0]*f + color[0]*r) >> 8);
@@ -225,11 +225,11 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
               beginOutPtr[2] =
                 static_cast<T>((beginInPtr[2]*f + color[2]*r) >> 8);
               }
-            
+
             else if (inC == 2)
-              { 
+              {
               // luminance(+alpha) blended with luminance+alpha
-              
+
               // multiply to get a number in the range [0,65280]
               // where 65280 = 255*256 = range of beginInPtr[1] * range of o
               r = static_cast<unsigned short>(beginInPtr[1]*o);
@@ -241,17 +241,17 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
               beginOutPtr[0] =
                 static_cast<T>((v0 + (v0 >> 8) + (v0 >> 16) + 1) >> 16);
               }
-            
+
             else
-              { 
+              {
               // luminance(+alpha) blended with luminance
-              
+
               // the bit-shift achieves a division by 256
               beginOutPtr[0] = static_cast<T>((beginInPtr[0]*f) >> 8);
               }
 
             beginInPtr += inC;
-            beginOutPtr += outC; 
+            beginOutPtr += outC;
             }
           }
         }
@@ -260,19 +260,19 @@ void vtkKWEPaintbrushBlendExecuteChar( vtkImageStencilData * stencil,
 }
 
 //----------------------------------------------------------------------------
-// This templated function blends an image that represents a label map into 
+// This templated function blends an image that represents a label map into
 // the overlay image. This function is specific to the case when the overlay
 // image has data type of CHAR
 template <class T>
-void vtkKWEPaintbrushBlendExecuteChar( 
+void vtkKWEPaintbrushBlendExecuteChar(
      vtkKWEPaintbrushLabelData *labelMap,
-     vtkKWEPaintbrushBlend *self, 
-     int extent[6], 
+     vtkKWEPaintbrushBlend *self,
+     int extent[6],
      vtkImageData *inData, T *,
      vtkImageData *outData, T *,
      vtkKWEPaintbrushPropertyManager::LabelToColorMapType &labelToColorMap)
 {
-  // Is an overlay present ? If absent, the label map, passed through the 
+  // Is an overlay present ? If absent, the label map, passed through the
   // color lookup table is displayed as is. If not, it is blended with
   // the overlay and displayed.
   bool useOverlay = self->GetUseOverlay() ? true : false;
@@ -286,7 +286,7 @@ void vtkKWEPaintbrushBlendExecuteChar(
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the label map's extents 
+  // Check the label map's extents
   labelMap->GetExtent(labelMapExtent);
 
   // Find the intersection of the labelmap's extents and the overlaid image's
@@ -302,27 +302,34 @@ void vtkKWEPaintbrushBlendExecuteChar(
 
   // Lookup table of label to color map.
   unsigned char color[3];
+
+  // To avoid gcc 4.4 warning "color[x] may be used uninitialized in this
+  // function [-Wuninitialized]"
+  color[0]=0;
+  color[1]=0;
+  color[2]=0;
+
   vtkKWEPaintbrushPropertyManager::vtkKWEPaintbrushLabelMapColor colorClass;
 
   // Loop through pixels
   T *beginInPtr = NULL, *beginOutPtr;
   vtkKWEPaintbrushEnums::LabelType * labelPtr;
 
-  // Type of compositing.. 
+  // Type of compositing..
   int compositeType = 3; // luminance(+alpha) blended with luminance
-  if (outC >= 3 && inC >= 4) 
-    { 
+  if (outC >= 3 && inC >= 4)
+    {
     // RGB(A) blended with RGBA
-    compositeType = 0; 
+    compositeType = 0;
     }
   else if (outC >= 3 && inC == 3)
     {
-    // RGB(A) blended with RGB      
+    // RGB(A) blended with RGB
     compositeType = 1;
     }
   else if (inC == 2)
     {
-    // luminance(+alpha) blended with luminance+alpha     
+    // luminance(+alpha) blended with luminance+alpha
     compositeType = 2;
     }
 
@@ -342,7 +349,7 @@ void vtkKWEPaintbrushBlendExecuteChar(
       beginOutPtr = static_cast<T *>(outData->GetScalarPointer(labelMapExtent[0], idxY, idxZ));
       labelPtr = static_cast<vtkKWEPaintbrushEnums::LabelType *>(
           labelMapData->GetScalarPointer(labelMapExtent[0], idxY, idxZ));
-        
+
       for (int idxX = labelMapExtent[0]; idxX <= labelMapExtent[1]; idxX++)
         {
 
@@ -354,7 +361,7 @@ void vtkKWEPaintbrushBlendExecuteChar(
             {
             if( label != lastLabel )
               {
-              colorClass = labelToColorMap[label];      
+              colorClass = labelToColorMap[label];
               lastLabel = label;
               color[0] = colorClass.Color[0];
               color[1] = colorClass.Color[1];
@@ -368,7 +375,7 @@ void vtkKWEPaintbrushBlendExecuteChar(
               }
 
             if (compositeType == 0)
-              { 
+              {
               // RGB(A) blended with RGBA
 
               // multiply to get a number in the range [0,65280]
@@ -389,9 +396,9 @@ void vtkKWEPaintbrushBlendExecuteChar(
               beginOutPtr[2] =
                 static_cast<T>((v2 + (v2 >> 8) + (v2 >> 16) + 1) >> 16);
               }
-                
+
             else if (compositeType == 1)
-              {            
+              {
               // the bit-shift achieves a division by 256
               beginOutPtr[0] =
                 static_cast<T>((beginInPtr[0]*f + color[0]*r) >> 8);
@@ -400,11 +407,11 @@ void vtkKWEPaintbrushBlendExecuteChar(
               beginOutPtr[2] =
                 static_cast<T>((beginInPtr[2]*f + color[2]*r) >> 8);
               }
-            
+
             else if (compositeType == 2)
-              { 
+              {
               // luminance(+alpha) blended with luminance+alpha
-              
+
               // multiply to get a number in the range [0,65280]
               // where 65280 = 255*256 = range of beginInPtr[1] * range of o
               r = static_cast<unsigned short>(beginInPtr[1]*o);
@@ -417,11 +424,11 @@ void vtkKWEPaintbrushBlendExecuteChar(
               beginOutPtr[0] =
                 static_cast<T>((v0 + (v0 >> 8) + (v0 >> 16) + 1) >> 16);
               }
-            
+
             else
-              { 
+              {
               // luminance(+alpha) blended with luminance
-              
+
               // the bit-shift achieves a division by 256
               beginOutPtr[0] = static_cast<T>((beginInPtr[0]*f) >> 8);
               }
@@ -435,32 +442,32 @@ void vtkKWEPaintbrushBlendExecuteChar(
           {
           if( label != lastLabel )
             {
-            colorClass = labelToColorMap[label];      
+            colorClass = labelToColorMap[label];
             lastLabel = label;
             }
 
           if (compositeType == 0)
-            { 
+            {
             beginOutPtr[0] = colorClass.Color[0];
             beginOutPtr[1] = colorClass.Color[1];
             beginOutPtr[2] = colorClass.Color[2];
-            if (outC > 3) 
+            if (outC > 3)
               {
-              beginOutPtr[3] = 255; 
+              beginOutPtr[3] = 255;
               }
             }
           else if (compositeType == 1)
-            { 
+            {
             beginOutPtr[0] = colorClass.Color[0];
             beginOutPtr[1] = colorClass.Color[1];
             beginOutPtr[2] = colorClass.Color[2];
             }
           else if (compositeType == 2)
-            { 
+            {
             beginOutPtr[0] = colorClass.Color[0];
             }
           else
-            { 
+            {
             // luminance(+alpha) blended with luminance
             // the bit-shift achieves a division by 256
             beginOutPtr[0] = colorClass.Color[0];
@@ -476,20 +483,20 @@ void vtkKWEPaintbrushBlendExecuteChar(
 }
 
 //----------------------------------------------------------------------------
-// This templated function blends an image that represents a label map into 
+// This templated function blends an image that represents a label map into
 // the overlay image. This function is specific to the case when the overlay
 // (canvas) image as well as the label map have data type of CHAR
 template <class T>
-void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC( 
+void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
                         vtkKWEPaintbrushLabelData * labelMap,
                         vtkKWEPaintbrushBlend *self,
-                        int extent[6], 
+                        int extent[6],
                         vtkImageData *inData, T *,
-                        vtkImageData *outData, T *, 
+                        vtkImageData *outData, T *,
                         VTKColorType *labelToColorMapUC,
                         double       *labelToOpacityMapUC)
 {
-  // Is an overlay present ? If absent, the label map, passed through the 
+  // Is an overlay present ? If absent, the label map, passed through the
   // color lookup table is displayed as is. If not, it is blended with
   // the overlay and displayed.
   bool useOverlay = self->GetUseOverlay() ? true : false;
@@ -504,7 +511,7 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the label map's extents 
+  // Check the label map's extents
   labelMap->GetExtent(labelMapExtent);
 
   // Find the intersection of the labelmap's extents and the overlaid image's
@@ -520,14 +527,14 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
 
   vtkImageIterator< T > inIt( inData, labelMapExtent );
   vtkImageIterator< T > outIt( outData, labelMapExtent );
-  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt( 
+  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt(
                                  labelMapData, labelMapExtent );
 
   unsigned char *color;
 
   int compositeType = 3;
-  if (outC >= 3 && inC >= 4) 
-    { 
+  if (outC >= 3 && inC >= 4)
+    {
     compositeType = 0;
     }
   else if (outC >= 3 && inC == 3)
@@ -554,15 +561,15 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
       beginOutPtr = static_cast<T *>(outData->GetScalarPointer(labelMapExtent[0], idxY, idxZ));
       labelPtr = static_cast<vtkKWEPaintbrushEnums::LabelType *>(
           labelMapData->GetScalarPointer(labelMapExtent[0], idxY, idxZ));
-        
+
       for (int idxX = labelMapExtent[0]; idxX <= labelMapExtent[1]; idxX++)
         {
 
         const vtkKWEPaintbrushEnums::LabelType label = *labelPtr;
-          
+
         if (useOverlay)
           {
-        
+
           if (label != vtkKWEPaintbrushLabelData::NoLabelValue)
             {
             // Get the color for this label in the label map.
@@ -574,23 +581,23 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
             o = static_cast<unsigned short>(256*opacity + 0.5);
             r = o;
             f = static_cast<unsigned short>(256 - o);
-            
+
             if (compositeType == 0)
-              { 
+              {
               if (useOverlay)
                 {
                 // RGB(A) blended with RGBA
-                  
+
                 // multiply to get a number in the range [0,65280]
                 // where 65280 = 255*256 = range of beginInPtr[3] * range of o
                 r = static_cast<unsigned short>(beginInPtr[3]*o);
                 f = static_cast<unsigned short>(65280 - r);
-                
+
                 v0 = beginInPtr[0]*f + color[0]*r;
                 v1 = beginInPtr[1]*f + color[1]*r;
                 v2 = beginInPtr[2]*f + color[2]*r;
 
-                
+
                 // do some math tricks to achieve division by 65280:
                 // this is not an approximation, it gives exactly the
                 // same result as an integer division by 65280
@@ -608,13 +615,13 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
                 beginOutPtr[2] = color[2];
                 }
               }
-                
+
             else if (compositeType == 1)
-              { 
+              {
               if (useOverlay)
                 {
                 // RGB(A) blended with RGB
-                
+
                 // the bit-shift achieves a division by 256
                 beginOutPtr[0] =
                   static_cast<T>((beginInPtr[0]*f + color[0]*r) >> 8);
@@ -630,11 +637,11 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
                 beginOutPtr[2] = color[2];
                 }
               }
-            
+
             else if (compositeType == 2)
-              { 
+              {
               // luminance(+alpha) blended with luminance+alpha
-              
+
               // multiply to get a number in the range [0,65280]
               // where 65280 = 255*256 = range of beginInPtr[1] * range of o
               r = static_cast<unsigned short>(beginInPtr[1]*o);
@@ -646,11 +653,11 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
               beginOutPtr[0] =
                 static_cast<T>((v0 + (v0 >> 8) + (v0 >> 16) + 1) >> 16);
               }
-            
+
             else
-              { 
+              {
               // luminance(+alpha) blended with luminance
-              
+
               // the bit-shift achieves a division by 256
               beginOutPtr[0] = static_cast<T>((beginInPtr[0]*f) >> 8);
               }
@@ -666,42 +673,42 @@ void vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
           color = labelToColorMapUC[label];
 
           if (compositeType == 0)
-            { 
+            {
             beginOutPtr[0] = color[0];
             beginOutPtr[1] = color[1];
             beginOutPtr[2] = color[2];
             if (outC > 3) { beginOutPtr[3] = 255; }
             }
-              
+
           else if (compositeType == 1)
-            { 
+            {
             beginOutPtr[0] = color[0];
             beginOutPtr[1] = color[1];
             beginOutPtr[2] = color[2];
             }
-          
+
           else if (compositeType == 2)
-            { 
+            {
             beginOutPtr[0] = color[0];
             }
-          
+
           else
-            { 
+            {
             beginOutPtr[0] = color[0];
-            }            
+            }
           beginOutPtr += outC;
           ++labelPtr;
           }
         }
       }
-    }  
+    }
 }
 
 //----------------------------------------------------------------------------
 template <class T>
-void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil, 
-                                   vtkKWEPaintbrushBlend *vtkNotUsed(self), 
-                                   int extent[6], 
+void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
+                                   vtkKWEPaintbrushBlend *vtkNotUsed(self),
+                                   int extent[6],
                                    vtkImageData *inData, T *,
                                    vtkImageData *outData, T *,
                                    double opacity )
@@ -731,7 +738,7 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the stencil extents 
+  // Check the stencil extents
   stencil->GetExtent(stencilExtent);
   stencilExtent[0] = (stencilExtent[0] < extent[0]) ? extent[0] : stencilExtent[0];
   stencilExtent[1] = (stencilExtent[1] > extent[1]) ? extent[1] : stencilExtent[1];
@@ -739,7 +746,7 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
   stencilExtent[3] = (stencilExtent[3] > extent[3]) ? extent[3] : stencilExtent[3];
   stencilExtent[4] = (stencilExtent[4] < extent[4]) ? extent[4] : stencilExtent[4];
   stencilExtent[5] = (stencilExtent[5] > extent[5]) ? extent[5] : stencilExtent[5];
-  
+
   // Loop through ouput pixels
   for (int idxZ = stencilExtent[4]; idxZ <= stencilExtent[5]; idxZ++)
     {
@@ -750,23 +757,23 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
         {
         moreSubExtents = stencil->GetNextExtent( r1, r2,
             stencilExtent[0], stencilExtent[1], idxY, idxZ, iter );
-        
+
         if (r1 <= r2 )  // sanity check
-          { 
+          {
           T *beginOutPtr=
             static_cast<T *>(outData->GetScalarPointer(r1, idxY, idxZ));
           T *endOutPtr=
             static_cast<T *>(outData->GetScalarPointer(r2, idxY, idxZ));
           T *beginInPtr=
             static_cast<T *>(inData->GetScalarPointer(r1, idxY, idxZ));
-          
+
           while (beginOutPtr <= endOutPtr)
             {
 
             if (outC >= 3 && inC >= 4)
-              { 
+              {
               // RGB(A) blended with RGBA
-                
+
               // multiply to get a number in the range [0,65280]
               // where 65280 = 255*256 = range of beginInPtr[3] * range of o
               r = opacity*(static_cast<double>(beginInPtr[3])-minA);
@@ -780,11 +787,11 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
               beginOutPtr += outC;
               beginInPtr += inC;
               }
-                
+
             else if (outC >= 3 && inC == 3)
-              { 
+              {
               // RGB(A) blended with RGB
-              
+
               // the bit-shift achieves a division by 256
               beginOutPtr[0] = T(static_cast<double>(beginOutPtr[0])*f
                                  + static_cast<double>(beginInPtr[0])*r);
@@ -795,9 +802,9 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
               beginOutPtr += outC;
               beginInPtr += inC;
               }
-            
+
             else if (inC == 2)
-              { 
+              {
               r = opacity*(static_cast<double>(beginInPtr[1])-minA);
               f = 1.0-r;
               *beginOutPtr = T(static_cast<double>(*beginOutPtr)*f
@@ -805,14 +812,14 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
               beginOutPtr += outC;
               beginInPtr += 2;
               }
-            
+
             else
-              { 
+              {
               // luminance(+alpha) blended with luminance
-              
+
               // the bit-shift achieves a division by 256
               *beginOutPtr = T(static_cast<double>(*beginOutPtr)*f + static_cast<double>(*beginInPtr)*r);
-              beginOutPtr += outC; 
+              beginOutPtr += outC;
               beginInPtr++;
               }
             }
@@ -827,7 +834,7 @@ void vtkKWEPaintbrushBlendExecute( vtkImageStencilData *stencil,
 template <class T>
 void vtkKWEPaintbrushBlendExecute(
   vtkKWEPaintbrushLabelData *labelMap,
-  vtkKWEPaintbrushBlend *vtkNotUsed(self), 
+  vtkKWEPaintbrushBlend *vtkNotUsed(self),
   int extent[6],
   vtkImageData *inData, T *,
   vtkImageData *outData, T *,
@@ -854,7 +861,7 @@ void vtkKWEPaintbrushBlendExecute(
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the label map's extents 
+  // Check the label map's extents
   labelMap->GetExtent(labelMapExtent);
 
   // Find the intersection of the labelmap's extents and the overlaid image's
@@ -868,7 +875,7 @@ void vtkKWEPaintbrushBlendExecute(
 
   vtkImageIterator< T > inIt( inData, labelMapExtent );
   vtkImageIterator< T > outIt( outData, labelMapExtent );
-  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt( 
+  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt(
                                      labelMap->GetLabelMap(), labelMapExtent );
 
   // Lookup table of label to color map.
@@ -878,16 +885,16 @@ void vtkKWEPaintbrushBlendExecute(
   // Loop through pixels
   while (!labelMapIt.IsAtEnd())
     {
-    vtkKWEPaintbrushEnums::LabelType *labelMapSI    = labelMapIt.BeginSpan();  
+    vtkKWEPaintbrushEnums::LabelType *labelMapSI    = labelMapIt.BeginSpan();
     vtkKWEPaintbrushEnums::LabelType *labelMapSIEnd = labelMapIt.EndSpan();
     T                             *inSI          = inIt.BeginSpan();
     T                             *outSI         = outIt.BeginSpan();
 
-    while (labelMapSI != labelMapSIEnd) 
+    while (labelMapSI != labelMapSIEnd)
       {
 
       const vtkKWEPaintbrushEnums::LabelType label = *labelMapSI;
-      colorClass = labelToColorMap[label];      
+      colorClass = labelToColorMap[label];
       color[0] = colorClass.Color[0];
       color[1] = colorClass.Color[1];
       color[2] = colorClass.Color[2];
@@ -898,9 +905,9 @@ void vtkKWEPaintbrushBlendExecute(
       opacity = opacity/(maxA-minA);
 
       if (outC >= 3 && inC >= 4)
-        { 
+        {
         // RGB(A) blended with RGBA
-          
+
         // multiply to get a number in the range [0,65280]
         // where 65280 = 255*256 = range of inSI[3] * range of o
         r = opacity*(static_cast<double>(inSI[3])-minA);
@@ -914,11 +921,11 @@ void vtkKWEPaintbrushBlendExecute(
         outSI += outC;
         inSI += inC;
         }
-          
+
       else if (outC >= 3 && inC == 3)
-        { 
+        {
         // RGB(A) blended with RGB
-        
+
         // the bit-shift achieves a division by 256
         outSI[0] = T(static_cast<double>(outSI[0])*f +
                      static_cast<double>(inSI[0])*r);
@@ -929,9 +936,9 @@ void vtkKWEPaintbrushBlendExecute(
         outSI += outC;
         inSI += inC;
         }
-      
+
       else if (inC == 2)
-        { 
+        {
         r = opacity*(static_cast<double>(inSI[1])-minA);
         f = 1.0-r;
         *outSI = T(static_cast<double>(*outSI)*f +
@@ -939,15 +946,15 @@ void vtkKWEPaintbrushBlendExecute(
         outSI += outC;
         inSI += 2;
         }
-      
+
       else
-        { 
+        {
         // luminance(+alpha) blended with luminance
-        
+
         // the bit-shift achieves a division by 256
         *outSI = T(static_cast<double>(*outSI)*f +
                    static_cast<double>(*inSI)*r);
-        outSI += outC; 
+        outSI += outC;
         inSI++;
         }
 
@@ -963,14 +970,14 @@ void vtkKWEPaintbrushBlendExecute(
 }
 
 //----------------------------------------------------------------------------
-// This templated function blends an image that represents a label map into 
+// This templated function blends an image that represents a label map into
 // the overlay image. This function is specific to the case when the overlay
 // image has data type of CHAR
 template <class T>
 void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
                 vtkKWEPaintbrushLabelData *labelMap,
-                vtkKWEPaintbrushBlend *vtkNotUsed(self), 
-                int extent[6], 
+                vtkKWEPaintbrushBlend *vtkNotUsed(self),
+                int extent[6],
                 vtkImageData *inData, T *,
                 vtkImageData *outData, T *,
                 VTKColorType *labelToColorMapUC,
@@ -997,7 +1004,7 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
   inC = inData->GetNumberOfScalarComponents();
   outC = outData->GetNumberOfScalarComponents();
 
-  // Check the label map's extents 
+  // Check the label map's extents
   labelMap->GetExtent(labelMapExtent);
 
   // Find the intersection of the labelmap's extents and the overlaid image's
@@ -1011,18 +1018,18 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
 
   vtkImageIterator< T > inIt( inData, labelMapExtent );
   vtkImageIterator< T > outIt( outData, labelMapExtent );
-  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt( 
+  vtkImageIterator< vtkKWEPaintbrushEnums::LabelType > labelMapIt(
                                      labelMap->GetLabelMap(), labelMapExtent );
 
   // Loop through pixels
   while (!labelMapIt.IsAtEnd())
     {
-    vtkKWEPaintbrushEnums::LabelType *labelMapSI    = labelMapIt.BeginSpan();  
+    vtkKWEPaintbrushEnums::LabelType *labelMapSI    = labelMapIt.BeginSpan();
     vtkKWEPaintbrushEnums::LabelType *labelMapSIEnd = labelMapIt.EndSpan();
     T                             *inSI          = inIt.BeginSpan();
     T                             *outSI         = outIt.BeginSpan();
 
-    while (labelMapSI != labelMapSIEnd) 
+    while (labelMapSI != labelMapSIEnd)
       {
 
       // Fast retrieve from the lookup table to fetch the color for this label.
@@ -1035,9 +1042,9 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
       opacity = opacity/(maxA-minA);
 
       if (outC >= 3 && inC >= 4)
-        { 
+        {
         // RGB(A) blended with RGBA
-          
+
         // multiply to get a number in the range [0,65280]
         // where 65280 = 255*256 = range of inSI[3] * range of o
         r = opacity*(static_cast<double>(inSI[3])-minA);
@@ -1051,11 +1058,11 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
         outSI += outC;
         inSI += inC;
         }
-          
+
       else if (outC >= 3 && inC == 3)
-        { 
+        {
         // RGB(A) blended with RGB
-        
+
         // the bit-shift achieves a division by 256
         outSI[0] = T(static_cast<double>(outSI[0])*f +
                      static_cast<double>(inSI[0])*r);
@@ -1066,9 +1073,9 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
         outSI += outC;
         inSI += inC;
         }
-      
+
       else if (inC == 2)
-        { 
+        {
         r = opacity*(static_cast<double>(inSI[1])-minA);
         f = 1.0-r;
         *outSI = T(static_cast<double>(*outSI)*f +
@@ -1076,15 +1083,15 @@ void vtkKWEPaintbrushBlendExecuteLabelMapTypeUC(
         outSI += outC;
         inSI += 2;
         }
-      
+
       else
-        { 
+        {
         // luminance(+alpha) blended with luminance
-        
+
         // the bit-shift achieves a division by 256
         *outSI = T(static_cast<double>(*outSI)*f +
                    static_cast<double>(*inSI)*r);
-        outSI += outC; 
+        outSI += outC;
         inSI++;
         }
 
@@ -1109,19 +1116,19 @@ void vtkKWEPaintbrushBlendCopyData(vtkImageData *inData, vtkImageData *outData,
   vtkIdType inIncX, inIncY, inIncZ;
   vtkIdType rowLength;
   unsigned char *inPtr, *inPtr1, *outPtr;
- 
+
   inPtr = static_cast<unsigned char *>(inData->GetScalarPointerForExtent(ext));
- 
+
   // Get increments to march through inData
   inData->GetIncrements(inIncX, inIncY, inIncZ);
- 
+
   // find the region to loop over
   rowLength = (ext[1] - ext[0]+1)*inIncX*inData->GetScalarSize();
   maxY = ext[3] - ext[2];
   maxZ = ext[5] - ext[4];
 
   outPtr=static_cast<unsigned char *>(outData->GetScalarPointerForExtent(ext));
-  
+
   inData->GetIncrements(inIncX, inIncY, inIncZ);
   inIncY *= inData->GetScalarSize();
   inIncZ *= inData->GetScalarSize();
@@ -1144,11 +1151,11 @@ void vtkKWEPaintbrushBlendCopyData(vtkImageData *inData, vtkImageData *outData,
 // algorithm to fill the output from the inputs.
 // It just executes a switch statement to call the correct function for
 // the regions data types.
-void vtkKWEPaintbrushBlend::ThreadedRequestData (  
-  vtkInformation * vtkNotUsed( request ), 
-  vtkInformationVector** inputVector, 
+void vtkKWEPaintbrushBlend::ThreadedRequestData (
+  vtkInformation * vtkNotUsed( request ),
+  vtkInformationVector** inputVector,
   vtkInformationVector * vtkNotUsed( outputVector ),
-  vtkImageData ***inData, 
+  vtkImageData ***inData,
   vtkImageData **outData,
   int outExt[6],
   int vtkNotUsed(id))
@@ -1164,7 +1171,7 @@ void vtkKWEPaintbrushBlend::ThreadedRequestData (
     }
 
   vtkInformation *info = inputVector[1]->GetInformationObject(0);
-  vtkKWEPaintbrushDrawing *drawing = vtkKWEPaintbrushDrawing::SafeDownCast(  
+  vtkKWEPaintbrushDrawing *drawing = vtkKWEPaintbrushDrawing::SafeDownCast(
                      info->Get(vtkDataObject::DATA_OBJECT()));
 
   if (this->GetUseOverlay())
@@ -1177,25 +1184,25 @@ void vtkKWEPaintbrushBlend::ThreadedRequestData (
   if (inData[0][0]->GetScalarType() != outData[0]->GetScalarType())
     {
     vtkErrorMacro(
-      << "Execute: input ScalarType (" << inData[0][0]->GetScalarType() 
-      << "), must match output ScalarType (" << outData[0]->GetScalarType() 
+      << "Execute: input ScalarType (" << inData[0][0]->GetScalarType()
+      << "), must match output ScalarType (" << outData[0]->GetScalarType()
       << ")" );
     return;
     }
-  
+
   inPtr = inData[0][0]->GetScalarPointerForExtent(outExt);
-  outPtr = outData[0]->GetScalarPointerForExtent(outExt);  
+  outPtr = outData[0]->GetScalarPointerForExtent(outExt);
 
   if (drawing->GetRepresentation() == vtkKWEPaintbrushEnums::Binary)
     {
-    
+
     // Loop over each stencil and blend it.
     for (int n = 0; n < drawing->GetNumberOfItems(); n++)
       {
       vtkKWEPaintbrushSketch *sketch = drawing->GetItem(n);
       vtkImageStencilData *stencil = (vtkKWEPaintbrushStencilData::
         SafeDownCast(sketch->GetPaintbrushData()))->GetImageStencilData();
-        
+
       // The color of the blend.
       unsigned char color[3];
       double colorD[3];
@@ -1221,7 +1228,7 @@ void vtkKWEPaintbrushBlend::ThreadedRequestData (
           vtkTemplateMacro(
             vtkKWEPaintbrushBlendExecute(stencil, this, outExt,
                                  inData[0][0], static_cast<VTK_TT *>(inPtr),
-                                 outData[0], static_cast<VTK_TT *>(outPtr), 
+                                 outData[0], static_cast<VTK_TT *>(outPtr),
                                  opacity ));
           default:
             vtkErrorMacro(<< "Execute: Unknown ScalarType");
@@ -1235,13 +1242,13 @@ void vtkKWEPaintbrushBlend::ThreadedRequestData (
     {
 
     // the label map we need to blend onto our overlay image.
-    vtkKWEPaintbrushLabelData *labelData = 
-      vtkKWEPaintbrushLabelData::SafeDownCast( 
+    vtkKWEPaintbrushLabelData *labelData =
+      vtkKWEPaintbrushLabelData::SafeDownCast(
               drawing->GetPaintbrushData() );
 
-    vtkKWEPaintbrushPropertyManager *propertyManager 
+    vtkKWEPaintbrushPropertyManager *propertyManager
           = drawing->GetPaintbrushPropertyManager();
-    
+
 
     // for performance reasons, use a special method for unsigned char
     if (inData[0][0]->GetScalarType() == VTK_UNSIGNED_CHAR)
@@ -1252,11 +1259,11 @@ void vtkKWEPaintbrushBlend::ThreadedRequestData (
         // Fast Lookup table of label to color map.
         VTKColorType *labelToColorMapUC   = propertyManager->LabelToColorMapUC;
         double       *labelToOpacityMapUC = propertyManager->LabelToOpacityMapUC;
-          
+
         vtkKWEPaintbrushBlendExecuteCharLabelMapTypeUC(
             labelData, this, outExt,
             inData[0][0], static_cast<unsigned char *>(inPtr),
-            outData[0], static_cast<unsigned char *>(outPtr), 
+            outData[0], static_cast<unsigned char *>(outPtr),
             labelToColorMapUC, labelToOpacityMapUC );
         }
       else

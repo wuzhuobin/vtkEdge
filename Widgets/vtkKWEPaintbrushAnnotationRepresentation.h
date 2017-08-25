@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -23,7 +23,7 @@
 // .SECTION Description
 // See vtkKWEPaintbrushAnnotationRepresentation2D for more details.
 // The ShapePlacer must be set prior to use.
-// 
+//
 // Before using the class, you must set the ImageActor on which the brush is
 // being drawn.
 
@@ -60,7 +60,7 @@ public:
   virtual void BuildRepresentation();
 
   // Description:
-  // Methods required by vtkProp superclass.   
+  // Methods required by vtkProp superclass.
   virtual void ReleaseGraphicsResources(vtkWindow *w);
   virtual int  RenderOverlay(vtkViewport *viewport);
   virtual int  RenderOpaqueGeometry(vtkViewport *viewport);
@@ -72,11 +72,11 @@ public:
   // Legacy method to support VTK source versions prior to 2007/03/05
   virtual int  RenderTranslucentGeometry(vtkViewport *viewport);
 #endif
-  
+
   // Description:
   // Override superclass method and propagate to all sub-props.
   virtual void SetVisibility(int);
-  
+
   // Description:
   // Annotations will by default be placed whereever the brush currently is.
   // If you would like to have annotations appearing at a certain spot, you
@@ -85,15 +85,15 @@ public:
   vtkGetVector2Macro( AnnotationPosition, double );
 
   // Description:
-  // Set/Get the string to render. This is automatically set from 
+  // Set/Get the string to render. This is automatically set from
   // vtkKWEPaintbrushAnnotationWidget.
   vtkSetStringMacro( Annotation );
   vtkGetStringMacro( Annotation );
-  
+
   // Description:
   // Get the text property used to render the annotation.
   vtkGetObjectMacro( TextProperty, vtkTextProperty );
-  
+
 protected:
   vtkKWEPaintbrushAnnotationRepresentation();
   ~vtkKWEPaintbrushAnnotationRepresentation();
@@ -101,13 +101,13 @@ protected:
   vtkTimeStamp                *BuildTime;
   vtkActor2D                  *TextActor;
   vtkTextProperty             *TextProperty;
-  vtkTextMapper               *TextMapper;  
+  vtkTextMapper               *TextMapper;
   char                        *Annotation;
   vtkKWEPaintbrushRepresentation *PaintbrushRepresentation;
   vtksys_stl::string           LastDisplayedAnnotation;
   int                          LastDisplayPosition[2];
   double                       AnnotationPosition[2];
-  
+
 private:
   vtkKWEPaintbrushAnnotationRepresentation(const vtkKWEPaintbrushAnnotationRepresentation&);  //Not implemented
   void operator=(const vtkKWEPaintbrushAnnotationRepresentation&);  //Not implemented

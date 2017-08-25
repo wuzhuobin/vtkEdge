@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushShape.h"
@@ -25,7 +25,7 @@
 #include "vtkImageData.h"
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushShape, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushShape, "$Revision: 3282 $");
 
 //----------------------------------------------------------------------
 vtkKWEPaintbrushShape::vtkKWEPaintbrushShape()
@@ -33,10 +33,16 @@ vtkKWEPaintbrushShape::vtkKWEPaintbrushShape()
   this->Spacing[0]       = this->Spacing[1] = this->Spacing[2] = 1.0;
   this->Origin[0]        = this->Origin[1]  = this->Origin[2]  = 0.0;
   this->ScalarType       = VTK_UNSIGNED_CHAR;
-  this->Polarity         = vtkKWEPaintbrushEnums::Draw; 
+  this->Polarity         = vtkKWEPaintbrushEnums::Draw;
   this->ResizeConstraint = vtkKWEPaintbrushShape::PaintbrushResizeUnConstrained;
   this->Representation   = vtkKWEPaintbrushEnums::Binary;
   this->MaxWidth[0]      = this->MaxWidth[1] = this->MaxWidth[2] = -1.0;
+  this->ClipExtent[0]    = VTK_INT_MIN;
+  this->ClipExtent[2]    = VTK_INT_MIN;
+  this->ClipExtent[4]    = VTK_INT_MIN;
+  this->ClipExtent[1]    = VTK_INT_MAX;
+  this->ClipExtent[3]    = VTK_INT_MAX;
+  this->ClipExtent[5]    = VTK_INT_MAX;
 }
 
 //----------------------------------------------------------------------
@@ -51,7 +57,7 @@ void vtkKWEPaintbrushShape::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushShape::GetPaintbrushData(vtkKWEPaintbrushData *d, 
+void vtkKWEPaintbrushShape::GetPaintbrushData(vtkKWEPaintbrushData *d,
                                            int x,
                                            int y,
                                            int z)
@@ -71,7 +77,7 @@ void vtkKWEPaintbrushShape::GetPaintbrushData(vtkKWEPaintbrushData *d,
     {
     this->GetStencil( s->GetImageStencilData(), p);
     }
-  else if (vtkKWEPaintbrushGrayscaleData *t = 
+  else if (vtkKWEPaintbrushGrayscaleData *t =
            vtkKWEPaintbrushGrayscaleData::SafeDownCast(d))
     {
     this->GetGrayscaleData( t->GetImageData(), p);
@@ -94,6 +100,30 @@ void vtkKWEPaintbrushShape::DeepCopy(vtkKWEPaintbrushShape *s)
     this->Polarity   = s->Polarity;
     }
   this->Modified();
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushShape::SetClipExtent(int e[6])
+{
+  for (int i = 0; i < 6; i++)
+    {
+    this->ClipExtent[i] = e[i];
+    }
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushShape::GetClipExtent(int e[6])
+{
+  for (int i = 0; i < 6; i++)
+    {
+    e[i] = this->ClipExtent[i];
+    }
+}
+
+//----------------------------------------------------------------------
+int *vtkKWEPaintbrushShape::GetClipExtent()
+{
+  return this->ClipExtent;
 }
 
 //----------------------------------------------------------------------

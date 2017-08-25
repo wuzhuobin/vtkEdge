@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEObjectTreeTransformableNode.h"
@@ -26,7 +26,7 @@
 
 #include <vtkstd/set>
 
-vtkCxxRevisionMacro(vtkKWEObjectTreeTransformableNode, "$Revision: 702 $");
+vtkCxxRevisionMacro(vtkKWEObjectTreeTransformableNode, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEObjectTreeTransformableNode);
 
 vtkCxxSetObjectMacro(vtkKWEObjectTreeTransformableNode, Transform, vtkTransform);
@@ -51,7 +51,7 @@ vtkKWEObjectTreeTransformableNode::~vtkKWEObjectTreeTransformableNode()
 
 //-----------------------------------------------------------------------------
 unsigned long vtkKWEObjectTreeTransformableNode::GetMTime()
-{  
+{
   unsigned long mTime = this->Superclass::GetMTime();
   if (this->Transform && this->Transform->GetMTime() > mTime)
     {
@@ -71,9 +71,9 @@ void vtkKWEObjectTreeTransformableNode::UpdateTreeModifiedTime(unsigned long tre
 
   this->Superclass::UpdateTreeModifiedTime(treeTime);
 
-  // iterate through referencing nodes, pushing the treeTime up their tree 
+  // iterate through referencing nodes, pushing the treeTime up their tree
   vtkKWEObjectTreeTransformableNodeReferencingNodes::const_iterator refIterator;
-  for (refIterator = this->ReferencingNodes->begin(); 
+  for (refIterator = this->ReferencingNodes->begin();
     refIterator != this->ReferencingNodes->end(); refIterator++)
     {
     (*refIterator)->UpdateTreeModifiedTime(treeTime);
@@ -82,20 +82,20 @@ void vtkKWEObjectTreeTransformableNode::UpdateTreeModifiedTime(unsigned long tre
 
 // ---------------------------------------------------------------------------
 bool vtkKWEObjectTreeTransformableNode::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
-                                                  bool checkDescendants, 
+                                                  bool checkDescendants,
                                                   bool canBeSuperset/*=false*/,
                                                   bool considerInheritedProperties/*=false*/)
 {
-  if (!this->Superclass::IsEqualTo(testNode, checkDescendants, 
+  if (!this->Superclass::IsEqualTo(testNode, checkDescendants,
     canBeSuperset, considerInheritedProperties))
     {
     return false;
     }
 
-  vtkKWEObjectTreeTransformableNode *transformableTestNode = 
+  vtkKWEObjectTreeTransformableNode *transformableTestNode =
     vtkKWEObjectTreeTransformableNode::SafeDownCast(testNode);
   // if the testNode is NOT a vtkKWEObjectTreeTransformableNode, then only should
-  // have gotten here if canBeSuperset == true.  
+  // have gotten here if canBeSuperset == true.
   if (!transformableTestNode)
     {
     if (!canBeSuperset)
@@ -162,7 +162,7 @@ void vtkKWEObjectTreeTransformableNode::Serialize(vtkKWESerializer* ser)
     // the object is registered during serialization
     vtkObject *transform = 0;
     ser->Serialize("Transform", transform);
-    this->Transform = vtkTransform::SafeDownCast(transform); 
+    this->Transform = vtkTransform::SafeDownCast(transform);
     }
 }
 

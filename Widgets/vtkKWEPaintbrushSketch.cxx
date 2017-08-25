@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushSketch.h"
@@ -36,7 +36,7 @@
 
 #define max(x,y) ((x>y) ? (x) : (y))
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushSketch, "$Revision: 824 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushSketch, "$Revision: 3551 $");
 vtkStandardNewMacro(vtkKWEPaintbrushSketch);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushSketch,PaintbrushOperation,
                                              vtkKWEPaintbrushOperation);
@@ -82,7 +82,7 @@ void vtkKWEPaintbrushSketch::Initialize()
     vtkErrorMacro( << "No image data");
     return;
     }
-    
+
   if (this->PaintbrushData)
     {
     this->PaintbrushData->Delete();
@@ -117,37 +117,37 @@ void vtkKWEPaintbrushSketch::Initialize( vtkKWEPaintbrushLabelData *labelMap )
   if (this->Representation != vtkKWEPaintbrushEnums::Label)
     {
     vtkErrorMacro( << "Representation of the sketch isnt a label map!"
-      << " You probably want to call SetRepresentation( " 
+      << " You probably want to call SetRepresentation( "
       << "vtkKWEPaintbrushEnums::Label) on the sketch first.");
     return;
     }
 
   if (this->Label == vtkKWEPaintbrushLabelData::NoLabelValue)
     {
-    vtkErrorMacro( << "Set the Label on this sketch first. " 
-                   << "Note that " << vtkKWEPaintbrushLabelData::NoLabelValue 
+    vtkErrorMacro( << "Set the Label on this sketch first. "
+                   << "Note that " << vtkKWEPaintbrushLabelData::NoLabelValue
                    << " is a reserved value.");
     return;
     }
 
   // Add the label data for this label as a stroke, so it can be undone or
-  // redone. Note also that strokes are still managed as stencils, since 
+  // redone. Note also that strokes are still managed as stencils, since
   // they are guarenteed to be binary. Stencils, inherently stored in run-
-  // length encoded form still are the most efficient representations 
+  // length encoded form still are the most efficient representations
   // for strokes.
 
   vtkKWEPaintbrushStencilData *strokeData = vtkKWEPaintbrushStencilData::New();
 
   // Extract all voxels in the label map with this->Label and store
   // it in strokeData.
-  
-  vtkKWEPaintbrushUtilities::GetStencilFromImage< 
-      vtkKWEPaintbrushUtilities::vtkFunctorEqualTo >(
-                  labelMap->GetLabelMap(), 
-                  strokeData->GetImageStencilData(), 
-                  this->Label );  
 
-  // Add the initial segmentation as a stroke to this sketch.  
+  vtkKWEPaintbrushUtilities::GetStencilFromImage<
+      vtkKWEPaintbrushUtilities::vtkFunctorEqualTo >(
+                  labelMap->GetLabelMap(),
+                  strokeData->GetImageStencilData(),
+                  this->Label );
+
+  // Add the initial segmentation as a stroke to this sketch.
   this->AddNewStroke( vtkKWEPaintbrushEnums::Draw, strokeData, NULL, true );
 
   strokeData->Delete();
@@ -158,14 +158,14 @@ void vtkKWEPaintbrushSketch::SetImageData( vtkImageData * imageData )
 {
   if (this->ImageData != imageData)
     {
-    vtkImageData * var = this->ImageData;                     
+    vtkImageData * var = this->ImageData;
     this->ImageData = imageData;
     if (this->ImageData != NULL) { this->ImageData->Register(this); }
     if (var != NULL)
-      {                                                    
-      var->UnRegister(this);                    
-      }                                                    
-    this->Modified();                                      
+      {
+      var->UnRegister(this);
+      }
+    this->Modified();
     }
 }
 
@@ -180,13 +180,13 @@ void vtkKWEPaintbrushSketch::AllocatePaintbrushData()
     {
     vtkErrorMacro( << "Must call Initialize() before using this class !");
     }
-  
+
   int extent[6];
   double spacing[3], origin[3];
   this->ImageData->GetWholeExtent(extent);
   this->ImageData->GetSpacing(spacing);
   this->ImageData->GetOrigin(origin);
-  
+
   this->PaintbrushData->SetExtent(extent);
   this->PaintbrushData->SetSpacing(spacing);
   this->PaintbrushData->SetOrigin(origin);
@@ -194,7 +194,7 @@ void vtkKWEPaintbrushSketch::AllocatePaintbrushData()
 }
 
 //----------------------------------------------------------------------
-int vtkKWEPaintbrushSketch::AddNewStroke( 
+int vtkKWEPaintbrushSketch::AddNewStroke(
     int polarity,                       // Draw or erase
     vtkKWEPaintbrushData *initialization,
     int *extents,
@@ -202,8 +202,8 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
 {
   this->CurrentStroke++;
 
-  // If we've exceeded the maximum allowed queue length, keep the queue length 
-  // at the limit by merging the last two strokes in the queue. This will 
+  // If we've exceeded the maximum allowed queue length, keep the queue length
+  // at the limit by merging the last two strokes in the queue. This will
   // ensure that the queue size is always "HistoryLength" or less.
   if (this->CurrentStroke > this->HistoryLength)
     {
@@ -226,10 +226,10 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
         }
 
       // Update stroke0's draw time to the most recent of stroke0 and stroke1.
-      // Of course the more recent one is stroke1. 
+      // Of course the more recent one is stroke1.
       stroke0->SetDrawTime( stroke1->GetDrawTime() );
 
-      // Now that we've merged, remove the stroke. So if we have 5 strokes: 
+      // Now that we've merged, remove the stroke. So if we have 5 strokes:
       //       0, 1, 2, 3, 4.
       // 1 is merged into 0. Then 1 is removed. We will end up with 4 strokes:7
       //     (0 U 1), 2, 3, 4
@@ -240,9 +240,9 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
     // We are at the end of the queue.
     this->CurrentStroke = this->HistoryLength;
     }
- 
+
   // Only if we are worried about Undo/Redo
-  if (this->HistoryLength) 
+  if (this->HistoryLength)
     {
     // Erase all future sequences.. (the moment you start drawing a new
     // sequence, you forget about the last undo), exactly like MSWord
@@ -269,7 +269,7 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
     stroke->SetState(polarity); // The polarity, draw / erase.
     stroke->SetLabel(this->Label);
 
-    // Check if extents have been specified, the stroke size may be a lot 
+    // Check if extents have been specified, the stroke size may be a lot
     // smaller than that of the canvas and we can save memory :)
     if (extents && extents[1] >= extents[0])
       {
@@ -282,7 +282,7 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
     stroke->Register(this);
     this->Strokes.push_back(stroke);
     }
-  
+
   if (initialization)
     {
     initialization->SetLabel( this->Label );
@@ -292,8 +292,72 @@ int vtkKWEPaintbrushSketch::AddNewStroke(
     stroke->SetPaintbrushData(initialization);
     this->PaintbrushData->Add(initialization, forceMutable);
     }
-  
+
   return 1;
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushSketch::Add( vtkKWEPaintbrushSketch * sketch )
+{
+  // Merges another sketch into this sketch.
+
+  if (!this->PaintbrushData)
+    {
+    vtkErrorMacro( << "PaintbrushData is NULL. Did you add this sketch to the "
+      << "drawing and Initialize the drawing prior to initializing the sketch ?");
+    return;
+    }
+
+  if (this->Representation != sketch->GetRepresentation())
+    {
+    vtkErrorMacro( << "Both sketches should have the same representation.");
+    return;
+    }
+
+  if (this->Representation == vtkKWEPaintbrushEnums::Label &&
+      sketch->GetRepresentation() == vtkKWEPaintbrushEnums::Label)
+    {
+    if (this->Label == vtkKWEPaintbrushLabelData::NoLabelValue ||
+        sketch->GetLabel() == vtkKWEPaintbrushLabelData::NoLabelValue)
+      {
+      vtkErrorMacro( << "Set the Label on this sketch first. "
+                     << "Note that " << vtkKWEPaintbrushLabelData::NoLabelValue
+                     << " is a reserved value.");
+      return;
+      }
+
+
+    // Add the label data for this label as a stroke, so it can be undone or
+    // redone. Note also that strokes are still managed as stencils, since
+    // they are guarenteed to be binary. Stencils, inherently stored in run-
+    // length encoded form still are the most efficient representations
+    // for strokes.
+
+    vtkKWEPaintbrushLabelData * labelMap =
+      vtkKWEPaintbrushLabelData::SafeDownCast(sketch->GetPaintbrushData());
+    vtkKWEPaintbrushStencilData *strokeData = vtkKWEPaintbrushStencilData::New();
+
+    // Extract all voxels in the label map with this->Label and store
+    // it in strokeData.
+
+    vtkKWEPaintbrushUtilities::GetStencilFromImage<
+        vtkKWEPaintbrushUtilities::vtkFunctorEqualTo >(
+                    labelMap->GetLabelMap(),
+                    strokeData->GetImageStencilData(),
+                    sketch->GetLabel() );
+
+    // Add the initial segmentation as a stroke to this sketch.
+    this->AddNewStroke( vtkKWEPaintbrushEnums::Draw, strokeData, NULL, true );
+
+    strokeData->Delete();
+    }
+  else
+    {
+    // For other representations, no need to extract the label. The generic
+    // method takes care of it.
+    this->AddNewStroke(
+      vtkKWEPaintbrushEnums::Draw, sketch->GetPaintbrushData(), NULL, true );
+    }
 }
 
 //----------------------------------------------------------------------
@@ -304,19 +368,19 @@ void vtkKWEPaintbrushSketch::EraseStrokes(int start, int end)
     {
     return;
     }
-  
+
   for (int i=start; i <= end; i++)
     {
     this->Strokes[i]->UnRegister(this);
     }
-  this->Strokes.erase(this->Strokes.begin()+start, 
+  this->Strokes.erase(this->Strokes.begin()+start,
                                 this->Strokes.begin()+end+1);
 }
 
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushSketch::PopStroke()
 {
-  if (!this->Strokes.size() || this->CurrentStroke < 0)
+  if (this->Strokes.size() <= 1 || this->CurrentStroke < 1)
     {
     return 0;
     }
@@ -329,7 +393,7 @@ int vtkKWEPaintbrushSketch::PopStroke()
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushSketch::PushStroke()
 {
-  if (!this->Strokes.size() || 
+  if (!this->Strokes.size() ||
       this->CurrentStroke >= (static_cast<int>(this->Strokes.size())-1) )
     {
     return 0;
@@ -338,7 +402,7 @@ int vtkKWEPaintbrushSketch::PushStroke()
 
   if (this->Representation == vtkKWEPaintbrushEnums::Label)
     {
-    // Need to compose all strokes for multi-label undo/redo. 
+    // Need to compose all strokes for multi-label undo/redo.
     this->ComposeStrokes();
     }
   else
@@ -347,14 +411,14 @@ int vtkKWEPaintbrushSketch::PushStroke()
 
     vtkKWEPaintbrushStroke *stroke = this->Strokes[this->CurrentStroke];
     stroke->GetPaintbrushData()->SetLabel(this->Label);
-    
-    // Subtract this stroke if it was an erase stroke, add it if it was a 
+
+    // Subtract this stroke if it was an erase stroke, add it if it was a
     // draw stroke.
     if (stroke->GetState() == vtkKWEPaintbrushEnums::Erase)
       {
-      this->PaintbrushData->Subtract(stroke->GetPaintbrushData()); 
+      this->PaintbrushData->Subtract(stroke->GetPaintbrushData());
       }
-    else   
+    else
       {
       this->PaintbrushData->Add(stroke->GetPaintbrushData());
       }
@@ -376,7 +440,7 @@ int vtkKWEPaintbrushSketch::DeleteLastStroke()
   this->Strokes.pop_back();
 
   this->ComposeStrokes();
-  
+
   if (this->CurrentStroke >= 0)
     {
     this->CurrentStroke--;
@@ -389,15 +453,15 @@ int vtkKWEPaintbrushSketch::DeleteLastStroke()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushSketch::ComposeStrokes()
 {
-  // Clear before composing 
+  // Clear before composing
   // FIXME check if allocate erases the buffer for ImageData too
   this->PaintbrushData->Clear( this->Label );
-  
+
   if (this->CurrentStroke >= static_cast<int>(this->Strokes.size()))
     {
     vtkErrorMacro(
-      << "Trying to access " << this->CurrentStroke << " but number of strokes " 
-      << "available in sketch " << this << " is " 
+      << "Trying to access " << this->CurrentStroke << " but number of strokes "
+      << "available in sketch " << this << " is "
       << this->Strokes.size());
     return;
     }
@@ -412,21 +476,21 @@ void vtkKWEPaintbrushSketch::ComposeStrokes()
     }
   else
     {
-    
+
     if (this->CurrentStroke >= 0)
       {
       for (int i=0; i<= this->CurrentStroke; i++)
         {
         vtkKWEPaintbrushStroke *stroke = this->Strokes[i];
         stroke->GetPaintbrushData()->SetLabel(this->Label);
-        
-        // Subtract this stroke if it was an erase stroke, add it if it was a 
+
+        // Subtract this stroke if it was an erase stroke, add it if it was a
         // draw stroke.
         if (stroke->GetState()  == vtkKWEPaintbrushEnums::Erase)
           {
-          this->PaintbrushData->Subtract(stroke->GetPaintbrushData()); 
+          this->PaintbrushData->Subtract(stroke->GetPaintbrushData());
           }
-        else   
+        else
           {
           this->PaintbrushData->Add(stroke->GetPaintbrushData());
           }
@@ -439,7 +503,7 @@ void vtkKWEPaintbrushSketch::ComposeStrokes()
 void vtkKWEPaintbrushSketch::AddShapeToCurrentStroke(double p[3],
                                                   vtkKWEPaintbrushData *auxData)
 {
-  if (!this->Strokes.size() || this->CurrentStroke < 0 || 
+  if (!this->Strokes.size() || this->CurrentStroke < 0 ||
       this->CurrentStroke >= static_cast<int>(this->Strokes.size()) ||
       !this->PaintbrushData)
     {
@@ -452,11 +516,11 @@ void vtkKWEPaintbrushSketch::AddShapeToCurrentStroke(double p[3],
   // pass in the paintbrush data from this sketch (this->PaintbrushData) and
   // the one from the drawing (auxData) and add/subtract the shape (passed
   // through the operation) to that data. This is done for efficiency, so that
-  // we don't query the shape twice to compute the paintbrushData at the 
-  // current location. 
+  // we don't query the shape twice to compute the paintbrushData at thex
+  // current location.
   //   Hey, you need some hacks for speed right :) !
 
-  if (!stroke->AddShapeAtPosition(p, this->PaintbrushData, auxData)) 
+  if (!stroke->AddShapeAtPosition(p, this->PaintbrushData, auxData))
     {
     return;
     }
@@ -465,10 +529,10 @@ void vtkKWEPaintbrushSketch::AddShapeToCurrentStroke(double p[3],
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushSketch::SetPaintbrushData(vtkKWEPaintbrushData * data )
 {
-  // If you set an external data as the stroke manager's data, you 
+  // If you set an external data as the stroke manager's data, you
   // lose all the undo-redo history..
   this->EraseStrokes(0,static_cast<int>(this->Strokes.size()-1));
-  
+
   if (this->PaintbrushData != data)
     {
     vtkKWEPaintbrushData * var = this->PaintbrushData;
@@ -487,7 +551,7 @@ void vtkKWEPaintbrushSketch::SetPaintbrushData(vtkKWEPaintbrushData * data )
 unsigned long vtkKWEPaintbrushSketch::GetMTime()
 {
   // TODO: Check this. Do we need to check the property MTime. I
-  // don't want uncessary re-rendering... for instance changing the 
+  // don't want uncessary re-rendering... for instance changing the
   // highlight property when I am not using Highlight etc....
 
   unsigned long t = 0;
@@ -507,8 +571,8 @@ GetStrokes(vtkstd::vector< vtkKWEPaintbrushStroke * > &strokes)
   // Push all the strokes until the current stroke into strokes.
   if (this->Strokes.size())
     {
-    strokes.insert( strokes.end(), 
-                    this->Strokes.begin(), 
+    strokes.insert( strokes.end(),
+                    this->Strokes.begin(),
                     this->Strokes.begin() + this->CurrentStroke + 1 );
     }
 }
@@ -523,7 +587,7 @@ void vtkKWEPaintbrushSketch::SetMutable( int m )
     return;
     }
 
-  vtkKWEPaintbrushLabelData *labelData 
+  vtkKWEPaintbrushLabelData *labelData
     = vtkKWEPaintbrushLabelData::SafeDownCast(this->PaintbrushData);
 
   if (!labelData)
@@ -539,7 +603,7 @@ void vtkKWEPaintbrushSketch::SetMutable( int m )
     }
 
 
-  if (labelData)
+  if (labelData && labelData->IsMutable(this->Label) != m)
     {
     // Let's collapse the history. Consider a scenario where we make a
     // sketch immutable, then draw, (it doesn't actually change the sketch).
@@ -550,7 +614,7 @@ void vtkKWEPaintbrushSketch::SetMutable( int m )
     // change the mutability flag.
     for (int i = 0; i < this->PaintbrushDrawing->GetNumberOfItems(); i++)
       {
-      this->PaintbrushDrawing->GetItem(i)->CollapseHistory();
+      //this->PaintbrushDrawing->GetItem(i)->CollapseHistory();
       }
 
     labelData->SetMutable( m, this->Label );
@@ -587,10 +651,10 @@ void vtkKWEPaintbrushSketch::CollapseHistory()
         }
 
       // Update stroke0's draw time to the most recent of stroke0 and stroke1.
-      // Of course the more recent one is stroke1. 
+      // Of course the more recent one is stroke1.
       stroke0->SetDrawTime( stroke1->GetDrawTime() );
 
-      // Now that we've merged, remove the stroke. So if we have 5 strokes: 
+      // Now that we've merged, remove the stroke. So if we have 5 strokes:
       //       0, 1, 2, 3, 4.
       // 1 is merged into 0. Then 1 is removed. We will end up with 4 strokes:7
       //     (0 U 1), 2, 3, 4
@@ -599,7 +663,83 @@ void vtkKWEPaintbrushSketch::CollapseHistory()
       }
 
     this->CurrentStroke = 0;
+
+
+    // Re-create the initial stroke to match what's there.
+    if (this->Strokes.size())
+      {
+      if (vtkKWEPaintbrushLabelData *labelMap = 
+          vtkKWEPaintbrushLabelData::SafeDownCast(this->PaintbrushData))
+        {
+        if (vtkKWEPaintbrushStencilData *stencilData =
+            vtkKWEPaintbrushStencilData::SafeDownCast(
+                this->Strokes[0]->GetPaintbrushData()))
+          {
+          vtkKWEPaintbrushUtilities::GetStencilFromImage<
+            vtkKWEPaintbrushUtilities::vtkFunctorEqualTo >(
+                  labelMap->GetLabelMap(),
+                  stencilData->GetImageStencilData(),
+                  this->Label );
+          }
+        }
+      }      
     }
+}
+
+// ----------------------------------------------------------------------------
+void vtkKWEPaintbrushSketch::CopySketchFromExtentToExtent(
+    int sourceExtent[6], int targetExtent[6] )
+{
+  // This method is useful for copying a sketch from one slice to another.
+  // The source and target extents should be of the same dimension.
+  // Its currently implemented only if the sketch is of a label map type.
+  if (this->Representation != vtkKWEPaintbrushEnums::Label)
+    {
+    vtkErrorMacro( <<
+      "Currently the copy functionality is implemented only for label maps.");
+    return;
+    }
+
+  vtkKWEPaintbrushLabelData *labelData =
+    vtkKWEPaintbrushLabelData::SafeDownCast(this->PaintbrushData);
+  vtkImageData *labelImage = labelData->GetLabelMap();
+  
+  typedef vtkKWEPaintbrushEnums::LabelType LabelType;
+  typedef vtkImageIterator< LabelType > IteratorType;
+
+  // Copy over.. We won't do any extent checking..
+  int labelImageExtent[6];
+  labelImage->GetExtent(labelImageExtent);
+  
+  if (!vtkMath::ExtentIsWithinOtherExtent(sourceExtent, labelImageExtent) ||
+      !vtkMath::ExtentIsWithinOtherExtent(targetExtent, labelImageExtent))
+    {
+    vtkErrorMacro( << "Copy extents are not within the labelmap's extent");
+    return;
+    }
+
+  IteratorType it1(labelImage, sourceExtent);
+  IteratorType it2(labelImage, targetExtent);
+  while( !it1.IsAtEnd() )
+    {
+    LabelType *inSI1    = it1.BeginSpan();
+    LabelType *inSIEnd1 = it1.EndSpan();
+    LabelType *inSI2    = it2.BeginSpan();
+    while (inSI1 != inSIEnd1)
+      {
+      LabelType l = *inSI1;
+      if (l == this->Label)
+        {
+        *inSI2 = l;
+        }
+      ++inSI1;
+      ++inSI2;
+      }
+    it1.NextSpan();    
+    it2.NextSpan();    
+    }
+
+  this->Modified();
 }
 
 //----------------------------------------------------------------------
@@ -611,7 +751,7 @@ void vtkKWEPaintbrushSketch::PrintSelf(ostream& os, vtkIndent indent)
     {
     this->PaintbrushOperation->PrintSelf( os, indent.GetNextIndent() );
     }
-  
+
   this->Superclass::PrintSelf(os,indent);
 }
 

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #ifndef __itkConfidenceConnectedMiniPipelineFilter_h
@@ -39,8 +39,8 @@ namespace itk{
  *  Nonlinear Smoothing ->   Region growing  -> Hole filling
  *
  * The smoothing process employed here is Median filter with a 3x3 kernel,
- * cause its fast. The region growing process is 
- * ConfidenceConnectedRegionGrowing. Hole filling is accomplised by a 
+ * cause its fast. The region growing process is
+ * ConfidenceConnectedRegionGrowing. Hole filling is accomplised by a
  * binary voting filter.
  *
  * The class gives you access to the three filters. It is up to you to
@@ -68,16 +68,16 @@ public:
   typedef TOutputImage OutputImageType;
 
   /** Pipeline filters */
-  typedef MedianImageFilter< 
+  typedef MedianImageFilter<
     InputImageType, InputImageType >            SmoothingFilterType;
-  typedef ConfidenceConnectedImageFilter< 
+  typedef ConfidenceConnectedImageFilter<
         InputImageType, OutputImageType >       RegionGrowingFilterType;
-  typedef VotingBinaryHoleFillingImageFilter< 
+  typedef VotingBinaryHoleFillingImageFilter<
     OutputImageType, OutputImageType >          HoleFillingFilterType;
 
-  typedef typename 
+  typedef typename
     RegionGrowingFilterType::SeedsContainerType SeedsContainerType;
-  
+
   void PrintSelf ( std::ostream& os, Indent indent ) const;
 
   /** Get the pipeline filters */
@@ -89,16 +89,16 @@ public:
   itkSetMacro(               UseHoleFilling, bool );
   itkGetConstReferenceMacro( UseHoleFilling, bool );
   itkBooleanMacro(           UseHoleFilling       );
-  
+
 protected:
   ConfidenceConnectedMiniPipelineFilter();
   ~ConfidenceConnectedMiniPipelineFilter(){};
-  
+
   // Override since the filter needs all the data for the algorithm
   void GenerateInputRequestedRegion();
   virtual void GenerateOutputInformation();
   void GenerateData();
-  
+
 private:
   ConfidenceConnectedMiniPipelineFilter(const Self&); //purposely not implemented
   void operator=(const Self&); //purposely not implemented

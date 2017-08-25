@@ -1,8 +1,29 @@
+##=============================================================================
+##   This file is part of VTKEdge. See vtkedge.org for more information.
+##
+##   Copyright (c) 2010 Kitware, Inc.
+##
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
+##
+##   Alternatively, you may see: 
+##
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
+##
+##=============================================================================
+
 #-----------------------------------------------------------------------------
 #
 # VTKEdgeConfig.cmake - CMake configuration file for external projects.
 #
-# This file is configured by VTKEdge and used by the UseVTKEdge.cmake 
+# This file is configured by VTKEdge and used by the UseVTKEdge.cmake
 # module to load VTKEdge's settings for an external project.
 @VTKEdge_CONFIG_INSTALL_ONLY@
 # The VTKEdge version number.
@@ -44,15 +65,15 @@ set(VTKEdge_BUILD_Widgets_KIT         "@VTKEdge_BUILD_Widgets_KIT@")
 set(VTKEdge_PAINTBRUSH_LABEL_TYPE     "@VTKEdge_PAINTBRUSH_LABEL_TYPE@")
 
 # The C and C++ flags added to the cmake-configured flags.
-set(VTKEdge_REQUIRED_C_FLAGS 
+set(VTKEdge_REQUIRED_C_FLAGS
   "@VTKEdge_REQUIRED_C_FLAGS@")
-set(VTKEdge_REQUIRED_CXX_FLAGS 
+set(VTKEdge_REQUIRED_CXX_FLAGS
   "@VTKEdge_REQUIRED_CXX_FLAGS@")
-set(VTKEdge_REQUIRED_EXE_LINKER_FLAGS 
+set(VTKEdge_REQUIRED_EXE_LINKER_FLAGS
   "@VTKEdge_REQUIRED_EXE_LINKER_FLAGS@")
-set(VTKEdge_REQUIRED_SHARED_LINKER_FLAGS 
+set(VTKEdge_REQUIRED_SHARED_LINKER_FLAGS
   "@VTKEdge_REQUIRED_SHARED_LINKER_FLAGS@")
-set(VTKEdge_REQUIRED_MODULE_LINKER_FLAGS 
+set(VTKEdge_REQUIRED_MODULE_LINKER_FLAGS
   "@VTKEdge_REQUIRED_MODULE_LINKER_FLAGS@")
 
 # The "use" file.

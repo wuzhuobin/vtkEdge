@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -50,17 +50,17 @@
 
 /** \class ItkToVtkPipeline
  *  This helper class will take care of instantiating the appropriate
- *  ITK Export class corresponding to the actual pixel type of the 
+ *  ITK Export class corresponding to the actual pixel type of the
  *  input image. */
 template <class TPixel > class ItkToVtkPipeline
 {
 public:
   typedef itk::Image< TPixel, 3 >     ImageType;
 
-  static void CreateExporter( itk::ImageBase<3>::Pointer  & imageBase, 
+  static void CreateExporter( itk::ImageBase<3>::Pointer  & imageBase,
                               itk::ProcessObject::Pointer & exporter )
     {
-    if (ImageType * image = 
+    if (ImageType * image =
           dynamic_cast< ImageType * >( imageBase.GetPointer() ))
       {
       typedef itk::ImageToVTKImageFilter< ImageType >   ExportFilterType;
@@ -70,7 +70,7 @@ public:
       exporter = itkExporter;
       }
     }
-  
+
   static vtkImageData * GetOutput( itk::ProcessObject::Pointer & exporter )
     {
     ItkToVtkPipelineGetOutputMacro( unsigned char );
@@ -89,11 +89,11 @@ public:
 
 /** \class ItkToVtkPipeline
  *  This helper class will take care of instantiating the appropriate
- *  ITK Export class corresponding to the actual pixel type of the 
+ *  ITK Export class corresponding to the actual pixel type of the
  *  input image. */
 template <class TPixel > class VtkToItkPipeline
 {
-public:  
+public:
   typedef itk::Image< TPixel, 3 >     ImageType;
 
   static void CreateExporter( vtkImageData                * image,
@@ -106,7 +106,7 @@ public:
     exporter = itkExporter;
     }
 
-  static itk::ImageBase<3> * 
+  static itk::ImageBase<3> *
   GetOutput( itk::ProcessObject::Pointer & exporter )
     {
     VtkToItkPipelineGetOutputMacro( unsigned char );
@@ -131,7 +131,7 @@ public:
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro( vtkKWEITKImage );
-vtkCxxRevisionMacro(vtkKWEITKImage, "$Revision: 590 $");
+vtkCxxRevisionMacro(vtkKWEITKImage, "$Revision: 1774 $");
 
 //----------------------------------------------------------------------------
 vtkKWEITKImage::vtkKWEITKImage()
@@ -211,7 +211,7 @@ vtkImageData * vtkKWEITKImage::GetVTKImage()
       this->VtkImageTime.Modified();
       }
     }
-  
+
   else if (this->InputMode == VTK_IMAGE_STENCIL_INPUT && this->VtkImageStencil)
     {
     if (this->VtkImageTime < this->VtkImageStencilTime)
@@ -220,23 +220,23 @@ vtkImageData * vtkKWEITKImage::GetVTKImage()
         {
         this->VtkImage = vtkImageData::New();
         }
-      
+
       vtkKWEITKImage::GetImageFromStencil(
           this->VtkImage, this->VtkImageStencil, 255, 0);
       this->VtkImageTime.Modified();
       }
     }
-  
+
   else if (this->InputMode == VTK_IMAGE_INPUT && this->VtkImage)
     {
     // No conversion to do :)
     }
-  
+
   else
     {
     this->VtkImage = NULL;
     }
-  
+
   return this->VtkImage;
 }
 
@@ -258,14 +258,14 @@ vtkKWEITKImage::ImageBaseType * vtkKWEITKImage::GetITKImage()
           {
           vtkitkTemplateMacro( VtkToItkPipeline< VTK_TT >::CreateExporter(
                                     image, this->VtkToItkExporter) );
-        
+
           default:
             {
             vtkErrorMacro(<< "vtkitkTemplateMacro: Unknown ScalarType");
             return NULL;
             }
           }
-        
+
         this->ItkImage = VtkToItkPipeline<int>::GetOutput(this->VtkToItkExporter);
         this->ItkImageTime.Modified();
         }
@@ -309,7 +309,7 @@ vtkImageStencilData * vtkKWEITKImage::GetVTKImageStencilData()
         {
         this->VtkImageStencil = vtkImageStencilData::New();
         }
-      
+
       vtkKWEITKImage::GetStencilFromImage(this->GetVTKImage(), this->VtkImageStencil, 128);
       this->VtkImageStencilTime.Modified();
       }
@@ -346,7 +346,7 @@ vtkImageStencilData * vtkKWEITKImage::GetVTKImageStencilData()
 vtkKWEITKImage::ITKScalarPixelType vtkKWEITKImage::GetITKScalarPixelType()
 {
   this->GetITKImage();
-  
+
   ITKScalarPixelType pixelType = itk::ImageIOBase::UCHAR;
 
   ImageBaseType * itkImageBase = this->ItkImage.GetPointer();
@@ -402,8 +402,8 @@ int vtkKWEITKImage::GetVTKScalarPixelType()
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEITKImage::GetImageFromStencil( 
-                          vtkImageData *image, 
+void vtkKWEITKImage::GetImageFromStencil(
+                          vtkImageData *image,
                           vtkImageStencilData *stencilData,
                           unsigned char inVal, unsigned char outVal)
 {
@@ -418,14 +418,14 @@ void vtkKWEITKImage::GetImageFromStencil(
 
   vtkImageIterator< unsigned char > it(image, image->GetExtent());
   while( !it.IsAtEnd() )
-    { 
-    unsigned char *inSI    = it.BeginSpan();  
+    {
+    unsigned char *inSI    = it.BeginSpan();
     unsigned char *inSIEnd = it.EndSpan();
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
       *inSI = outVal;
       ++inSI;
-      }      
+      }
     it.NextSpan();
     }
 
@@ -459,13 +459,13 @@ void vtkKWEITKImage::GetImageFromStencil(
           }
         } // end for each extent tuple
       } // end for each scan line
-    } // end of each slice 
+    } // end of each slice
 }
 
 //----------------------------------------------------------------------------
 template < class T >
 void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
-                                     vtkImageStencilData *stencilData, 
+                                     vtkImageStencilData *stencilData,
                                      T threshold)
 {
   int extent[6];
@@ -473,21 +473,21 @@ void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
   image->GetExtent(extent);
   image->GetSpacing(spacing);
   image->GetOrigin(origin);
-  
+
   stencilData->SetExtent(extent);
   stencilData->SetSpacing(spacing);
-  stencilData->SetOrigin(origin); 
+  stencilData->SetOrigin(origin);
   stencilData->AllocateExtents();
 
   vtkImageIterator< T > it(image, extent);
 
-  int ends[2], index[3]; 
-  index[1] = extent[2]; 
+  int ends[2], index[3];
+  index[1] = extent[2];
   index[2] = extent[4];
-  
+
   while( !it.IsAtEnd() )
-    { 
-    T *inSI    = it.BeginSpan();  
+    {
+    T *inSI    = it.BeginSpan();
     T *inSIEnd = it.EndSpan();
 
     index[0] = extent[0];
@@ -497,10 +497,10 @@ void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
       {
       ends[0] = extent[0];
       }
-    
+
     // for each row
 
-    while (inSI != inSIEnd) 
+    while (inSI != inSIEnd)
       {
 
       if (ends[0] == -1 && *inSI >= threshold)
@@ -518,7 +518,7 @@ void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
         stencilData->InsertNextExtent(ends[0], ends[1], index[1], index[2]);
         ends[0] = ends[1] = -1;
         }
-      
+
       ++index[0];
       ++inSI;
       }
@@ -533,7 +533,7 @@ void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
     if (index[1] == extent[3])
       {
       ++index[2];
-      index[1] = extent[2]; 
+      index[1] = extent[2];
       }
     else
       {
@@ -544,7 +544,7 @@ void vtkKWEITKImageGetStencilFromImage( vtkImageData *image,
 
 //----------------------------------------------------------------------------
 void vtkKWEITKImage::GetStencilFromImage( vtkImageData *image,
-                                       vtkImageStencilData *stencilData, 
+                                       vtkImageStencilData *stencilData,
                                        double threshold)
 {
   if (image == NULL)
@@ -552,7 +552,7 @@ void vtkKWEITKImage::GetStencilFromImage( vtkImageData *image,
     stencilData = NULL;
     return;
     }
-  
+
   switch (image->GetScalarType())
     {
     vtkTemplateMacro( vtkKWEITKImageGetStencilFromImage(

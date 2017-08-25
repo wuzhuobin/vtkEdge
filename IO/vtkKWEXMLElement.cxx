@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEXMLElement.h"
@@ -24,7 +24,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
 
-vtkCxxRevisionMacro(vtkKWEXMLElement, "$Revision: 710 $");
+vtkCxxRevisionMacro(vtkKWEXMLElement, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEXMLElement);
 
 #include <vtkstd/string>
@@ -82,7 +82,7 @@ void vtkKWEXMLElement::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLElement::AddAttribute(const char* attrName, 
+void vtkKWEXMLElement::AddAttribute(const char* attrName,
                                    unsigned int attrValue)
 {
   vtksys_ios::ostringstream valueStr;
@@ -132,13 +132,13 @@ void vtkKWEXMLElement::AddAttribute(const char* attrName,
     {
     return;
     }
-  
+
   this->Internal->AttributeNames.push_back(attrName);
   this->Internal->AttributeValues.push_back(attrValue);
 }
 
 //----------------------------------------------------------------------------
-void vtkKWEXMLElement::AddAttribute(const char* attrName, 
+void vtkKWEXMLElement::AddAttribute(const char* attrName,
                                     double* vals,
                                     unsigned int length)
 {
@@ -160,7 +160,7 @@ void vtkKWEXMLElement::AddAttribute(const char* attrName,
 
 //----------------------------------------------------------------------------
 void vtkKWEXMLElement::AddAttribute(const char *attrName,
-                                    int *vals, 
+                                    int *vals,
                                     unsigned int length)
 {
   if (!attrName || !vals || length == 0)
@@ -196,10 +196,10 @@ void vtkKWEXMLElement::AddAttribute(const char* attrName,
   this->AddAttribute(attrName, valueStr.str().c_str());
 }
 
-#if defined(VTK_USE_64BIT_IDS) 
+#if defined(VTK_USE_64BIT_IDS)
 //----------------------------------------------------------------------------
 void vtkKWEXMLElement::AddAttribute(const char* attrName,
-                                    vtkIdType* vals, 
+                                    vtkIdType* vals,
                                     unsigned int length)
 {
   if (!attrName || !vals || length == 0)
@@ -225,7 +225,7 @@ void vtkKWEXMLElement::SetAttribute(const char *attrName,
     {
     return;
     }
-  
+
   // iterate over the names, and find if the attribute name exists.
   size_t numAttributes = this->Internal->AttributeNames.size();
   size_t i;
@@ -485,35 +485,35 @@ vtkKWEXMLElement* vtkKWEXMLElement::LookupElementUpScope(const char* id)
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   int* value)
 {
   return this->GetVectorAttribute(name, 1, value);
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   unsigned int* value)
 {
   return this->GetVectorAttribute(name, 1, value);
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   unsigned long* value)
 {
   return this->GetVectorAttribute(name, 1, value);
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   float* value)
 {
   return this->GetVectorAttribute(name, 1, value);
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   double* value)
 {
   return this->GetVectorAttribute(name, 1, value);
@@ -521,7 +521,7 @@ unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
 
 #if defined(VTK_USE_64BIT_IDS)
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
                                                   vtkIdType* value)
 {
   return this->GetVectorAttribute(name, 1, value);
@@ -530,7 +530,7 @@ unsigned int vtkKWEXMLElement::GetScalarAttribute(const char* name,
 
 //----------------------------------------------------------------------------
 template <class T>
-unsigned int vtkKWEXMLVectorAttributeParse(const char* str, 
+unsigned int vtkKWEXMLVectorAttributeParse(const char* str,
                                            unsigned int length,
                                            T* data)
 {
@@ -546,7 +546,7 @@ unsigned int vtkKWEXMLVectorAttributeParse(const char* str,
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   int* data)
 {
@@ -554,7 +554,7 @@ unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   unsigned int* data)
 {
@@ -562,7 +562,7 @@ unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   unsigned long* data)
 {
@@ -570,7 +570,7 @@ unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   float* data)
 {
@@ -578,7 +578,7 @@ unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
 }
 
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   double* data)
 {
@@ -587,7 +587,7 @@ unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
 
 #if defined(VTK_USE_64BIT_IDS)
 //----------------------------------------------------------------------------
-unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name, 
+unsigned int vtkKWEXMLElement::GetVectorAttribute(const char* name,
                                                   unsigned int length,
                                                   vtkIdType* data)
 {
@@ -722,7 +722,7 @@ void vtkKWEXMLElement::Merge(vtkKWEXMLElement* element, const char* attributeNam
     {
     this->Internal->CharacterData = element->Internal->CharacterData;
     }
-  
+
   // add attributes from element to this, or override attribute values on this
   size_t numAttributes = element->Internal->AttributeNames.size();
   size_t numAttributes2 = this->Internal->AttributeNames.size();
@@ -772,7 +772,7 @@ void vtkKWEXMLElement::Merge(vtkKWEXMLElement* element, const char* attributeNam
     // if not found, add it
     if(!found)
       {
-      vtkSmartPointer<vtkKWEXMLElement> newElement = 
+      vtkSmartPointer<vtkKWEXMLElement> newElement =
         vtkSmartPointer<vtkKWEXMLElement>::New();
       newElement->SetName((*iter)->GetName());
       newElement->SetId((*iter)->GetId());

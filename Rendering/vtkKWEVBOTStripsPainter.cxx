@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -38,7 +38,7 @@
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 vtkStandardNewMacro(vtkKWEVBOTStripsPainter);
-vtkCxxRevisionMacro(vtkKWEVBOTStripsPainter, "$Revision: 426 $");
+vtkCxxRevisionMacro(vtkKWEVBOTStripsPainter, "$Revision: 1774 $");
 
 //-----------------------------------------------------------------------------
 vtkKWEVBOTStripsPainter::vtkKWEVBOTStripsPainter()
@@ -83,10 +83,10 @@ void vtkKWEVBOTStripsPainter::ReleaseGraphicsResources(vtkWindow* w)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx, 
+bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
   vtkDataArray* n,
-  vtkUnsignedCharArray* c, 
-  vtkDataArray* t, 
+  vtkUnsignedCharArray* c,
+  vtkDataArray* t,
   vtkRenderer* renderer)
 {
   bool forceUpdate = false;
@@ -108,7 +108,7 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
   vtkPoints* points = pd->GetPoints();
   vtkCellArray* ca = pd->GetStrips();
 
-  if (forceUpdate || 
+  if (forceUpdate ||
     !this->PointIDs->GetInitialized() ||
     this->PointIDs->GetMTime() < pd->GetMTime() ||
     this->PointIDs->GetMTime() < ca->GetMTime())
@@ -119,8 +119,8 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
       }
     }
 
-  if (forceUpdate || 
-    !this->PointCoordinates->GetInitialized() || 
+  if (forceUpdate ||
+    !this->PointCoordinates->GetInitialized() ||
     this->PointCoordinates->GetMTime() < pd->GetMTime() ||
     this->PointCoordinates->GetMTime() < points->GetMTime())
     {
@@ -132,7 +132,7 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
 
   if ((idx & VTK_PDM_NORMALS) && n)
     {
-    if (forceUpdate || 
+    if (forceUpdate ||
       !this->PointNormals->GetInitialized() ||
       this->PointNormals->GetMTime() < pd->GetMTime() ||
       this->PointNormals->GetMTime() < n->GetMTime())
@@ -151,7 +151,7 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
 
   if ((idx & VTK_PDM_COLORS) && c && !(idx & VTK_PDM_CELL_COLORS))
     {
-    if (forceUpdate || 
+    if (forceUpdate ||
       !this->PointColors->GetInitialized() ||
       this->PointColors->GetMTime() < pd->GetMTime() ||
       this->PointColors->GetMTime() < c->GetMTime())
@@ -170,7 +170,7 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
   // transfer texture coords to buffer object
   if (idx & VTK_PDM_TCOORDS && t)
     {
-    if (forceUpdate || 
+    if (forceUpdate ||
       !this->PointTCords->GetInitialized() ||
       this->PointTCords->GetMTime() < pd->GetMTime() ||
       this->PointTCords->GetMTime() < t->GetMTime())
@@ -192,7 +192,7 @@ bool vtkKWEVBOTStripsPainter::UpdateGraphicsResources(unsigned long idx,
 
 //-----------------------------------------------------------------------------
 int vtkKWEVBOTStripsPainter::RenderPrimitive(unsigned long idx, vtkDataArray* n,
-                                          vtkUnsignedCharArray* c, 
+                                          vtkUnsignedCharArray* c,
                                           vtkDataArray* t, vtkRenderer* ren)
 {
   vtkOpenGLRenderWindow* renWin = vtkOpenGLRenderWindow::SafeDownCast(
@@ -226,15 +226,15 @@ int vtkKWEVBOTStripsPainter::RenderPrimitive(unsigned long idx, vtkDataArray* n,
     }
 
   // check for extension support
-  vtkOpenGLExtensionManager* mgr = renWin->GetExtensionManager(); 
+  vtkOpenGLExtensionManager* mgr = renWin->GetExtensionManager();
   if (!mgr->ExtensionSupported("GL_VERSION_2_0") &&
     !mgr->ExtensionSupported("GL_ARB_vertex_buffer_object"))
     {
     case_handled = false;
     }
-  
+
   // generate the VBOs and copy data to the card
-  if (case_handled == false || 
+  if (case_handled == false ||
     this->UpdateGraphicsResources(idx, n, c, t, ren) == false)
     {
     if (this->LastContext)
@@ -271,7 +271,7 @@ int vtkKWEVBOTStripsPainter::RenderPrimitive(unsigned long idx, vtkDataArray* n,
     {
     int numComponents = idx & VTK_PDM_OPAQUE_COLORS ? 3 : 4;
     int dataNumComponents = c->GetNumberOfComponents();
-    int stride = (dataNumComponents == 4 && numComponents == 3) ? 
+    int stride = (dataNumComponents == 4 && numComponents == 3) ?
       4 * c->GetDataTypeSize() : 0;
     this->PointColors->Bind(vtkKWEVertexBufferObject::ARRAY_BUFFER);
     device->SetAttributePointer(vtkDataSetAttributes::SCALARS,
@@ -282,18 +282,18 @@ int vtkKWEVBOTStripsPainter::RenderPrimitive(unsigned long idx, vtkDataArray* n,
     }
 
   // tcoords
-  if (this->PointTCords->GetInitialized()) 
+  if (this->PointTCords->GetInitialized())
     {
-    int numComponents = t->GetNumberOfComponents();    
+    int numComponents = t->GetNumberOfComponents();
     this->PointTCords->Bind(vtkKWEVertexBufferObject::ARRAY_BUFFER);
-    device->SetAttributePointer(vtkDataSetAttributes::TCOORDS, 
+    device->SetAttributePointer(vtkDataSetAttributes::TCOORDS,
       numComponents, t->GetDataType(), 0, 0);
     this->PointTCords->UnBind();
     device->EnableAttributeArray(vtkDataSetAttributes::TCOORDS);
     }
 
   this->PointIDs->RenderIndices(VTK_TRIANGLE_STRIP);
-  
+
   // disable client state
   device->DisableAttributeArray(vtkDataSetAttributes::NUM_ATTRIBUTES);
   device->DisableAttributeArray(vtkDataSetAttributes::NORMALS);

@@ -1,28 +1,28 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEObjectTreeUserProperty - A user editable Property for ObjectTree nodes
 // .SECTION Description
-// Whereas other ObjectTreeProperties can only be edited via the provided 
+// Whereas other ObjectTreeProperties can only be edited via the provided
 // Set/Get methods, the vtkKWEObjectTreeUserProperty allows an application
-// developer to define specific attributes/keys within the app (without 
+// developer to define specific attributes/keys within the app (without
 // subclassing vtkKWEObjectTreePropertyBase) which can then be serialized
 // as other vtkKWEObjectTreePropertyBase) are serialized.  Note that it
 // is the responsibility of the user of this class to call Modified()
@@ -35,7 +35,7 @@
 #ifndef __vtkKWEObjectTreeUserProperty_h
 #define __vtkKWEObjectTreeUserProperty_h
 
-#include "vtkKWEObjectTreePropertyBase.h" 
+#include "vtkKWEObjectTreePropertyBase.h"
 
 class vtkInformationDoubleVectorKey;
 class vtkInformationObjectBaseKey;
@@ -50,13 +50,13 @@ public:
   // Description:
   // Give access to the internal vtkInformation object so information can be
   // added as user wants.  NOTE: If changes are made, Modified() should/must
-  // be called so we can update the TreeModifiedTime of all our 
+  // be called so we can update the TreeModifiedTime of all our
   // referencing nodes.
   vtkInformation *GetAttributesPointer();
 
   // Description:
   // Get the key used for keeping track of this property.
-  static vtkInformationObjectBaseKey* KEY();  
+  static vtkInformationObjectBaseKey* KEY();
   virtual vtkInformationObjectBaseKey* GetKey()
     {
     return KEY();

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -56,11 +56,11 @@ int main( int argc, char *argv[] )
   w2->UseCompressionOn();
   w2->SetFileName( "VTKImageToITKImage.mhd" );
   w2->Update();
-  
+
   // vtkImageData -> vtkImageStencilData -> itk::Image< T >
   //
   typedef itk::Image< unsigned char, 3 > UCharImageType;
-  itk::ImageFileWriter< UCharImageType >::Pointer 
+  itk::ImageFileWriter< UCharImageType >::Pointer
     w3 = itk::ImageFileWriter< UCharImageType >::New();
   vtkITKImage *image2 = vtkITKImage::New();
   image2->SetImage(image->GetVTKImageStencilData());
@@ -68,8 +68,8 @@ int main( int argc, char *argv[] )
   w3->SetFileName( "VTKImageToVTKImageStencilDataToITKImage.mhd" );
   w3->UseCompressionOn();
   w3->Update();
-  
-  // itk::Image< T >    -->   vtkImageData 
+
+  // itk::Image< T >    -->   vtkImageData
   //
   vtkXMLImageDataWriter *w4 = vtkXMLImageDataWriter::New();
   vtkITKImage *image3 = vtkITKImage::New();
@@ -77,7 +77,7 @@ int main( int argc, char *argv[] )
   w4->SetInput( image3->GetVTKImage() );
   w4->SetFileName( "ITKImageToVTKImage.vtp" );
   w4->Update();
-    
+
   w->Delete();
   w4->Delete();
   v16->Delete();
@@ -85,6 +85,6 @@ int main( int argc, char *argv[] )
   image2->Delete();
   image3->Delete();
   delete [] fname2;
-  
+
   return EXIT_SUCCESS;
 }

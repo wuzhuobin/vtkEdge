@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushAnnotationWidget.h"
@@ -43,7 +43,7 @@
 
 #define sign(x) ((((double)x) < 0.0) ? (-1) : (1))
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushAnnotationWidget, "$Revision: 826 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushAnnotationWidget, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushAnnotationWidget);
 
 //----------------------------------------------------------------------
@@ -58,10 +58,10 @@ vtkKWEPaintbrushAnnotationWidget::vtkKWEPaintbrushAnnotationWidget()
   this->CallbackMapper->SetCallbackMethod(vtkCommand::TimerEvent,
                                           vtkWidgetEvent::TimedOut,
                                           this, vtkKWEPaintbrushAnnotationWidget::HoverCallback);
- 
+
   this->Movement         = 0;
   this->TimerDuration    = 5000;
-  this->TimerId          = -1;  
+  this->TimerId          = -1;
   this->PaintbrushWidget = NULL;
   this->CreateDefaultRepresentation();
 }
@@ -69,7 +69,7 @@ vtkKWEPaintbrushAnnotationWidget::vtkKWEPaintbrushAnnotationWidget()
 //----------------------------------------------------------------------
 vtkKWEPaintbrushAnnotationWidget::~vtkKWEPaintbrushAnnotationWidget()
 {
-  if (    this->WidgetState == vtkKWEPaintbrushAnnotationWidget::Timing 
+  if (    this->WidgetState == vtkKWEPaintbrushAnnotationWidget::Timing
        && this->TimerId != -1 && this->Interactor)
     {
     this->Interactor->DestroyTimer(this->TimerId);
@@ -97,7 +97,7 @@ void vtkKWEPaintbrushAnnotationWidget::SetEnabled(int enabling)
   // The handle widgets take their representation from the vtkKWEPaintbrushAnnotationRepresentation.
   if ( enabling )
     {
-    vtkKWEPaintbrushAnnotationRepresentation *rep 
+    vtkKWEPaintbrushAnnotationRepresentation *rep
       = vtkKWEPaintbrushAnnotationRepresentation::SafeDownCast(this->WidgetRep);
     rep->VisibilityOn();
     }
@@ -107,24 +107,24 @@ void vtkKWEPaintbrushAnnotationWidget::SetEnabled(int enabling)
                           this->WidgetRep))->VisibilityOff();
     }
 
-  this->Superclass::SetEnabled(enabling);  
+  this->Superclass::SetEnabled(enabling);
 }
 
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotateString( const char *s )
 {
-  if (vtkKWEPaintbrushAnnotationRepresentation *rep 
+  if (vtkKWEPaintbrushAnnotationRepresentation *rep
      = static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep))
     {
     rep->SetAnnotation(s);
-    this->SetWidgetState( vtkKWEPaintbrushAnnotationWidget::BeginTimer );  
+    this->SetWidgetState( vtkKWEPaintbrushAnnotationWidget::BeginTimer );
     }
 }
 
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotateIncrementSketch()
 {
-  if (vtkKWEPaintbrushRepresentation *rep = static_cast< 
+  if (vtkKWEPaintbrushRepresentation *rep = static_cast<
     vtkKWEPaintbrushRepresentation*>(this->PaintbrushWidget->GetRepresentation()))
     {
     if (vtkKWEPaintbrushSketch *sketch = rep->GetPaintbrushDrawing()->
@@ -134,13 +134,13 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateIncrementSketch()
 
       vtksys_ios::ostringstream o;
       o << "Sketch " << rep->GetSketchIndex();
-      if (sketchProperty->GetIdentifier()) 
-        { 
+      if (sketchProperty->GetIdentifier())
+        {
         o << ": " << sketchProperty->GetIdentifier();
         }
       o << ends;
-  
-      // Annotation color to match the sketch color. 
+
+      // Annotation color to match the sketch color.
       static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep)->
         GetTextProperty()->SetColor( sketchProperty->GetColor() );
 
@@ -152,7 +152,7 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateIncrementSketch()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotateDecrementSketch()
 {
-  if (vtkKWEPaintbrushRepresentation *rep = static_cast< 
+  if (vtkKWEPaintbrushRepresentation *rep = static_cast<
     vtkKWEPaintbrushRepresentation*>(this->PaintbrushWidget->GetRepresentation()))
     {
     if (vtkKWEPaintbrushSketch *sketch = rep->GetPaintbrushDrawing()->
@@ -162,17 +162,17 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateDecrementSketch()
 
       vtksys_ios::ostringstream o;
       o << "Sketch " << rep->GetSketchIndex();
-      if (sketchProperty->GetIdentifier()) 
-        { 
+      if (sketchProperty->GetIdentifier())
+        {
         o << ": " << sketchProperty->GetIdentifier();
         }
       o << ends;
 
 
-      // Annotation color to match the sketch color. 
+      // Annotation color to match the sketch color.
       static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep)->
         GetTextProperty()->SetColor( sketchProperty->GetColor() );
-    
+
       this->AnnotateString(o.str().c_str());
       }
     }
@@ -181,26 +181,26 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateDecrementSketch()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotateNewSketch()
 {
-  if (vtkKWEPaintbrushRepresentation *rep = static_cast< 
+  if (vtkKWEPaintbrushRepresentation *rep = static_cast<
     vtkKWEPaintbrushRepresentation*>(this->PaintbrushWidget->GetRepresentation()))
     {
     if (vtkKWEPaintbrushSketch *sketch = rep->GetPaintbrushDrawing()->
                                             GetItem(rep->GetSketchIndex()))
       {
       vtkKWEPaintbrushProperty * sketchProperty = sketch->GetPaintbrushProperty();
-    
+
       vtksys_ios::ostringstream o;
       o << "New sketch " << rep->GetSketchIndex();
-      if (sketchProperty->GetIdentifier()) 
-        { 
+      if (sketchProperty->GetIdentifier())
+        {
         o << ": " << sketchProperty->GetIdentifier();
         }
       o << ends;
 
-      // Annotation color to match the sketch color. 
+      // Annotation color to match the sketch color.
       static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep)->
         GetTextProperty()->SetColor( sketchProperty->GetColor() );
-    
+
       this->AnnotateString(o.str().c_str());
       }
     }
@@ -209,7 +209,7 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateNewSketch()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotateSize()
 {
-  if (vtkKWEPaintbrushRepresentation *rep = static_cast< 
+  if (vtkKWEPaintbrushRepresentation *rep = static_cast<
     vtkKWEPaintbrushRepresentation*>(this->PaintbrushWidget->GetRepresentation()))
     {
     char str[256];
@@ -218,9 +218,9 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateSize()
     if (vtkKWEPaintbrushSketch *sketch = rep->GetPaintbrushDrawing()->
                                             GetItem(rep->GetSketchIndex()))
       {
-      vtkKWEPaintbrushProperty * sketchProperty = sketch->GetPaintbrushProperty();    
+      vtkKWEPaintbrushProperty * sketchProperty = sketch->GetPaintbrushProperty();
 
-      // Annotation color to match the sketch color. 
+      // Annotation color to match the sketch color.
       static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep)->
         GetTextProperty()->SetColor( sketchProperty->GetColor() );
       }
@@ -231,19 +231,19 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotateSize()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::AnnotatePaintbrushMode()
 {
-  vtksys_stl::string annotationString = 
-    (this->PaintbrushWidget->GetPaintbrushMode() 
+  vtksys_stl::string annotationString =
+    (this->PaintbrushWidget->GetPaintbrushMode()
        == vtkKWEPaintbrushWidget::Edit) ? "EditMode" : "Select Mode";
 
-  if (vtkKWEPaintbrushRepresentation *rep = static_cast< 
+  if (vtkKWEPaintbrushRepresentation *rep = static_cast<
     vtkKWEPaintbrushRepresentation*>(this->PaintbrushWidget->GetRepresentation()))
     {
     if (vtkKWEPaintbrushSketch *sketch = rep->GetPaintbrushDrawing()->
                                             GetItem(rep->GetSketchIndex()))
       {
-      vtkKWEPaintbrushProperty * sketchProperty = sketch->GetPaintbrushProperty();    
+      vtkKWEPaintbrushProperty * sketchProperty = sketch->GetPaintbrushProperty();
 
-      // Annotation color to match the sketch color. 
+      // Annotation color to match the sketch color.
       static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep)->
         GetTextProperty()->SetColor( sketchProperty->GetColor() );
       }
@@ -254,12 +254,12 @@ void vtkKWEPaintbrushAnnotationWidget::AnnotatePaintbrushMode()
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::SetWidgetState( int w )
 {
-  if (this->WidgetState != w) 
-    { 
+  if (this->WidgetState != w)
+    {
     bool needRender = false;
-    vtkKWEPaintbrushAnnotationRepresentation *rep 
+    vtkKWEPaintbrushAnnotationRepresentation *rep
       = static_cast< vtkKWEPaintbrushAnnotationRepresentation *>(this->WidgetRep);
-    
+
     // Create a new timer.
     if (w == vtkKWEPaintbrushAnnotationWidget::BeginTimer)
       {
@@ -268,7 +268,7 @@ void vtkKWEPaintbrushAnnotationWidget::SetWidgetState( int w )
         this->Interactor->DestroyTimer(this->TimerId);
         this->TimerId = -1;
         }
-          
+
       this->TimerId = this->Interactor->CreateOneShotTimer(this->TimerDuration);
       this->WidgetState = vtkKWEPaintbrushAnnotationWidget::Timing;
       this->Movement = 0;
@@ -287,7 +287,7 @@ void vtkKWEPaintbrushAnnotationWidget::SetWidgetState( int w )
         {
         this->Interactor->DestroyTimer(this->TimerId);
         this->TimerId = -1;
-        this->WidgetState = vtkKWEPaintbrushAnnotationWidget::Start;        
+        this->WidgetState = vtkKWEPaintbrushAnnotationWidget::Start;
         if (rep)
           {
           rep->VisibilityOff();
@@ -302,41 +302,41 @@ void vtkKWEPaintbrushAnnotationWidget::SetWidgetState( int w )
     }
 }
 
-// The following methods are the callbacks that the widget responds to. 
+// The following methods are the callbacks that the widget responds to.
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::MoveCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushAnnotationWidget *self = 
+  vtkKWEPaintbrushAnnotationWidget *self =
           reinterpret_cast<vtkKWEPaintbrushAnnotationWidget*>(w);
   if (self->Movement++ > 20)
     {
     // Remove annotation. User is trying to shirk it off
-    self->SetWidgetState(vtkKWEPaintbrushAnnotationWidget::EndTimer); 
+    self->SetWidgetState(vtkKWEPaintbrushAnnotationWidget::EndTimer);
     }
 }
 
 //-------------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationWidget::HoverCallback(vtkAbstractWidget *w)
 {
-  vtkKWEPaintbrushAnnotationWidget *self = 
+  vtkKWEPaintbrushAnnotationWidget *self =
     reinterpret_cast<vtkKWEPaintbrushAnnotationWidget*>(w);
   if (self->CallData)
     {
     int timerId = *(reinterpret_cast<int*>(self->CallData));
-    
+
     // If this is the timer event we are waiting for...
-    if ( timerId == self->TimerId 
+    if ( timerId == self->TimerId
         && self->WidgetState == vtkKWEPaintbrushAnnotationWidget::Timing )
       {
       // Remove annotation. Its been there for too long (TimerDuration time).
-      //self->SetWidgetState(vtkKWEPaintbrushAnnotationWidget::EndTimer); 
+      //self->SetWidgetState(vtkKWEPaintbrushAnnotationWidget::EndTimer);
       self->EventCallbackCommand->SetAbortFlag(1); //no one else gets this timer
       }
     }
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushAnnotationWidget::SetRepresentation( 
+void vtkKWEPaintbrushAnnotationWidget::SetRepresentation(
            vtkKWEPaintbrushAnnotationRepresentation * r )
 {
   this->Superclass::SetWidgetRepresentation(r);
@@ -346,5 +346,5 @@ void vtkKWEPaintbrushAnnotationWidget::SetRepresentation(
 void vtkKWEPaintbrushAnnotationWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
   //Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
-  this->Superclass::PrintSelf(os,indent); 
+  this->Superclass::PrintSelf(os,indent);
 }

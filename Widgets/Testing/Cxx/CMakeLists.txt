@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -31,8 +31,10 @@ set(TESTBASE ${PROJECT_NAME}${KIT})
 set(WIDGETS_DATA_ROOT ${VTKEdge_SOURCE_DIR}/Data)
 set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 
-set(MyTests     
+set(MyTests
   PaintbrushTest1.cxx
+  PaintbrushTest1b.cxx
+  PaintbrushTest1c.cxx
   PaintbrushTest2.cxx
   PaintbrushTest3.cxx
   PaintbrushTest4.cxx
@@ -43,8 +45,8 @@ set(MyTests
   PaintbrushInstantiatonMemLeaksTest.cxx
   )
 
-create_test_sourcelist(Tests 
-  ${TESTBASE}CxxTests.cxx 
+create_test_sourcelist(Tests
+  ${TESTBASE}CxxTests.cxx
   ${MyTests}
   EXTRA_INCLUDE vtkTestDriver.h
   )
@@ -52,85 +54,107 @@ create_test_sourcelist(Tests
 add_executable(${TESTBASE}CxxTests ${Tests})
 #install_targets(${VTKEdge_INSTALL_BIN_DIR} ${TESTBASE}CxxTests)
 
-target_link_libraries(${TESTBASE}CxxTests 
+target_link_libraries(${TESTBASE}CxxTests
   vtkRendering vtkIO vtkKWEWidgets vtkFiltering vtkImaging )
 
 #ADD regression testing
-add_test(PaintbrushTest1 
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+set(labelmap_type "USHORT")
+if (VTKEdge_PAINTBRUSH_LABEL_TYPE STREQUAL "VTK_UNSIGNED_CHAR")
+  set(labelmap_type "UCHAR")
+endif (VTKEdge_PAINTBRUSH_LABEL_TYPE STREQUAL "VTK_UNSIGNED_CHAR")
+
+add_test(PaintbrushTest1
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest1
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest1InputEventLog.txt
   0
-  ${CMAKE_CURRENT_BINARY_DIR}/EditedLabelMap.mha 
+  ${CMAKE_CURRENT_BINARY_DIR}/EditedLabelMap.mha
+  )
+add_test(PaintbrushTest1b
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
+  PaintbrushTest1b
+  ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest1bInputEventLog.txt
+  0
+  ${CMAKE_CURRENT_BINARY_DIR}/EditedLabelMap.mha
+  )
+add_test(PaintbrushTest1c
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
+  PaintbrushTest1c
+  ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest1cInputEventLog.txt
+  0
+  ${CMAKE_CURRENT_BINARY_DIR}/EditedLabelMap.mha
   )
 add_test(PaintbrushTest2
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest2
   ${WIDGETS_DATA_ROOT}/Data/HeadMR.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest2InputEventLog.txt
   0
   )
 add_test(PaintbrushTest3
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest3
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest3InputEventLog.txt
   0
-  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha 
+  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha
   )
 
 add_test(PaintbrushTest4
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest4
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest4InputEventLog.txt
-  0 
-  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha 
+  0
+  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha
   )
 
 add_test(PaintbrushTest5
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest5
   ${WIDGETS_DATA_ROOT}/Data/IBSRData.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest4InputEventLog.txt
-  0 
-  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha 
+  0
+  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha
   )
 
 add_test(PaintbrushTest6
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest6
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-WhiteMatter-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-WhiteMatter-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest6InputEventLog.txt
-  0 
+  0
   )
 
 add_test(PaintbrushTest7
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest7
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest7InputEventLog.txt
-  0 
-  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha 
+  0
+  ${CMAKE_CURRENT_BINARY_DIR}/Temporary/EditedLabelMap.mha
   )
 
 add_test(PaintbrushTest8
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushTest8
   ${WIDGETS_DATA_ROOT}/Data/IBSRDataCropped.mha
-  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-USHORT-Cropped.mha
+  ${WIDGETS_DATA_ROOT}/Data/IBSRLabelMap-4Labels-${labelmap_type}-Cropped.mha
   ${WIDGETS_DATA_ROOT}/Data/PaintbrushTest8InputEventLog.txt
-  0 
+  0
   )
 
 add_test( PaintbrushInstantiationMemLeaksTest
-  ${CXX_TEST_PATH}/${TESTBASE}CxxTests 
+  ${CXX_TEST_PATH}/${TESTBASE}CxxTests
   PaintbrushInstantiatonMemLeaksTest )
-

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEObjectTreeNodeBase.h"
@@ -33,7 +33,7 @@
 
 #include <vtkstd/vector>
 
-vtkCxxRevisionMacro(vtkKWEObjectTreeNodeBase, "$Revision: 770 $");
+vtkCxxRevisionMacro(vtkKWEObjectTreeNodeBase, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEObjectTreeNodeBase);
 
 vtkInformationKeyMacro(vtkKWEObjectTreeNodeBase, NAME, String);
@@ -67,7 +67,7 @@ vtkKWEObjectTreeNodeBase::~vtkKWEObjectTreeNodeBase()
   // may be holding on to the child as a tree on it's own, but we need to tell
   // it it no longer has a parent)
   vtkKWEObjectTreeNodeBaseChildren::const_iterator childIterator;
-  for (childIterator = this->Children->begin(); 
+  for (childIterator = this->Children->begin();
     childIterator != this->Children->end(); childIterator++)
     {
     (*childIterator)->SetParent(0);
@@ -124,7 +124,7 @@ void vtkKWEObjectTreeNodeBase::SetParent(vtkKWEObjectTreeNodeBase *parent)
     return;
     }
   this->Parent = parent;
-  this->Modified();  
+  this->Modified();
 }
 
 //-----------------------------------------------------------------------------
@@ -208,7 +208,7 @@ int vtkKWEObjectTreeNodeBase::RemoveChild(vtkKWEObjectTreeNodeBase *childNode)
 {
   int index = 0;
   vtkKWEObjectTreeNodeBaseChildren::iterator childIterator;
-  for (childIterator = this->Children->begin(); 
+  for (childIterator = this->Children->begin();
     childIterator != this->Children->end(); childIterator++, index++)
     {
     if (*childIterator == childNode)
@@ -225,7 +225,7 @@ int vtkKWEObjectTreeNodeBase::RemoveChild(vtkKWEObjectTreeNodeBase *childNode)
 
 //-----------------------------------------------------------------------------
 int vtkKWEObjectTreeNodeBase::RemoveChild(unsigned int index)
-{ 
+{
   if (static_cast<size_t>(index) >= this->Children->size())
     {
     vtkErrorMacro(
@@ -247,7 +247,7 @@ int vtkKWEObjectTreeNodeBase::GetNumberOfProperties()
 //-----------------------------------------------------------------------------
 int vtkKWEObjectTreeNodeBase::GetNumberOfInformationEntries(vtkInformation *infoObject)
 {
-  vtkSmartPointer<vtkInformationIterator> infoIterator = 
+  vtkSmartPointer<vtkInformationIterator> infoIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   infoIterator->SetInformation( infoObject );
 
@@ -282,11 +282,11 @@ void vtkKWEObjectTreeNodeBase::GetAllProperties(vtkInformation *allProperties)
     vtkErrorMacro("Must pass in valid vtkInformation object");
     return;
     }
-  
+
   // make sure empty to start
   allProperties->Clear();
 
-  // copy the "local" (non-inherited) Properties 
+  // copy the "local" (non-inherited) Properties
   allProperties->Copy(this->Properties);
 
   if (this->CanInheritProperties() && this->Parent)
@@ -301,9 +301,9 @@ void vtkKWEObjectTreeNodeBase::AddInheritedProperties(vtkInformation *allPropert
   vtkInformationObjectBaseKey *key;
   vtkKWEObjectTreePropertyBase *tmpProperty;
 
-  // iterate through all our "local" properties; add to allProperties if not 
+  // iterate through all our "local" properties; add to allProperties if not
   // already in allProperties AND inheritable
-  vtkSmartPointer<vtkInformationIterator> propertyIterator = 
+  vtkSmartPointer<vtkInformationIterator> propertyIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   propertyIterator->SetInformation( this->Properties );
   for (propertyIterator->InitTraversal(); !propertyIterator->IsDoneWithTraversal();
@@ -316,7 +316,7 @@ void vtkKWEObjectTreeNodeBase::AddInheritedProperties(vtkInformation *allPropert
       continue;
       }
     tmpProperty = vtkKWEObjectTreePropertyBase::SafeDownCast( this->Properties->Get(key) );
-    if (tmpProperty->IsInheritable()) 
+    if (tmpProperty->IsInheritable())
       {
       allProperties->Set(key, tmpProperty);
       }
@@ -334,7 +334,7 @@ vtkKWEObjectTreePropertyBase* vtkKWEObjectTreeNodeBase::GetProperty(
   vtkInformationObjectBaseKey *propertyKey, bool &inheritedProperty,
   bool includeInheritance/*=false*/)
 {
-  vtkKWEObjectTreePropertyBase *requestedProperty = 
+  vtkKWEObjectTreePropertyBase *requestedProperty =
     vtkKWEObjectTreePropertyBase::SafeDownCast( this->Properties->Get(propertyKey) );
   if (requestedProperty)
     {
@@ -356,7 +356,7 @@ vtkKWEObjectTreePropertyBase* vtkKWEObjectTreeNodeBase::GetProperty(
 
 //-----------------------------------------------------------------------------
 int vtkKWEObjectTreeNodeBase::RemoveProperty(vtkKWEObjectTreePropertyBase *nodeProperty)
-{  
+{
   return this->RemoveProperty( nodeProperty->GetKey() );
 }
 
@@ -386,7 +386,7 @@ void vtkKWEObjectTreeNodeBase::RemoveAllProperties()
 //-----------------------------------------------------------------------------
 bool vtkKWEObjectTreeNodeBase::RemoveAllPropertiesInternal()
 {
-  vtkSmartPointer<vtkInformationIterator> propertyIterator = 
+  vtkSmartPointer<vtkInformationIterator> propertyIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   propertyIterator->SetInformation( this->Properties );
 
@@ -419,7 +419,7 @@ bool vtkKWEObjectTreeNodeBase::IsDescendant(vtkKWEObjectTreeNodeBase *testNode)
     }
 
   vtkKWEObjectTreeNodeBaseChildren::const_iterator childIterator;
-  for (childIterator = this->Children->begin(); 
+  for (childIterator = this->Children->begin();
     childIterator != this->Children->end(); childIterator++)
     {
     if ((*childIterator)->IsDescendant(testNode))
@@ -531,7 +531,7 @@ void vtkKWEObjectTreeNodeBase::SetInheritProperties(bool inheritState)
 
 //-----------------------------------------------------------------------------
 unsigned long vtkKWEObjectTreeNodeBase::GetMTime()
-{  
+{
   unsigned long propMTime;
   unsigned long mTime = this->Superclass::GetMTime();
 
@@ -540,8 +540,8 @@ unsigned long vtkKWEObjectTreeNodeBase::GetMTime()
     mTime = this->Attributes->GetMTime();
     }
 
-  // consider the MTime of our Properties as well; 
-  vtkSmartPointer<vtkInformationIterator> propertyIterator = 
+  // consider the MTime of our Properties as well;
+  vtkSmartPointer<vtkInformationIterator> propertyIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   propertyIterator->SetInformation( this->Properties );
 
@@ -551,7 +551,7 @@ unsigned long vtkKWEObjectTreeNodeBase::GetMTime()
     {
     key = vtkInformationObjectBaseKey::SafeDownCast(
       propertyIterator->GetCurrentKey() );
-    propMTime = 
+    propMTime =
       vtkKWEObjectTreePropertyBase::SafeDownCast( this->Properties->Get(key) )->GetMTime();
     if ( propMTime > mTime )
       {
@@ -585,12 +585,12 @@ void vtkKWEObjectTreeNodeBase::UpdateTreeModifiedTime(unsigned long treeTime)
 }
 
 //-----------------------------------------------------------------------------
-bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode, 
-                                         bool checkDescendants, 
+bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
+                                         bool checkDescendants,
                                          bool canBeSuperset/*=false*/,
                                          bool considerInheritedProperties/*=false*/)
 {
-  if (!testNode) 
+  if (!testNode)
     {
     return false;  // can't be EqualTo if it doesn't exist!
     }
@@ -600,7 +600,7 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
   if ((!canBeSuperset && strcmp(this->GetClassName(), testNode->GetClassName())) ||
     (canBeSuperset && !this->IsA(testNode->GetClassName())))
     {
-    return false; 
+    return false;
     }
 
   // Do our Attributes match?
@@ -624,12 +624,12 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
     }
 
   // compare Objects... is only one or the other set (if so, return false,
-  // unless canBeSuperset).  
+  // unless canBeSuperset).
   if ((!testNode->NodeObject && this->NodeObject && !canBeSuperset) ||
     (testNode->NodeObject && !this->NodeObject) ||
-    // if both objects exist, then type must match exactly if can't be superset OR 
+    // if both objects exist, then type must match exactly if can't be superset OR
     // this->NodeObject only has to be an IsA (subclass of) if it can be a superset
-    ((testNode->NodeObject && this->NodeObject) && 
+    ((testNode->NodeObject && this->NodeObject) &&
     ((!canBeSuperset && strcmp(testNode->NodeObject->GetClassName(), this->NodeObject->GetClassName())) ||
     ((canBeSuperset && !this->NodeObject->IsA(testNode->NodeObject->GetClassName()))))))
     {
@@ -640,10 +640,10 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
   vtkSmartPointer<vtkInformation> myProperties, testNodeProperties;
   if (considerInheritedProperties)
     {
-    // if we inherited properties are considered for the purpose of this 
-    // comparison then build a complete set of properties for this node 
+    // if we inherited properties are considered for the purpose of this
+    // comparison then build a complete set of properties for this node
     // (include inherited properties)
-    myProperties = vtkSmartPointer<vtkInformation>::New();   
+    myProperties = vtkSmartPointer<vtkInformation>::New();
     this->GetAllProperties(myProperties);
     myNumProperties = this->GetNumberOfInformationEntries(myProperties);
 
@@ -659,10 +659,10 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
     testNodeProperties = testNode->Properties;
     }
 
-  if (myNumProperties < testNumProperties || 
+  if (myNumProperties < testNumProperties ||
     (myNumProperties > testNumProperties && !canBeSuperset))
     {
-    // if the number of properties doesn't match, then we can't be equal... 
+    // if the number of properties doesn't match, then we can't be equal...
     // unless "this" has more and it can be a superset of the testNode we are
     // comparing ourselves to
     return false;
@@ -670,7 +670,7 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
 
   // To be "equal", we must have that same set of Properties as the testNode...
   // and the Properties need to be equal
-  vtkSmartPointer<vtkInformationIterator> propertyIterator = 
+  vtkSmartPointer<vtkInformationIterator> propertyIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   propertyIterator->SetInformation( testNodeProperties );
 
@@ -681,15 +681,15 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
     key = vtkInformationObjectBaseKey::SafeDownCast(
       propertyIterator->GetCurrentKey() );
 
-    vtkKWEObjectTreePropertyBase *thisProperty = 
+    vtkKWEObjectTreePropertyBase *thisProperty =
       vtkKWEObjectTreePropertyBase::SafeDownCast(myProperties->Get(key));
-    // if the Property doesn't exist in "this" then return false (not equal)... 
+    // if the Property doesn't exist in "this" then return false (not equal)...
     // (we know it exists in testNode since that is  what we're iterating over)
     if (!thisProperty)
       {
       return false;
       }
-    vtkKWEObjectTreePropertyBase *testProperty = 
+    vtkKWEObjectTreePropertyBase *testProperty =
       vtkKWEObjectTreePropertyBase::SafeDownCast(testNodeProperties->Get(key));
     // if IsEqualTo returns false, then "obviously" not equal
     if (!thisProperty->IsEqualTo( testProperty, canBeSuperset ))
@@ -718,7 +718,7 @@ bool vtkKWEObjectTreeNodeBase::IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
     }
 
   return true;
-  
+
 }
 
 //-----------------------------------------------------------------------------
@@ -739,7 +739,7 @@ void vtkKWEObjectTreeNodeBase::SerializeObject(vtkKWESerializer* ser)
       this->NodeObject = 0;
       }
     // the object is registered during serialization
-    ser->Serialize("NodeObject", this->NodeObject); 
+    ser->Serialize("NodeObject", this->NodeObject);
     }
 }
 
@@ -811,7 +811,7 @@ void vtkKWEObjectTreeNodeBase::PrintSelf(ostream& os, vtkIndent indent)
     }
 
   os << indent << "PROPERTIES:\n";
-  vtkSmartPointer<vtkInformationIterator> propertyIterator = 
+  vtkSmartPointer<vtkInformationIterator> propertyIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   propertyIterator->SetInformation( this->Properties );
 
@@ -826,10 +826,10 @@ void vtkKWEObjectTreeNodeBase::PrintSelf(ostream& os, vtkIndent indent)
     }
   os << indent << "END PROPERTIES:\n";
 
-  // Print the children... 
+  // Print the children...
   os << indent << "CHILDREN:\n";
   vtkKWEObjectTreeNodeBaseChildren::const_iterator childIterator;
-  for (childIterator = this->Children->begin(); 
+  for (childIterator = this->Children->begin();
     childIterator != this->Children->end(); childIterator++)
     {
     (*childIterator)->PrintSelf(os, indent.GetNextIndent());

@@ -1,21 +1,21 @@
 ##=============================================================================
 ##   This file is part of VTKEdge. See vtkedge.org for more information.
 ##
-##   Copyright (c) 2008 Kitware, Inc.
+##   Copyright (c) 2010 Kitware, Inc.
 ##
-##   VTKEdge may be used under the terms of the GNU General Public License 
-##   version 3 as published by the Free Software Foundation and appearing in 
-##   the file LICENSE.txt included in the top level directory of this source
-##   code distribution. Alternatively you may (at your option) use any later 
-##   version of the GNU General Public License if such license has been 
-##   publicly approved by Kitware, Inc. (or its successors, if any).
+##   VTKEdge may be used under the terms of the BSD License
+##   Please see the file Copyright.txt in the root directory of
+##   VTKEdge for further information.
 ##
-##   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-##   PURPOSE. See LICENSE.txt for additional details.
+##   Alternatively, you may see: 
 ##
-##   VTKEdge is available under alternative license terms. Please visit
-##   vtkedge.org or contact us at kitware@kitware.com for further information.
+##   http://www.vtkedge.org/vtkedge/project/license.html
+##
+##
+##   For custom extensions, consulting services, or training, please
+##   this or any other Kitware supported open source project, please
+##   contact Kitware at sales@kitware.com.
+##
 ##
 ##=============================================================================
 
@@ -35,27 +35,16 @@ set(TESTBASE ${PROJECT_NAME}${KIT})
 # -----------------------------------------------------------------------------
 set(MyTests
   TestIlluminatedLines.cxx
-  TestSurfaceLIC.cxx
   TestHiddenLinesRemoval.cxx
   #  TestTransferRates.cxx
   #  TestVBO.cxx
-  TestGlyph3DMapper.cxx
-  TestGlyph3DMapperMasking.cxx
-  TestGlyph3DMapperOrientationArray.cxx
-  TestGlyph3DMapperPicking.cxx
-  # TestGlyph3DMapper2.cxx
   )
 
 # add tests that require data from VTKData/Data
-if(VTK_DATA_ROOT)
-  set(MyTestsWithVTKData
-    TestGlyph3DMapperArrow.cxx
-    )
-endif(VTK_DATA_ROOT)
 
 include_directories("${VTKEdge_SOURCE_DIR}/Examples/Rendering/Cxx")
-create_test_sourcelist(Tests 
-  ${TESTBASE}CxxTests.cxx 
+create_test_sourcelist(Tests
+  ${TESTBASE}CxxTests.cxx
   ${MyTests} ${MyTestsWithVTKData}
   EXTRA_INCLUDE vtkTestDriver.h
   )

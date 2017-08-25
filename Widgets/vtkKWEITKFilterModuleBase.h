@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <fstream>   
+#include <fstream>
 
 class vtkImageData;
 class vtkImageStencilData;
@@ -41,14 +41,14 @@ class vtkImageStencilData;
 #if defined(VTK_TYPE_USE___INT64)
   #define vtkitkTemplateMacro___INT64 \
     vtkTemplateMacroCase_si64(VTK___INT64, __int64, call);
-#else 
-  #define vtkitkTemplateMacro___INT64 
+#else
+  #define vtkitkTemplateMacro___INT64
 #endif
 
 #if defined(VTK_TYPE_USE___INT64) && defined(VTK_TYPE_CONVERT_UI64_TO_DOUBLE)
   #define vtkitkTemplateMacro___UINT64 \
     vtkTemplateMacroCase_ui64(VTK_UNSIGNED___INT64, unsigned __int64, call);
-#else 
+#else
   #define vtkitkTemplateMacro___UINT64
 #endif
 
@@ -71,10 +71,10 @@ class vtkImageStencilData;
   vtkTemplateMacroCase(VTK_UNSIGNED_CHAR, unsigned char, call)
 
 
-namespace vtkitk 
+namespace vtkitk
 {
 
-class FilterModuleBase 
+class FilterModuleBase
 {
 
 public:
@@ -87,7 +87,7 @@ public:
   typedef itk::Size<3>            SizeType;
 
   /**  Constructor */
-  FilterModuleBase() 
+  FilterModuleBase()
     {
     this->m_CommandObserver    = CommandType::New();
     this->m_UpdateMessage      = "Processing the filter...";
@@ -100,7 +100,7 @@ public:
 
 
   /**  Destructor */
-  virtual ~FilterModuleBase() 
+  virtual ~FilterModuleBase()
     {
     }
 
@@ -142,20 +142,20 @@ public:
     return this->m_CommandObserver;
     }
 
-  void 
-  ProgressUpdate( itk::Object * itkNotUsed(caller), 
+  void
+  ProgressUpdate( itk::Object * itkNotUsed(caller),
                   const itk::EventObject & itkNotUsed(event) )
     {
-    // TODO Invoke a vtk event for the corresponding itk event here.... 
+    // TODO Invoke a vtk event for the corresponding itk event here....
     }
 
   virtual void SetInput( vtkImageData * itkNotUsed(data) ) = 0;
   virtual vtkImageData * GetInput() = 0;
 
   // Optional method for subclasses that output a stencil
-  virtual int GetOutputAsStencil( vtkImageStencilData * itkNotUsed(data) ) 
+  virtual int GetOutputAsStencil( vtkImageStencilData * itkNotUsed(data) )
              { return 0; };
-  virtual int GetSphereBoundedOutputAsStencil( vtkImageStencilData * 
+  virtual int GetSphereBoundedOutputAsStencil( vtkImageStencilData *
                                                         itkNotUsed(data),
                                             int itkNotUsed(center)[3],
                                             double itkNotUsed(radius)[3] )

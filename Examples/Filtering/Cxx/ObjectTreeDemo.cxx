@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -35,16 +35,19 @@
 #include "vtkKWEUUID.h"
 #include "vtkKWEInformationKeyMap.h"
 #include "vtkKWEObjectTreeColorProperty.h"
-#include "vtkKWEObjectTreeNodeIterator.h"
 #include "vtkKWEObjectTreeTransformableNode.h"
+#include "vtkKWEObjectTreeNodeIterator.h"
 #include "vtkKWEObjectTreeUserProperty.h"
 #include "vtkKWESerializationHelperMap.h"
 #include "vtkKWEXMLArchiveWriter.h"
 #include "vtkKWEXMLArchiveReader.h"
 #include "vtkKWEXMLElement.h"
+#include "vtkKWEFilteringInstantiator.h"
 #include "vtkSmartPointer.h"
 #include "vtkTestUtilities.h"
 #include "vtkTransform.h"
+#include "vtkCommonInstantiator.h"
+#include "vtkRenderingInstantiator.h"
 #include <vtksys/CommandLineArguments.hxx>
 #include <vtksys/ios/sstream>
 
@@ -112,12 +115,12 @@ int BuildOriginalTree(vtkKWEObjectTreeNodeBase *root)
   child[5] = vtkKWEObjectTreeTransformableNode::New();
   child[5]->SetName("Node 5 (grandchild)");
   vtkSmartPointer<vtkTransform> tmpTransform2 = vtkSmartPointer<vtkTransform>::New();
-  tmpTransform2->Translate(5.0, 0, 0); 
+  tmpTransform2->Translate(5.0, 0, 0);
   child[5]->SetTransform(tmpTransform2);
   tmpPtr->AddChild(child[5]);
   child[5]->Delete();
 
-  // actually add a transform 
+  // actually add a transform
   child[6] = vtkKWEObjectTreeTransformableNode::New();
   child[6]->SetName("Node 6 (grandchild)");
   vtkSmartPointer<vtkTransform> tmpTransform = vtkSmartPointer<vtkTransform>::New();
@@ -146,7 +149,7 @@ int BuildOriginalTree(vtkKWEObjectTreeNodeBase *root)
   root->RemoveChild(3);
 
   // and finally, start adding some properties
-  vtkSmartPointer<vtkKWEObjectTreeColorProperty> colorProp = 
+  vtkSmartPointer<vtkKWEObjectTreeColorProperty> colorProp =
     vtkSmartPointer<vtkKWEObjectTreeColorProperty>::New();
   double tmpColor[3] = {0.1, 0.5, 0.1};
   colorProp->SetColor(tmpColor);
@@ -157,7 +160,7 @@ int BuildOriginalTree(vtkKWEObjectTreeNodeBase *root)
   childIterator->SetTraversalToChildrenOnly();
   vtkKWEObjectTreeNodeBase *currentChild;
   cout << "Iterating through children of Node 2:\n";
-  for (childIterator->InitTraversal(); 
+  for (childIterator->InitTraversal();
        (currentChild = childIterator->GetCurrentNode());
        childIterator->GoToNextNode())
     {
@@ -173,12 +176,12 @@ int BuildOriginalTree(vtkKWEObjectTreeNodeBase *root)
       }
     }
 
-  // actually set the Object on one of the nodes; We want it to be serialized, 
+  // actually set the Object on one of the nodes; We want it to be serialized,
   // so that we get something more than <NodeObject type="Pointer"/>; thus set
   // as the Property we just created.
   baseChild->SetNodeObject( colorProp );
 
-  vtkSmartPointer<vtkKWEObjectTreeColorProperty> colorProp2 = 
+  vtkSmartPointer<vtkKWEObjectTreeColorProperty> colorProp2 =
     vtkSmartPointer<vtkKWEObjectTreeColorProperty>::New();
 
   // the correct result is that we shouldn't be able to add the same
@@ -213,7 +216,7 @@ int BuildOriginalTree(vtkKWEObjectTreeNodeBase *root)
     }
 
   // now add a "user" property
-  vtkSmartPointer<vtkKWEObjectTreeUserProperty> userProp = 
+  vtkSmartPointer<vtkKWEObjectTreeUserProperty> userProp =
     vtkSmartPointer<vtkKWEObjectTreeUserProperty>::New();
 
   // make up some keys for the user property
@@ -263,7 +266,7 @@ int CompareIterationResult(vtkKWEObjectTreeNodeIterator *iterator,
   int testResult = PASS;
   vtkKWEObjectTreeNodeBase *currentNode;
   int iterationIndex = 0;
-  for (iterator->InitTraversal(); 
+  for (iterator->InitTraversal();
        (currentNode = iterator->GetCurrentNode());
        iterator->GoToNextNode(), iterationIndex++)
     {
@@ -274,7 +277,7 @@ int CompareIterationResult(vtkKWEObjectTreeNodeIterator *iterator,
       }
     testString += currentNode->GetName();
     cout << testString;
-    if (iterationIndex >= expectedCount || 
+    if (iterationIndex >= expectedCount ||
       expectedResult[iterationIndex] != testString)
       {
       cout << " (WRONG!)\n";
@@ -287,7 +290,7 @@ int CompareIterationResult(vtkKWEObjectTreeNodeIterator *iterator,
     }
   if (iterationIndex != expectedCount)
     {
-    cout << "Iteration error: expected " << expectedCount << 
+    cout << "Iteration error: expected " << expectedCount <<
       " nodes, but iterated over " << iterationIndex << "\n";
     testResult = FAIL;
     }
@@ -309,10 +312,10 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
   cout << "EXAMPLE 0: Iterating over the children of the BaseNode:\n";
   vtkstd::string expectedResult0[3] = {"  Node 1 (child)",
     "  Node 2 (child)","  Node 3 (child)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult0, 3) == FAIL ? FAIL : testResult;
 
-  // Iteration Test/Example 1 
+  // Iteration Test/Example 1
   // now the whole tree, depth-first
   iterator->SetTraversalToEntireSubtree();
   iterator->SetTraversalModeToDepthFirst();
@@ -321,10 +324,10 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
     "  Node 2 (child)","    Node 6 (grandchild)","    Node 7 (grandchild)",
     "      Node 8 (great-grandchild)","    Node 5 (grandchild)",
     "  Node 3 (child)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult1, 8) == FAIL ? FAIL : testResult;
 
-  // Iteration Test/Example 2 
+  // Iteration Test/Example 2
   // now the whole tree, but breadth-first
   iterator->SetTraversalModeToBreadthFirst();
   cout << "\nEXAMPLE 2: Iterating through root (breadth-first):\n";
@@ -332,24 +335,24 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
     "  Node 2 (child)","  Node 3 (child)","    Node 6 (grandchild)",
     "    Node 7 (grandchild)","    Node 5 (grandchild)",
     "      Node 8 (great-grandchild)",};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult2, 8) == FAIL ? FAIL : testResult;
 
-  // Iteration Test/Example 3 
+  // Iteration Test/Example 3
   // now only nodes that have a UserProperty
   vtkSmartPointer<vtkKWEObjectTreeTransformableNode> patternNode =
     vtkSmartPointer<vtkKWEObjectTreeTransformableNode>::New();
-  vtkSmartPointer<vtkKWEObjectTreeUserProperty> userProp = 
+  vtkSmartPointer<vtkKWEObjectTreeUserProperty> userProp =
     vtkSmartPointer<vtkKWEObjectTreeUserProperty>::New();
   patternNode->AddProperty(userProp);
 
   iterator->SetPatternNode( patternNode );
   cout << "\nEXAMPLE 3: Iterating through root (breadth-first), with matching node:\n";
   vtkstd::string expectedResult3[2] = {"  Node 2 (child)","    Node 6 (grandchild)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult3, 2) == FAIL ? FAIL : testResult;
 
-  // Iteration Test/Example 4 
+  // Iteration Test/Example 4
   // now only nodes that have a UserProperty... which can be inherited;
   // Note, "Node 7" will inherit a UserProperty but is of the wrong type
   // (the PatternNode is more specific... vtkKWEObjectTreeTransformableNode)
@@ -359,7 +362,7 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
   cout << "\nEXAMPLE 4: Iterating through root (breadth-first), with matching node \n(can inherit property):\n";
   vtkstd::string expectedResult4[3] = {"  Node 2 (child)",
     "    Node 6 (grandchild)","    Node 5 (grandchild)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult4, 3) == FAIL ? FAIL : testResult;
 
   // Iteration Test/Example 5
@@ -368,7 +371,7 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
   patternNode->SetTransform(transform);
   cout << "\nEXAMPLE 5: Iterating through root (breadth-first), with matching node \n(can inherit property) and identity transform:\n";
   vtkstd::string expectedResult5[1] = {"    Node 6 (grandchild)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult5, 1) == FAIL ? FAIL : testResult;
 
   // Iteration Test/Example 6
@@ -381,7 +384,7 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
   cout << "\nEXAMPLE 6: Iterating through root (breadth-first), with (more basic) \nPatternNode (+ can inherit property):\n";
   vtkstd::string expectedResult6[4] = {"  Node 2 (child)",
     "    Node 6 (grandchild)","    Node 7 (grandchild)","    Node 5 (grandchild)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult6, 4) == FAIL ? FAIL : testResult;
 
   // Iteration Test/Example 6
@@ -391,7 +394,7 @@ int TestIteration( vtkKWEObjectTreeNodeBase *root )
   basePatternNode->SetNodeObject( tmpCamera );
   cout << "\nEXAMPLE 7: Iterating through root to find the (any) camera\n";
   vtkstd::string expectedResult7[1] = {"    Node 6 (grandchild)"};
-  testResult = 
+  testResult =
     CompareIterationResult(iterator, expectedResult7, 1) == FAIL ? FAIL : testResult;
 
   cout << endl;
@@ -442,7 +445,7 @@ bool AreInfoObjectsEqual(vtkInformation *info0, vtkInformation *info1)
     return false;
     }
 
-  vtkSmartPointer<vtkInformationIterator> infoIterator = 
+  vtkSmartPointer<vtkInformationIterator> infoIterator =
     vtkSmartPointer<vtkInformationIterator>::New();
   infoIterator->SetInformation( info0 );
   for (infoIterator->InitTraversal(); !infoIterator->IsDoneWithTraversal();
@@ -476,7 +479,7 @@ bool AreInfoObjectsEqual(vtkInformation *info0, vtkInformation *info1)
     else if (key->IsA("vtkInformationStringKey"))
       {
       vtkInformationStringKey *stringKey = static_cast<vtkInformationStringKey*>(key);
-      if (!info1->Has(stringKey) || 
+      if (!info1->Has(stringKey) ||
         strcmp(info1->Get(stringKey), info0->Get(stringKey)))
         {
         return false;
@@ -489,7 +492,7 @@ bool AreInfoObjectsEqual(vtkInformation *info0, vtkInformation *info1)
         {
         return false;
         }
-      }    
+      }
     else if (key->IsA("vtkInformationDoubleVectorKey"))
       {
       if (!AreVectorKeysEqual<vtkInformationDoubleVectorKey, double>(
@@ -505,7 +508,7 @@ bool AreInfoObjectsEqual(vtkInformation *info0, vtkInformation *info1)
 
 //-----------------------------------------------------------------------------
 template <typename ArrayType, typename ArrayDataType>
-bool AreTreeObjectDataArraysEqual(vtkKWEObjectTreeNodeBase *tree1, 
+bool AreTreeObjectDataArraysEqual(vtkKWEObjectTreeNodeBase *tree1,
                                   vtkKWEObjectTreeNodeBase *tree2)
 {
   vtkSmartPointer<vtkKWEObjectTreeNodeIterator> iterator =
@@ -550,7 +553,7 @@ bool AreTreeObjectDataArraysEqual(vtkKWEObjectTreeNodeBase *tree1,
     cout << "Error: Comparing vtkDataArrays... sizes don't match\n";
     return false;
     }
-  
+
   for (vtkIdType i = 0; i < array1->GetDataSize(); i++)
     {
     if (array1->GetValue(i) != array2->GetValue(i))
@@ -610,12 +613,12 @@ static int ObjectTreeDemo(int argc, char* argv[])
   vtkKWEInformationKeyMap::RegisterKey(vtkKWEObjectTreePropertyBase::IS_INHERITABLE());
 
   // ObjectTree we build
-  vtkSmartPointer<vtkKWEObjectTreeTransformableNode> root = 
+  vtkSmartPointer<vtkKWEObjectTreeTransformableNode> root =
     vtkSmartPointer<vtkKWEObjectTreeTransformableNode>::New();
   testResult = BuildOriginalTree(root);
 
   // Output the tree to an archive (a string stream)
-  vtkSmartPointer<vtkKWEXMLArchiveWriter> strWriter = 
+  vtkSmartPointer<vtkKWEXMLArchiveWriter> strWriter =
     vtkSmartPointer<vtkKWEXMLArchiveWriter>::New();
   vtksys_ios::ostringstream ostr;
   // Set to version to 1 (default is 0)
@@ -626,7 +629,7 @@ static int ObjectTreeDemo(int argc, char* argv[])
   // just for grins, and because I just changed the input to Serialize to take
   // a vector of vtkObjects instead of vtkSerializableObjects, add the camera
   // that is the "Object" of "Node 6" to the root objects
-  objs.push_back(camera);  
+  objs.push_back(camera);
   // The root node with be called ObjectTree. This is for
   // reference only.
   strWriter->Serialize(ostr, "ObjectTree", objs);
@@ -640,14 +643,14 @@ static int ObjectTreeDemo(int argc, char* argv[])
     vtksys_ios::ifstream ifstr( filename.c_str() );
 
     // Read using a vtkKWEXMLArchiveReader
-    vtkSmartPointer<vtkKWEXMLArchiveReader> reader = 
+    vtkSmartPointer<vtkKWEXMLArchiveReader> reader =
       vtkSmartPointer<vtkKWEXMLArchiveReader>::New();
     vtkstd::vector<vtkSmartPointer<vtkObject> > inObjs;
     reader->Serialize(ifstr, "ObjectTree", inObjs);
     ifstr.close();
 
     // compare tree we read in to the one we built
-    vtkKWEObjectTreeNodeBase *treeFromDisk = 
+    vtkKWEObjectTreeNodeBase *treeFromDisk =
       vtkKWEObjectTreeNodeBase::SafeDownCast( inObjs[0] );
     if (!root->IsEqualTo(treeFromDisk, true))
       {
@@ -658,15 +661,15 @@ static int ObjectTreeDemo(int argc, char* argv[])
 
   // Test IO via vtkKWEXMLElement instead of a stream
   vtkKWEXMLElement *rootElement = vtkKWEXMLElement::New();
-  vtkSmartPointer<vtkKWEXMLArchiveWriter> elemWriter = 
+  vtkSmartPointer<vtkKWEXMLArchiveWriter> elemWriter =
     vtkSmartPointer<vtkKWEXMLArchiveWriter>::New();
   elemWriter->Serialize(rootElement, "My Name", root);
 
-  vtkSmartPointer<vtkKWEXMLArchiveReader> elemReader = 
+  vtkSmartPointer<vtkKWEXMLArchiveReader> elemReader =
     vtkSmartPointer<vtkKWEXMLArchiveReader>::New();
   vtkstd::vector<vtkSmartPointer<vtkObject> > inFromElementObjs;
   elemReader->Serialize(rootElement, 0, inFromElementObjs);
-  vtkKWEObjectTreeNodeBase *treeFromElement = 
+  vtkKWEObjectTreeNodeBase *treeFromElement =
     vtkKWEObjectTreeNodeBase::SafeDownCast( inFromElementObjs[0] );
   if (!root->IsEqualTo(treeFromElement, true))
     {
@@ -683,17 +686,17 @@ static int ObjectTreeDemo(int argc, char* argv[])
 
   /////////////////////////////////////////////////////////////////////////////
   // write out the tree we built, then read it back and compare to the original
-  // to test write/read... 
+  // to test write/read...
   /////////////////////////////////////////////////////////////////////////////
-  char *tmpFileName = 
+  char *tmpFileName =
     vtkTestUtilities::GetArgOrEnvOrDefault("-T", argc, argv, "VTK_TEMP_DIR", ".");
   vtkstd::string testOutputInputFilename = tmpFileName;
   delete [] tmpFileName;
   testOutputInputFilename += "/testObjectTree.xml";
 
-  // Create an output stream to write the XML 
+  // Create an output stream to write the XML
   vtksys_ios::ofstream ofstr( testOutputInputFilename.c_str() );
-  vtkSmartPointer<vtkKWEXMLArchiveWriter> writer = 
+  vtkSmartPointer<vtkKWEXMLArchiveWriter> writer =
     vtkSmartPointer<vtkKWEXMLArchiveWriter>::New();
 
   // Set to version to 1 (default is 0)
@@ -710,11 +713,11 @@ static int ObjectTreeDemo(int argc, char* argv[])
   writer->Serialize(ofstr, "ObjectTree", outObjs);
   ofstr.close();
 
-  // now read it back in 
+  // now read it back in
   vtksys_ios::ifstream ifstr( testOutputInputFilename.c_str() );
 
   // Read using a vtkKWEXMLArchiveReader
-  vtkSmartPointer<vtkKWEXMLArchiveReader> reader = 
+  vtkSmartPointer<vtkKWEXMLArchiveReader> reader =
     vtkSmartPointer<vtkKWEXMLArchiveReader>::New();
   vtkstd::vector<vtkSmartPointer<vtkObject> > inObjs;
   reader->Serialize(ifstr, "ObjectTree", inObjs);
@@ -758,7 +761,7 @@ static int ObjectTreeDemo(int argc, char* argv[])
   // compare info we read in to the one we built
   if (inObjs.size() > 2)
     {
-    vtkInformation *infoFromDisk = 
+    vtkInformation *infoFromDisk =
       vtkInformation::SafeDownCast( inObjs[2] );
     if (!infoFromDisk || !AreInfoObjectsEqual(infoFromDisk, tmpInfo))
       {
@@ -777,7 +780,7 @@ static int ObjectTreeDemo(int argc, char* argv[])
   // comparisons along the way
   /////////////////////////////////////////////////////////////////////////////
   bool inheritedPropertyFlag;
-  vtkKWEObjectTreeUserProperty *userProperty = 
+  vtkKWEObjectTreeUserProperty *userProperty =
     vtkKWEObjectTreeUserProperty::SafeDownCast(
     treeFromDisk->GetChild(1)->GetProperty( vtkKWEObjectTreeUserProperty::KEY(), inheritedPropertyFlag ) );
   if (userProperty)
@@ -829,7 +832,7 @@ static int ObjectTreeDemo(int argc, char* argv[])
     cout << "Didn't get UserProperty as expected!!\n\n";
     testResult = FAIL;
     }
-  
+
   int uuidResult = root->CreateUUID();
   if (uuidResult == 1)
     {

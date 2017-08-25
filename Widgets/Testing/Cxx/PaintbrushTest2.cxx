@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkCommand.h"
@@ -42,7 +42,7 @@
 
 #include "vtkMetaImageReader.h"
 #include "vtkImageActor.h"
-#include "vtkImageData.h" 
+#include "vtkImageData.h"
 #include "vtkImageMapToColors.h"
 #include "vtkLookupTable.h"
 
@@ -50,19 +50,19 @@ int PaintbrushTest2( int argc, char *argv[] )
 {
   if( argc < 4 )
     {
-    std::cerr << "Usage error: \t " << argv[0] << "\t" 
+    std::cerr << "Usage error: \t " << argv[0] << "\t"
               << "Input_Image_Data \tEventsLogFile\t Mode(0:replay 1:record)" << std::endl;
     return EXIT_FAILURE;
     }
-   
+
   vtkImageReader2 * reader = vtkMetaImageReader::New();
 
   reader->SetFileName( argv[1] );
   if( reader->CanReadFile( argv[1] ) != 3 )
     {
-    std::cerr << "Meta image reader couldn't read the input data\t" << std::endl; 
+    std::cerr << "Meta image reader couldn't read the input data\t" << std::endl;
     return EXIT_FAILURE;
-    } 
+    }
 
   reader->Update();
 
@@ -73,7 +73,7 @@ int PaintbrushTest2( int argc, char *argv[] )
     renWin->AddRenderer(renderer);
   vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::New();
     iren->SetRenderWindow(renWin);
-    
+
   vtkImageViewer2 *viewer = vtkImageViewer2::New();
   viewer->SetRenderWindow(renWin);
   viewer->SetRenderer(renderer);
@@ -83,17 +83,17 @@ int PaintbrushTest2( int argc, char *argv[] )
   viewer->SetColorWindow(range[1] - range[0]);
   viewer->SetColorLevel(0.5 * (range[1] + range[0])+ 0.0000001);
   viewer->SetSlice( 15 );
-  
+
   vtkKWEPaintbrushWidget *widget = vtkKWEPaintbrushWidget::New();
-  widget->SetInteractor( iren ); 
-  
-  vtkKWEPaintbrushRepresentation2D * rep = 
+  widget->SetInteractor( iren );
+
+  vtkKWEPaintbrushRepresentation2D * rep =
     vtkKWEPaintbrushRepresentation2D::SafeDownCast(widget->GetRepresentation());
   rep->SetImageActor( viewer->GetImageActor() );
   rep->SetImageData(imageData);
-  rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing( 
+  rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetSpacing(
       imageData->GetSpacing() );
-  rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin( 
+  rep->GetPaintbrushOperation()->GetPaintbrushShape()->SetOrigin(
       imageData->GetOrigin() );
 
   iren->Initialize();
@@ -111,10 +111,10 @@ int PaintbrushTest2( int argc, char *argv[] )
   recorder->SetFileName(eventLogFileName.c_str());
   recorder->On();
 
-  //Set recorder mode depending on the user's choice 
+  //Set recorder mode depending on the user's choice
   int retVal = 1;
   unsigned int mode= atoi( argv[3] );
-  if( mode ) 
+  if( mode )
     {
     std::cout << "Interaction recording....." << std::endl;
     recorder->Record();

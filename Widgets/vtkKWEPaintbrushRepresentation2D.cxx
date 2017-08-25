@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see:
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWEPaintbrushRepresentation2D.h"
@@ -31,6 +31,7 @@
 #include "vtkKWEPaintbrushHighlightActors.h"
 #include "vtkKWEPaintbrushPropertyManager.h"
 #include "vtkKWEPaintbrushProperty.h"
+#include "vtkKWEPaintbrushLabelData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
 #include "vtkActor.h"
@@ -50,7 +51,7 @@
 #include "vtkAlgorithmOutput.h"
 #include "vtkExecutive.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushRepresentation2D, "$Revision: 633 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushRepresentation2D, "$Revision: 3301 $");
 vtkStandardNewMacro(vtkKWEPaintbrushRepresentation2D);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushRepresentation2D,ShapeOutlinePropertyDraw,vtkProperty);
 vtkCxxSetObjectMacro(vtkKWEPaintbrushRepresentation2D,ShapeOutlinePropertyErase,vtkProperty);
@@ -62,15 +63,16 @@ vtkKWEPaintbrushRepresentation2D::vtkKWEPaintbrushRepresentation2D()
   this->UseOverlay               = 1;
   this->ImageActor               = NULL;
   this->ImageData                = NULL;
+  this->SingleSliceThickBrush    = 0;
   this->ShapeOutline             = vtkPolyData::New();
-  
+
   // Create the mapper
   this->ShapeOutlineMapper  = vtkPolyDataMapper::New();
   vtkCoordinate *tcoord = vtkCoordinate::New();
   tcoord->SetCoordinateSystemToWorld();
   this->ShapeOutlineMapper->SetInput(this->ShapeOutline);
   tcoord->Delete();
-  
+
   // Create the actor
   this->ShapeOutlineActor   = vtkActor::New();
   this->ShapeOutlineActor->SetMapper( this->ShapeOutlineMapper );
@@ -91,31 +93,31 @@ vtkKWEPaintbrushRepresentation2D::vtkKWEPaintbrushRepresentation2D()
   this->ShapeOutlinePropertyInteract->SetOpacity(0.5);
   this->ShapeOutlinePropertyInteract->SetLineWidth( 2.0 );
   this->ShapeOutlineActor->SetProperty(this->ShapeOutlinePropertyDraw);
-  
-  /* TODELETE: The ellipsoid PaintbrushShape is already defined in the 
+
+  /* TODELETE: The ellipsoid PaintbrushShape is already defined in the
    * vtkKWEPaintbrushRepresentation constructor.
-  vtkKWEPaintbrushShapeEllipsoid *paintbrushShape 
+  vtkKWEPaintbrushShapeEllipsoid *paintbrushShape
                           = vtkKWEPaintbrushShapeEllipsoid::New();
   this->PaintbrushOperation->SetPaintbrushShape( paintbrushShape );
   paintbrushShape->SetWidth(5.0,5.0,5.0);
   paintbrushShape->Delete();
   */
-  
+
   this->PaintbrushBlend = NULL;
-  
-  this->CurrentShapePosition[0] = VTK_DOUBLE_MIN;
-  this->CurrentShapePosition[1] = VTK_DOUBLE_MIN;
-  this->CurrentShapePosition[2] = VTK_DOUBLE_MIN;
+
+  this->CurrentShapePosition[0] = VTK_FLOAT_MIN;
+  this->CurrentShapePosition[1] = VTK_FLOAT_MIN;
+  this->CurrentShapePosition[2] = VTK_FLOAT_MIN;
 
   // The paintbrushes snap to the grid
-  
-  vtkKWEVoxelAlignedImageActorPointPlacer * v 
+
+  vtkKWEVoxelAlignedImageActorPointPlacer * v
     = vtkKWEVoxelAlignedImageActorPointPlacer::New();
   this->SetShapePlacer(v);
   v->Delete();
 
   // Used if the paintbrush goes into "select" mode.
-  this->SelectionRepresentation = 
+  this->SelectionRepresentation =
     vtkKWEPaintbrushSelectionRepresentation2D::New();
   this->SelectionRepresentation->SetPaintbrushDrawing(this->PaintbrushDrawing);
 
@@ -149,32 +151,32 @@ void vtkKWEPaintbrushRepresentation2D::SetImageActor( vtkImageActor * imageActor
 {
   if (this->ImageActor != imageActor)
     {
-    vtkImageActor * var = this->ImageActor;                     
+    vtkImageActor * var = this->ImageActor;
     this->ImageActor = imageActor;
     if (this->ImageActor != NULL) { this->ImageActor->Register(this); }
     if (var != NULL)
-      {                                                    
-      var->UnRegister(this);                    
-      }                                                    
-    this->Modified();                                      
+      {
+      var->UnRegister(this);
+      }
+    this->Modified();
 
     if (this->ImageActor)
       {
       // Set the actor as the placer's actor, if it is an ImageActorPointPlacer.
-      vtkImageActorPointPlacer * imageActorPointPlacer = 
+      vtkImageActorPointPlacer * imageActorPointPlacer =
         vtkImageActorPointPlacer::SafeDownCast(this->ShapePlacer);
       if (imageActorPointPlacer)
         {
         imageActorPointPlacer->SetImageActor(this->ImageActor);
         }
       }
-    
-    if (vtkKWEPaintbrushSelectionRepresentation2D * selectionRep = 
+
+    if (vtkKWEPaintbrushSelectionRepresentation2D * selectionRep =
          vtkKWEPaintbrushSelectionRepresentation2D::SafeDownCast(
                                 this->SelectionRepresentation))
       {
       selectionRep->SetImageActor(imageActor);
-      } 
+      }
     }
 }
 
@@ -183,14 +185,14 @@ void vtkKWEPaintbrushRepresentation2D::SetImageData( vtkImageData * imageData )
 {
   if (this->ImageData != imageData)
     {
-    vtkImageData * var = this->ImageData;                     
+    vtkImageData * var = this->ImageData;
     this->ImageData = imageData;
     if (this->ImageData != NULL) { this->ImageData->Register(this); }
     if (var != NULL)
-      {                                                    
-      var->UnRegister(this);                    
-      }                                                    
-    this->Modified();                                      
+      {
+      var->UnRegister(this);
+      }
+    this->Modified();
     }
 
   if (this->ImageData)
@@ -205,14 +207,14 @@ void vtkKWEPaintbrushRepresentation2D::SetImageData( vtkImageData * imageData )
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation2D::SetPaintbrushOperation( 
+void vtkKWEPaintbrushRepresentation2D::SetPaintbrushOperation(
                           vtkKWEPaintbrushOperation * filter )
 {
   if (this->PaintbrushOperation != filter)
     {
     this->Superclass::SetPaintbrushOperation(filter);
 
-    if ( this->PaintbrushOperation && this->ImageActor && 
+    if ( this->PaintbrushOperation && this->ImageActor &&
         !this->PaintbrushOperation->GetImageData())
       {
       this->PaintbrushOperation->SetImageData(this->ImageActor->GetInput());
@@ -224,23 +226,23 @@ void vtkKWEPaintbrushRepresentation2D::SetPaintbrushOperation(
 void vtkKWEPaintbrushRepresentation2D::CreateShapeOutline( double *pos )
 {
   // TODO: Create a polydata that outlines the actual template..
-  
+
   if (!this->ImageActor)
     {
-    vtkErrorMacro( << 
+    vtkErrorMacro( <<
       "The image actor must be set prior to overlaying the paintbrush template");
     }
-  
+
   if (this->ShapeOutline)
     {
     this->ShapeOutline->Delete();
     this->ShapeOutline = NULL;
     }
-    
+
   vtkImageData *image = this->ImageActor->GetInput();
   if (!image)
     {
-    vtkErrorMacro( << 
+    vtkErrorMacro( <<
       "The image actor must be set prior to overlaying the paintbrush template");
     return;
     }
@@ -263,7 +265,7 @@ void vtkKWEPaintbrushRepresentation2D::CreateShapeOutline( double *pos )
     {
     this->ShapeOutline->DeepCopy(pd.GetPointer());
     }
-    
+
   this->CurrentShapePosition[0] = pos[0];
   this->CurrentShapePosition[1] = pos[1];
   this->CurrentShapePosition[2] = pos[2];
@@ -273,7 +275,7 @@ void vtkKWEPaintbrushRepresentation2D::CreateShapeOutline( double *pos )
 void vtkKWEPaintbrushRepresentation2D::BuildRepresentation()
 {
   this->HighlightActors->SetExtent(this->ImageActor->GetDisplayExtent());
-  this->HighlightActors->BuildRepresentation();  
+  this->HighlightActors->BuildRepresentation();
 }
 
 //----------------------------------------------------------------------
@@ -369,7 +371,7 @@ int vtkKWEPaintbrushRepresentation2D::HasTranslucentPolygonalGeometry()
   if ( this->HighlightActors->GetVisibility() )
     {
     result += this->HighlightActors->HasTranslucentPolygonalGeometry();
-    }  
+    }
   return result;
 }
 
@@ -391,7 +393,7 @@ int vtkKWEPaintbrushRepresentation2D::RenderTranslucentGeometry(vtkViewport *vie
   if ( this->HighlightActors->GetVisibility() )
     {
     count += this->HighlightActors->RenderTranslucentGeometry(viewport);
-    }  
+    }
   return count;
 }
 #endif
@@ -399,11 +401,11 @@ int vtkKWEPaintbrushRepresentation2D::RenderTranslucentGeometry(vtkViewport *vie
 //----------------------------------------------------------------------
 int vtkKWEPaintbrushRepresentation2D::ActivateShapeOutline( int x, int y )
 {
-  
+
   double displayPos[2], worldPos[3], worldOrient[9];
-  displayPos[0] = x;   
+  displayPos[0] = x;
   displayPos[1] = y;
-  
+
   // Compute world pos from the display pos.
   if ( !this->ShapePlacer->ComputeWorldPosition( this->Renderer,
                                                  displayPos, worldPos,
@@ -415,9 +417,9 @@ int vtkKWEPaintbrushRepresentation2D::ActivateShapeOutline( int x, int y )
 
   this->LastDisplayPosition[0] = x;  // bookkeeping
   this->LastDisplayPosition[1] = y;
-  
+
   // If the paintbrush template has moved, draw it again at the new spot.
-  if ( this->InteractionState == PaintbrushResize 
+  if ( this->InteractionState == PaintbrushResize
    ||  this->InteractionState == PaintbrushIsotropicResize
    ||  vtkMath::Distance2BetweenPoints(
          this->CurrentShapePosition, worldPos) > 1e-5)
@@ -425,8 +427,28 @@ int vtkKWEPaintbrushRepresentation2D::ActivateShapeOutline( int x, int y )
     this->CreateShapeOutline(worldPos);
     return 1;
     }
-  
+
   return 0;
+}
+
+//----------------------------------------------------------------------
+void vtkKWEPaintbrushRepresentation2D::AddShapeToCurrentStroke( double p[3] )
+{
+  // If we are doing a slice by slice segmentation, do a clip with the 
+  // current slice.
+  int extent[6];
+  if (this->SingleSliceThickBrush)
+    {
+    this->ImageActor->GetDisplayExtent(extent);
+    }
+  else
+    {
+    this->ImageData->GetExtent(extent);
+    }
+  this->PaintbrushDrawing->GetPaintbrushOperation()->
+            GetPaintbrushShape()->SetClipExtent(extent);
+
+  this->Superclass::AddShapeToCurrentStroke(p);
 }
 
 //----------------------------------------------------------------------
@@ -447,32 +469,32 @@ void vtkKWEPaintbrushRepresentation2D::GetActors2D( vtkPropCollection * )
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation2D::SetStateToDraw()     
-{ 
+void vtkKWEPaintbrushRepresentation2D::SetStateToDraw()
+{
   this->ShapeOutlineActor->SetProperty(this->ShapeOutlinePropertyDraw);
   this->SetShapeOutlineVisibility(1);
   this->Superclass::SetStateToDraw();
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation2D::SetStateToErase()     
-{ 
-  this->ShapeOutlineActor->SetProperty(this->ShapeOutlinePropertyErase);  
+void vtkKWEPaintbrushRepresentation2D::SetStateToErase()
+{
+  this->ShapeOutlineActor->SetProperty(this->ShapeOutlinePropertyErase);
   this->SetShapeOutlineVisibility(1);
   this->Superclass::SetStateToErase();
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation2D::SetStateToInteract()     
-{ 
+void vtkKWEPaintbrushRepresentation2D::SetStateToInteract()
+{
   this->ShapeOutlineActor->SetProperty(this->ShapeOutlinePropertyInteract);
   this->SetShapeOutlineVisibility(1);
   this->Superclass::SetStateToInteract();
 }
 
 //----------------------------------------------------------------------
-void vtkKWEPaintbrushRepresentation2D::SetStateToDisabled()     
-{ 
+void vtkKWEPaintbrushRepresentation2D::SetStateToDisabled()
+{
   this->SetShapeOutlineVisibility(0);
   this->Superclass::SetStateToDisabled();
 }
@@ -491,10 +513,10 @@ void vtkKWEPaintbrushRepresentation2D::InstallPipeline()
     {
     this->PaintbrushBlend = vtkKWEPaintbrushBlend::New();
     }
-    
+
   // What we do here is to stick a "Blender" before the ImageActor. The blender
   // will blend the background image with the sketch to give us an overlay.
-  if (!this->PipelineInstalled && 
+  if (!this->PipelineInstalled &&
       this->ImageActor->GetInput() != this->PaintbrushBlend->GetOutput())
     {
     // The "If" ensures that the pipeline has not already been installed.
@@ -502,10 +524,10 @@ void vtkKWEPaintbrushRepresentation2D::InstallPipeline()
     this->ImageActor->SetInput(this->PaintbrushBlend->GetOutput());
     }
 
-  // Sanity check  
-  if (this->PaintbrushDrawing->GetRepresentation() != vtkKWEPaintbrushEnums::Binary && 
+  // Sanity check
+  if (this->PaintbrushDrawing->GetRepresentation() != vtkKWEPaintbrushEnums::Binary &&
       this->PaintbrushDrawing->GetRepresentation() != vtkKWEPaintbrushEnums::Label)
-    { 
+    {
     vtkErrorMacro( << "This class is intended to be a representation for "
      << "overlaying vtkKWEPaintbrushStencilData or vtkKWEPaintbrushLabelData on an "
      << "image, not vtkKWEPaintbrushGrayscaleData !")
@@ -540,7 +562,7 @@ void vtkKWEPaintbrushRepresentation2D::UnInstallPipeline()
   else
     {
     // Get the consumer process object. Have the consumer's input be the
-    // PaintbrushBlend's input. In otherwords, remove PaintbrushBlend 
+    // PaintbrushBlend's input. In otherwords, remove PaintbrushBlend
     // from the chain.
     vtkInformation *info = this->PaintbrushBlend->GetExecutive()->
                                               GetOutputInformation(0);
@@ -549,12 +571,12 @@ void vtkKWEPaintbrushRepresentation2D::UnInstallPipeline()
 
     for (int consumerIdx = 0; consumerIdx < consumerCount; consumerIdx++)
       {
-      if (vtkAlgorithm * consumerProcessObject 
+      if (vtkAlgorithm * consumerProcessObject
             = consumers[consumerIdx]->GetAlgorithm())
         {
         // The assumption is made that PaintbrushBlend's output is always on
         // the first port of the consumer's. In general the consumer is another
-        // PaintbrushBlend, or an ImageActor, the latter which is handled on 
+        // PaintbrushBlend, or an ImageActor, the latter which is handled on
         // the other "if" block.
         consumerProcessObject->SetInputConnection( 0,
             this->PaintbrushBlend->GetInputConnection(0,0) );
@@ -592,8 +614,8 @@ void vtkKWEPaintbrushRepresentation2D::DeepCopy(vtkWidgetRepresentation *rep)
     {
     return;
     }
-  
-  vtkKWEPaintbrushRepresentation2D *r 
+
+  vtkKWEPaintbrushRepresentation2D *r
     = vtkKWEPaintbrushRepresentation2D::SafeDownCast(rep);
   if (r)
     {
@@ -705,6 +727,110 @@ void vtkKWEPaintbrushRepresentation2D::GetEtchExtents( int extent[6] )
         }
       }
     }
+}
+
+//----------------------------------------------------------------------
+int vtkKWEPaintbrushRepresentation2D
+::CopySketchToPreviousSlice( vtkKWEPaintbrushSketch *sketch )
+{
+  // Figure out the extents of the current slice and the next slice.
+
+  if (!this->PaintbrushDrawing)
+    {
+    vtkErrorMacro( << "Drawing does not exist!");
+    return 0;
+    }
+  if (this->PaintbrushDrawing->GetRepresentation() 
+      != vtkKWEPaintbrushEnums::Label)
+    {
+    vtkErrorMacro( << "This functionality exists only for label maps now");
+    return 0;
+    }
+  
+  // Figure out the extents of the current slice and the next slice.
+
+  int currSliceExt[6], targetSliceExt[6], labelImageExtent[6];
+  this->ImageActor->GetDisplayExtent(currSliceExt);
+
+  for (int i = 0; i < 3; i++)
+    {
+    targetSliceExt[2*i] = currSliceExt[2*i];
+    targetSliceExt[2*i+1] = currSliceExt[2*i+1];
+    if (currSliceExt[2*i] == currSliceExt[2*i+1])
+      {
+      targetSliceExt[2*i] = currSliceExt[2*i] - 1;
+      targetSliceExt[2*i+1] = currSliceExt[2*i+1] - 1;
+      }
+    }
+
+  // Do a sanity check to make sure that the target extents are within the
+  // whole extent. This may not be true if we are on the last slice.
+
+  vtkKWEPaintbrushLabelData *lData =
+    vtkKWEPaintbrushLabelData::SafeDownCast(
+        this->PaintbrushDrawing->GetPaintbrushData());
+  vtkImageData *labelImage = lData->GetLabelMap();
+  labelImage->GetExtent(labelImageExtent);
+
+  if (!vtkMath::ExtentIsWithinOtherExtent(targetSliceExt, labelImageExtent))
+    {
+    return 0;
+    }
+
+  sketch->CopySketchFromExtentToExtent(currSliceExt, targetSliceExt);
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int vtkKWEPaintbrushRepresentation2D
+::CopySketchToNextSlice( vtkKWEPaintbrushSketch *sketch )
+{
+  // Figure out the extents of the current slice and the next slice.
+
+  if (!this->PaintbrushDrawing)
+    {
+    vtkErrorMacro( << "Drawing does not exist!");
+    return 0;
+    }
+  if (this->PaintbrushDrawing->GetRepresentation() 
+      != vtkKWEPaintbrushEnums::Label)
+    {
+    vtkErrorMacro( << "This functionality exists only for label maps now");
+    return 0;
+    }
+  
+  // Figure out the extents of the current slice and the next slice.
+
+  int currSliceExt[6], targetSliceExt[6], labelImageExtent[6];
+  this->ImageActor->GetDisplayExtent(currSliceExt);
+
+  for (int i = 0; i < 3; i++)
+    {
+    targetSliceExt[2*i] = currSliceExt[2*i];
+    targetSliceExt[2*i+1] = currSliceExt[2*i+1];
+    if (currSliceExt[2*i] == currSliceExt[2*i+1])
+      {
+      targetSliceExt[2*i] = currSliceExt[2*i] + 1;
+      targetSliceExt[2*i+1] = currSliceExt[2*i+1] + 1;
+      }
+    }
+
+  // Do a sanity check to make sure that the target extents are within the
+  // whole extent. This may not be true if we are on the last slice.
+
+  vtkKWEPaintbrushLabelData *lData =
+    vtkKWEPaintbrushLabelData::SafeDownCast(
+        this->PaintbrushDrawing->GetPaintbrushData());
+  vtkImageData *labelImage = lData->GetLabelMap();
+  labelImage->GetExtent(labelImageExtent);
+
+  if (!vtkMath::ExtentIsWithinOtherExtent(targetSliceExt, labelImageExtent))
+    {
+    return 0;
+    }
+
+  sketch->CopySketchFromExtentToExtent(currSliceExt, targetSliceExt);
+  return 1;
 }
 
 //----------------------------------------------------------------------

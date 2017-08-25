@@ -1,31 +1,31 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEXMLArchiveWriter - Writes an XML archive to output stream
 // .SECTION Description
 // Given a vector of vtkObject, vtkKWEXMLArchiveWriter writes
 // the object graph in an XML format. Note, to be written an object
-// must either be a subclass of vtkSerializableObject or have a helper 
-// registered with vtkKWESerializationHelperMap which knows how to 
-// serialize the object type.  All objects are written in a flat collection 
-// under the root element. All references to these objects are stored using 
+// must either be a subclass of vtkSerializableObject or have a helper
+// registered with vtkKWESerializationHelperMap which knows how to
+// serialize the object type.  All objects are written in a flat collection
+// under the root element. All references to these objects are stored using
 // elements of type Pointer. All objects in the input vector are stored under
 // a RootObjects element.  For example:
 // \code
@@ -91,16 +91,16 @@ public:
   // not used when restoring the archive so it is for information
   // only. For example:
   // \code
-  // vtkKWEObjectTreeTransformableNode *root = 
+  // vtkKWEObjectTreeTransformableNode *root =
   //   vtkKWEObjectTreeTransformableNode::New();
   // root->SetName("RootNode");
-  // 
-  // vtkKWEObjectTreeTransformableNode *child = 
+  //
+  // vtkKWEObjectTreeTransformableNode *child =
   //   vtkKWEObjectTreeTransformableNode::New();
   // root->SetName("Child Node");
   // root->AddChild( child );
-  // 
-  // vtkSmartPointer<vtkKWEXMLArchiveWriter> writer = 
+  //
+  // vtkSmartPointer<vtkKWEXMLArchiveWriter> writer =
   //   vtkSmartPointer<vtkKWEXMLArchiveWriter>::New();
   // vtksys_ios::ostringstream ostr;
   // writer->SetArchiveVersion(1);
@@ -108,21 +108,21 @@ public:
   // objs.push_back(root);
   // writer->Serialize(ostr, "ObjectTree", objs);
   // \endcode
-  virtual void Serialize(ostream& ostr, const char* rootName, 
+  virtual void Serialize(ostream& ostr, const char* rootName,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs);
 
   // Description:
   // Additional entry point, used to write a vector of
   // objects to the XML archive, in the form of a vtkKWEXMLElement which
   // is assumed to have been allocated by the caller.
-  virtual void Serialize(vtkKWEXMLElement* elem, const char* rootName, 
+  virtual void Serialize(vtkKWEXMLElement* elem, const char* rootName,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs);
 
   // Description:
   // Additional entry point, used to write a single (root) object
   // to the XML archive, in the form of a vtkKWEXMLElement which
   // is assumed to have been allocated by the caller.
-  virtual void Serialize(vtkKWEXMLElement* elem, const char* rootName, 
+  virtual void Serialize(vtkKWEXMLElement* elem, const char* rootName,
     vtkObject *objs);
 
   // Description:
@@ -136,7 +136,7 @@ public:
   // Description:
   // Serializes a single unsigned long.
   virtual void Serialize(const char* name, unsigned long& val) ;
-  
+
  // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, unsigned long*& val, unsigned int& length);
@@ -156,7 +156,7 @@ public:
   // Description:
   // Serializes a single double.
   virtual void Serialize(const char* name, double& val);
-  
+
   // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, double*& val, unsigned int& length);
@@ -171,9 +171,9 @@ public:
 
   // Description:
   // Serializes a vtkObject.  Note, the object must either be subclass of
-  // vtkKWESerializableObject or have a helper registered with 
-  // vtkKWESerializableObjectManager which knows how to serialize the object 
-  // type. The weakPtr parameter is actually ignored (we don't write an 
+  // vtkKWESerializableObject or have a helper registered with
+  // vtkKWESerializableObjectManager which knows how to serialize the object
+  // type. The weakPtr parameter is actually ignored (we don't write an
   // attribute indicating it is weak, if it is) because the reading code will
   // have the same parameter specifying the pointer is weak. Here for symmetry.
   virtual void Serialize(const char* name, vtkObject*& object, bool weakPtr = false);
@@ -187,26 +187,32 @@ public:
   // is actually ignored (we don't write an attribute indicating it is weak,
   // if it is) because the reading code will have the same paremter specifying
   // the  pointer is weak.  Here for symmetry.
-  virtual void Serialize(const char* name, 
-    vtkstd::vector<vtkSmartPointer<vtkObject> >& objs, 
+  virtual void Serialize(const char* name,
+    vtkstd::vector<vtkSmartPointer<vtkObject> >& objs,
     bool weakPtr = false);
 
   // Description:
   // Serializes a map from int to vector of vtkObjects.
-  virtual void Serialize(const char* name, 
+  virtual void Serialize(const char* name,
     vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > >& objs);
 
 protected:
   vtkKWEXMLArchiveWriter();
   ~vtkKWEXMLArchiveWriter();
 
+  // Description:
+  // Try to serialize the given vtkObject if it has not been serialized already.
+  // If the object could not be serialized then return 0, else return the
+  // id for serialized object's xml tag.  The id is always greater than or
+  // equal to 1.  If the object has already been serialized then this will just
+  // lookup and return the id.
   virtual unsigned int Serialize(vtkObject*& obj);
-  
+
 private:
   vtkKWEXMLArchiveWriter(const vtkKWEXMLArchiveWriter&);  // Not implemented.
   void operator=(const vtkKWEXMLArchiveWriter&);  // Not implemented.
 
-  virtual void CreateDOM(const char* rootName, 
+  virtual void CreateDOM(const char* rootName,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs);
 
   void SetRootElement(vtkKWEXMLElement*);

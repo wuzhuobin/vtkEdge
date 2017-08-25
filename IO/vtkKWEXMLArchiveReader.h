@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEXMLArchiveReader - Reads an XML archive from input stream
@@ -26,8 +26,8 @@
 // \code
 //  vtkstd::vector<vtkSmartPointer<vtkObject> > objs;
 //  ifstream ifs(filename);
-//  
-//  vtkSmartPointer<vtkKWEXMLArchiveReader> reader = 
+//
+//  vtkSmartPointer<vtkKWEXMLArchiveReader> reader =
 //    vtkSmartPointer<vtkKWEXMLArchiveReader>::New();
 //  reader->Serialize(istr, "ObjectTree", objs);
 // .. Do something with objs
@@ -63,15 +63,15 @@ public:
   // Main entry point called to read an XML archive.
   // It populates the obj vector with the root objects in the
   // archive (under the RootObjects element).
-  virtual void Serialize(istream& istr, const char* rootName, 
+  virtual void Serialize(istream& istr, const char* rootName,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs);
 
   // Description:
   // Additional entry point called to read an XML archive from a
-  // vtkKWEXMLElement (as opposed to "from a stream"). It 
+  // vtkKWEXMLElement (as opposed to "from a stream"). It
   // populates the obj vector with the root objects in the
   // archive (under the RootObjects element).
-  virtual void Serialize(vtkKWEXMLElement *rootElement, const char* rootName, 
+  virtual void Serialize(vtkKWEXMLElement *rootElement, const char* rootName,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs);
 
   // Description:
@@ -85,7 +85,7 @@ public:
   // Description:
   // Serializes a single unsigned long.
   virtual void Serialize(const char* name, unsigned long& val) ;
-  
+
   // Description:
   // Serializes an array.
   virtual void Serialize(const char* name, unsigned long*& val, unsigned int& length);
@@ -105,7 +105,7 @@ public:
   // Description:
   // Reads a single double.
   virtual void Serialize(const char* name, double& val);
-  
+
   // Description:
   // Reads an array.
   virtual void Serialize(const char* name, double*& val, unsigned int& length);
@@ -130,13 +130,13 @@ public:
 
   // Description:
   // Reads a vector of vtkObjects.
-  virtual void Serialize(const char* name, 
+  virtual void Serialize(const char* name,
     vtkstd::vector<vtkSmartPointer<vtkObject> >& objs,
-    bool weakPtr = false); 
+    bool weakPtr = false);
 
   // Description:
   // Reads a map from int to vector of vtkObject.
-  virtual void Serialize(const char* name, 
+  virtual void Serialize(const char* name,
     vtkstd::map<int, vtkstd::vector<vtkSmartPointer<vtkObject> > >& objs);
 
 protected:
@@ -162,7 +162,7 @@ private:
 
 
   void SetRootElement(vtkKWEXMLElement* re);
-  
+
   vtkKWEXMLArchiveReaderInternals* Internal;
 };
 

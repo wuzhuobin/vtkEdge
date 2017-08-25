@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -56,7 +56,7 @@
 #include "vtksys/ios/sstream"
 
 static const char *vtkKWMyWindowWidgetStrings[] = {
-  "Axial", 
+  "Axial",
   "Coronal",
   "Sagittal",
   "Blank",
@@ -65,7 +65,7 @@ static const char *vtkKWMyWindowWidgetStrings[] = {
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro( vtkKWMyWindow );
-vtkCxxRevisionMacro(vtkKWMyWindow, "$Revision: 787 $");
+vtkCxxRevisionMacro(vtkKWMyWindow, "$Revision: 1774 $");
 vtkCxxSetObjectMacro( vtkKWMyWindow, Input, vtkImageData );
 
 //----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ vtkKWMyWindow::~vtkKWMyWindow()
     }
 
   // TODO I don't know why the following 6 lines are necessary, but their absence
-  // causes a warning "A TkRenderWidget is being destroyed before it associated 
+  // causes a warning "A TkRenderWidget is being destroyed before it associated
   // vtkRenderWindow is destroyed.".
   this->GetNthRenderWidget(0)->SetParent(NULL);
   if (this->FourPaneView)
@@ -109,7 +109,7 @@ vtkKWMyWindow::~vtkKWMyWindow()
     this->GetNthRenderWidget(1)->SetParent(NULL);
     this->GetNthRenderWidget(2)->SetParent(NULL);
     }
-  
+
   this->SelectionFrame->Delete();
   this->SelectionFrameLayoutManager->Delete();
   if (this->Filename)
@@ -131,7 +131,7 @@ vtkKWMyWindow::~vtkKWMyWindow()
 }
 
 //----------------------------------------------------------------------------
-void vtkKWMyWindow::SetApplication( vtkKWApplication * app ) 
+void vtkKWMyWindow::SetApplication( vtkKWApplication * app )
 {
   this->Application = app;
 }
@@ -163,8 +163,8 @@ void vtkKWMyWindow::Initialize()
       sel_frame->AllowChangeTitleOff();
       sel_frame->Delete();
       }
-    
-    app->Script("pack %s -expand y -fill both -anchor c -expand y", 
+
+    app->Script("pack %s -expand y -fill both -anchor c -expand y",
                 this->SelectionFrameLayoutManager->GetWidgetName());
 
     // Add a render widget, attach it to the view frame, and pack
@@ -175,7 +175,7 @@ void vtkKWMyWindow::Initialize()
           GetWidgetWithTitle(vtkKWMyWindowWidgetStrings[i])->GetBodyFrame());
       renwidget->Create();
       renwidget->CornerAnnotationVisibilityOn();
-      app->Script("pack %s -expand y -fill both -anchor c -expand y", 
+      app->Script("pack %s -expand y -fill both -anchor c -expand y",
                   renwidget->GetWidgetName());
       renwidget->Delete();
       }
@@ -188,18 +188,18 @@ void vtkKWMyWindow::Initialize()
     this->SelectionFrame->Create();
     this->SelectionFrame->SetSelectionList(3, vtkKWMyWindowWidgetStrings);
 
-    app->Script("pack %s -expand y -fill both -anchor c -expand y", 
+    app->Script("pack %s -expand y -fill both -anchor c -expand y",
                 this->SelectionFrame->GetWidgetName());
 
     vtkKWRenderWidget * renwidget = vtkKWRenderWidget::New();
     renwidget->SetParent(this->SelectionFrame->GetBodyFrame());
     renwidget->Create();
     renwidget->CornerAnnotationVisibilityOn();
-    app->Script("pack %s -expand y -fill both -anchor c -expand y", 
+    app->Script("pack %s -expand y -fill both -anchor c -expand y",
                 renwidget->GetWidgetName());
     renwidget->Delete();
     }
-  
+
 
   // Read the data, if an input hasn't already been specified
 
@@ -242,7 +242,7 @@ void vtkKWMyWindow::Initialize()
     this->SliceScale[0]->Create();
     this->SliceScale[0]->SetCommand(this, "SetSliceFromScaleCallback");
 
-    app->Script("pack %s -side top -expand n -fill x -padx 2 -pady 2", 
+    app->Script("pack %s -side top -expand n -fill x -padx 2 -pady 2",
                 this->SliceScale[0]->GetWidgetName());
 
     this->SelectionFrame->SetSelectionListCommand(
@@ -252,7 +252,7 @@ void vtkKWMyWindow::Initialize()
     {
     for (int i = 0; i < 3; i++)
       {
-      vtkKWSelectionFrame * sel_frame = 
+      vtkKWSelectionFrame * sel_frame =
         this->SelectionFrameLayoutManager->
              GetWidgetWithTitle(vtkKWMyWindowWidgetStrings[i]);
       vtkKWRenderWidget * rw = this->GetRenderWidget(sel_frame);
@@ -280,7 +280,7 @@ void vtkKWMyWindow::Initialize()
       s << "SetSliceFromScaleCallback" << i << std::ends;
       this->SliceScale[i]->SetCommand(this, s.str().c_str());
 
-      app->Script("pack %s -side top -anchor nw -expand yes -fill y -padx 0 -pady 0", 
+      app->Script("pack %s -side top -anchor nw -expand yes -fill y -padx 0 -pady 0",
                   this->SliceScale[i]->GetWidgetName());
       }
     }
@@ -288,7 +288,7 @@ void vtkKWMyWindow::Initialize()
   this->UpdateSliceRanges();
 
   this->Window->Display();
-  
+
   // Repeatedly set the layout manager resolution here. When win->Display
   // is invoked the layout manager is automatically re-adjusted.
   if (this->FourPaneView)
@@ -310,8 +310,8 @@ int vtkKWMyWindow::Run()
 //----------------------------------------------------------------------------
 vtkKWRenderWidget * vtkKWMyWindow::GetNthRenderWidget( int i )
 {
-  return this->GetRenderWidget( 
-      this->FourPaneView ? 
+  return this->GetRenderWidget(
+      this->FourPaneView ?
           this->SelectionFrameLayoutManager->
              GetWidgetWithTitle(vtkKWMyWindowWidgetStrings[i])
         : this->SelectionFrame);
@@ -406,7 +406,7 @@ void vtkKWMyWindow::UpdateSliceRanges()
     {
     for (int i = 0; i < 3; i++)
       {
-      this->SliceScale[i]->SetRange( this->ImageViewer[i]->GetSliceMin(), 
+      this->SliceScale[i]->SetRange( this->ImageViewer[i]->GetSliceMin(),
                                      this->ImageViewer[i]->GetSliceMax());
       this->SliceScale[i]->SetValue( this->ImageViewer[i]->GetSlice() );
       }
@@ -420,7 +420,7 @@ void vtkKWMyWindow::UpdateSliceRanges()
 }
 
 //----------------------------------------------------------------------------
-void vtkKWMyWindow::RenderWidgetSelectionChangedCallback( 
+void vtkKWMyWindow::RenderWidgetSelectionChangedCallback(
   const char * title, vtkKWSelectionFrame * )
 {
   for (int i = 0; i < 3; i++)
@@ -438,7 +438,7 @@ void vtkKWMyWindow::RenderWidgetSelectionChangedCallback(
 }
 
 //----------------------------------------------------------------------------
-void vtkKWMyWindow::GetValidReader( 
+void vtkKWMyWindow::GetValidReader(
     vtkImageReader2* & reader, const char *filename)
 {
   if (filename == NULL)
@@ -456,7 +456,7 @@ void vtkKWMyWindow::GetValidReader(
 /*
  * Damn ! I can't read .vtk files. they don't subclass from vtkImageReader2
  * TODO : put a work around for VTK files later
- * 
+ *
  * reader = vtkXMLImageDataReader::New();
   int valid = reader->CanReadFile(filename);
   if (reader->CanReadFile(filename) == 3)
@@ -470,13 +470,13 @@ void vtkKWMyWindow::GetValidReader(
     {
     return;
     }
-  
+
   reader = vtkBMPReader::New();
   if (reader->CanReadFile(filename) == 3)
     {
     return;
     }
-  
+
   reader = vtkPNMReader::New();
   if (reader->CanReadFile(filename) == 3)
     {
@@ -488,7 +488,7 @@ void vtkKWMyWindow::GetValidReader(
 }
 
 //----------------------------------------------------------------------------
-void vtkKWMyWindow::CreateInfo( vtksys_stl::string name, vtkKWApplication * app ) 
+void vtkKWMyWindow::CreateInfo( vtksys_stl::string name, vtkKWApplication * app )
 {
   this->InfoDialog->SetApplication(app);
   this->InfoDialog->Create();
@@ -521,18 +521,18 @@ void vtkKWMyWindow::CreateInfo( vtksys_stl::string name, vtkKWApplication * app 
   text->AddTagMatcher("<[^>]*>", "_fg_blue_tag_");
   text->AddTagMatcher("vtk[A-Z][a-zA-Z0-9_]+", "_fg_dark_green_tag_");
 
-  app->Script("pack %s -side top -expand y -fill both -padx 2 -pady 2", 
+  app->Script("pack %s -side top -expand y -fill both -padx 2 -pady 2",
               this->CxxSourceText->GetWidgetName());
 
   vtksys_stl::string fname_path =
     vtksys::SystemTools::GetFilenamePath(__FILE__);
-  sprintf(buffer, "%s/%s", 
-    fname_path.c_str(), 
+  sprintf(buffer, "%s/%s",
+    fname_path.c_str(),
     vtksys::SystemTools::GetFilenameName(name).c_str());
   if (!vtksys::SystemTools::FileExists(buffer))
     {
     sprintf(buffer, "%s/%s.cxx",
-              app->GetInstallationDirectory(), 
+              app->GetInstallationDirectory(),
               name.c_str());
     }
   source = "";
@@ -563,8 +563,8 @@ vtksys_stl::string vtkKWMyWindow::ExpandFilename( const char * s )
 //----------------------------------------------------------------------------
 void vtkKWMyWindow::AddSelectEditCallback( vtkKWEPaintbrushWidget * w )
 {
-  if (!this->Widgets->IsItemPresent(w)) 
-    { 
+  if (!this->Widgets->IsItemPresent(w))
+    {
     this->Widgets->AddItem(w);
     }
 
@@ -597,7 +597,7 @@ void vtkKWMyWindow::AddSelectEditCallback( vtkKWEPaintbrushWidget * w )
     this->SelectEditRadioButtons->GetWidget(0)->SetSelectedState(1);
 
     this->Application->Script("pack %s -side top -anchor nw -expand n -padx 2 -pady 2",
-       this->SelectEditRadioButtons->GetWidgetName() ); 
+       this->SelectEditRadioButtons->GetWidgetName() );
     }
 }
 
@@ -613,7 +613,7 @@ void vtkKWMyWindow::SelectEditCallback()
   vtkKWEPaintbrushWidget *w;
   for ( this->Widgets->InitTraversal(); (w=static_cast<
         vtkKWEPaintbrushWidget*>(this->Widgets->GetNextItemAsObject())); )
-    this->SelectEditCallbackMethod(w, 
+    this->SelectEditCallbackMethod(w,
       this->SelectEditRadioButtons->GetWidget(0)->GetSelectedState());
 }
 

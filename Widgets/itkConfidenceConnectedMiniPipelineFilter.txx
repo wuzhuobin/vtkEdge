@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #ifndef __itkConfidenceConnectedMiniPipelineFilter_txx_
@@ -47,13 +47,13 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage, TOutputImage>
   // Set up some default parameters of the pipeline filters
 
   // Smoothing filter params
-  
+
   typename InputImageType::SizeType medianFilterRadius;
   medianFilterRadius.Fill(1);
   this->m_SmoothingFilter->SetRadius(medianFilterRadius); // 3 x 3 kernel
 
   // Region growing filter params
-  
+
   this->m_RegionGrowingFilter->SetNumberOfIterations(2);
   this->m_RegionGrowingFilter->SetMultiplier(1.5);
   this->m_RegionGrowingFilter->SetInitialNeighborhoodRadius(1);
@@ -61,9 +61,9 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage, TOutputImage>
       itk::NumericTraits< typename OutputImageType::PixelType >::max() );
 
   // Hole filling filter params
-  
+
   typename InputImageType::SizeType holeFillingFilterRadius;
-  holeFillingFilterRadius.Fill(2); 
+  holeFillingFilterRadius.Fill(2);
   this->m_HoleFillingFilter->SetRadius(holeFillingFilterRadius);
   this->m_HoleFillingFilter->SetBackgroundValue(
       itk::NumericTraits< typename OutputImageType::PixelType >::Zero );
@@ -83,7 +83,7 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage, TOutputImage>
 ::PrintSelf(std::ostream& os, Indent indent) const
 {
   this->Superclass::PrintSelf(os, indent);
-  
+
   os << indent << "SmoothingFilter: " << std::endl;
     this->m_SmoothingFilter->Print(os,indent.GetNextIndent());
   os << indent << "RegionGrowingFilter: " << std::endl;
@@ -94,33 +94,33 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage, TOutputImage>
     {
     os << indent << "UseHoleFilling: On" << std::endl;
     }
-  else 
+  else
     {
     os << indent << "UseHoleFilling: Off" << std::endl;
     }
 }
-  
+
 template <class TInputImage, class TOutputImage>
-void 
+void
 ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
 ::GenerateInputRequestedRegion()
 {
   Superclass::GenerateInputRequestedRegion();
 
   // Why am I setting the region to largest possible region ?
-  //   Because the region growing filters in ITK do that. 
-  // Why do the region growing filters in ITK do that ? 
+  //   Because the region growing filters in ITK do that.
+  // Why do the region growing filters in ITK do that ?
   //   I don't know.
   if ( this->GetInput() )
     {
-    typename InputImageType::Pointer image = 
+    typename InputImageType::Pointer image =
       const_cast< TInputImage * >( this->GetInput() );
     image->SetRequestedRegionToLargestPossibleRegion();
     }
 }
 
 template <class TInputImage, class TOutputImage>
-void 
+void
 ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
 ::GenerateOutputInformation()
 {
@@ -129,15 +129,15 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
   if (!this->m_UseHoleFilling)
     {
     return;
-    }  
+    }
 
   const TInputImage * inputPtr = this->GetInput();
   if( !inputPtr )
     {
     return;
     }
-  
-  // If we use holefilling, the voting filters require that 
+
+  // If we use holefilling, the voting filters require that
   // the input be 1/2 the structuring element size larger on each side.
   // So we will shrink the output
 
@@ -149,10 +149,10 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
     inputPtr->GetLargestPossibleRegion().GetSize();
   typename InputImageType::IndexType input_idx =
     inputPtr->GetLargestPossibleRegion().GetIndex();
-  
-  idx = input_idx + this->m_HoleFillingFilter->GetRadius(); 
-  sz  = input_sz  - this->m_HoleFillingFilter->GetRadius(); 
-  sz  = sz        - this->m_HoleFillingFilter->GetRadius(); 
+
+  idx = input_idx + this->m_HoleFillingFilter->GetRadius();
+  sz  = input_sz  - this->m_HoleFillingFilter->GetRadius();
+  sz  = sz        - this->m_HoleFillingFilter->GetRadius();
 
   outputRegion.SetSize(sz);
   outputRegion.SetIndex(idx);
@@ -161,15 +161,15 @@ ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
 }
 
 template <class TInputImage, class TOutputImage>
-void 
+void
 ConfidenceConnectedMiniPipelineFilter<TInputImage,TOutputImage>
 ::GenerateData()
 {
   // Allocate the output
   this->AllocateOutputs();
-  
+
   this->m_SmoothingFilter->SetInput(this->GetInput());
-  // Create a process accumulator for tracking the progress of this 
+  // Create a process accumulator for tracking the progress of this
   // minipipeline
   ProgressAccumulator::Pointer progress = ProgressAccumulator::New();
   progress = ProgressAccumulator::New();

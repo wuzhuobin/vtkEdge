@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 #include "vtkKWECommonSerializationHelper.h"
@@ -30,7 +30,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkTransform.h"
 
-vtkCxxRevisionMacro(vtkKWECommonSerializationHelper, "$Revision: 757 $");
+vtkCxxRevisionMacro(vtkKWECommonSerializationHelper, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWECommonSerializationHelper);
 
 //-----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ vtkKWECommonSerializationHelper::vtkKWECommonSerializationHelper()
 }
 
 //-----------------------------------------------------------------------------
-int vtkKWECommonSerializationHelper::Serialize(vtkObject *object, 
+int vtkKWECommonSerializationHelper::Serialize(vtkObject *object,
                                                vtkKWESerializer *serializer)
 {
   if (vtkTransform::SafeDownCast(object))
@@ -48,7 +48,7 @@ int vtkKWECommonSerializationHelper::Serialize(vtkObject *object,
     return 1;
     }
   // make sure object is a type of vtkDataArray that is supported
-  else if (vtkDataArray::SafeDownCast(object) && 
+  else if (vtkDataArray::SafeDownCast(object) &&
     this->GetSerializationType(object))
     {
     this->SerializeDataArray(vtkDataArray::SafeDownCast(object), serializer);
@@ -59,7 +59,7 @@ int vtkKWECommonSerializationHelper::Serialize(vtkObject *object,
 }
 
 //-----------------------------------------------------------------------------
-void vtkKWECommonSerializationHelper::RegisterWithHelperMap() 
+void vtkKWECommonSerializationHelper::RegisterWithHelperMap()
 {
   vtkKWESerializationHelperMap::RegisterHelperForClass("vtkTransform", this);
   vtkKWESerializationHelperMap::RegisterHelperForClass("vtkIdTypeArray", this);
@@ -68,7 +68,7 @@ void vtkKWECommonSerializationHelper::RegisterWithHelperMap()
 }
 
 //-----------------------------------------------------------------------------
-void vtkKWECommonSerializationHelper::UnRegisterWithHelperMap() 
+void vtkKWECommonSerializationHelper::UnRegisterWithHelperMap()
 {
   vtkKWESerializationHelperMap::UnRegisterHelperForClass("vtkTransform", this);
   vtkKWESerializationHelperMap::UnRegisterHelperForClass("vtkIdTypeArray", this);
@@ -87,7 +87,7 @@ void vtkKWECommonSerializationHelper::SerializeTransform(vtkTransform *transform
     // just the matrix for now... plan to add better support for serializing transforms
     serializer->Serialize("Matrix", elementsPtr, length);
     }
-  else 
+  else
     {
     unsigned int length = 0;
     double *elements = 0;
@@ -116,7 +116,7 @@ void vtkKWECommonSerializationHelper::SerializeDataArray(vtkDataArray *dataArray
 
     // Upon reading we are going to be limited to array of length vtkIdType,
     // which if not using 64-bit ID's means at most ~2^31 (~2 billion) values...
-    // which is a LOT when considering this will be written as ASCII (this 
+    // which is a LOT when considering this will be written as ASCII (this
     // serialization is NOT intended for storing LARGE data).  Therefore, for the
     // time being, we write out at most what can be represented by an int.
     unsigned long numberOfValuesLong = dataArray->GetDataSize();
@@ -144,10 +144,10 @@ void vtkKWECommonSerializationHelper::SerializeDataArray(vtkDataArray *dataArray
       serializer->Serialize("Array", arrayPtr, numberOfValues);
       }
     }
-  else 
+  else
     {
     // handle vtkInformation, if present
-    vtkSmartPointer<vtkInformation> infoObject = 
+    vtkSmartPointer<vtkInformation> infoObject =
       vtkSmartPointer<vtkInformation>::New();
     serializer->Serialize("ArrayInformation", infoObject);
     if (infoObject->GetNumberOfKeys() > 0)
@@ -171,7 +171,7 @@ void vtkKWECommonSerializationHelper::SerializeDataArray(vtkDataArray *dataArray
         // the dataArray assumes reposibility for the array allocated
         // in Serialize(), indicated by the final arguement of "0"
         vtkIdTypeArray::SafeDownCast(dataArray)->SetArray(
-          arrayPtr, static_cast<vtkIdType>(numberOfValues), 0, 
+          arrayPtr, static_cast<vtkIdType>(numberOfValues), 0,
           vtkIdTypeArray::VTK_DATA_ARRAY_DELETE);
         }
       }
@@ -210,7 +210,7 @@ const char *vtkKWECommonSerializationHelper::GetSerializationType(vtkObject *obj
   if (vtkTransform::SafeDownCast(object))
     {
     return "vtkTransform";
-    }  
+    }
   if (vtkIdTypeArray::SafeDownCast(object))
     {
     return "vtkIdTypeArray";

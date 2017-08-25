@@ -1,32 +1,32 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
-//                                                                                
+//
 //  Copyright (c) CREATIS (Centre de Recherche et d'Applications en Traitement de
 //  l'Image). All rights reserved. See Doc/License.txt or
 //  http://www.creatis.insa-lyon.fr/Public/Gdcm/License.html for details.
-//                                                                                
+//
 //     This software is distributed WITHOUT ANY WARRANTY; without even
 //     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 //     PURPOSE.  See the above copyright notices for more information.
-//                                                                               
+//
 //=============================================================================
 
 // .NAME vtkKWEUUID - (Static) Class for generating/constructing UUIDs
@@ -58,13 +58,13 @@ public:
 
   // Description:
   // Construct a (binary) UUID from MAC address (if can successfully acquire),
-  // hostname, and random # generation.  This fn is guaranteed to create an 
+  // hostname, and random # generation.  This fn is guaranteed to create an
   // "uuid" (a semi-unique number) based on random # generation, regardless of
   // whether the MAC address and/or hostname is obtained.
   static void ConstructUUID(unsigned char uuid[16]);
 
   // Description:
-  // Convert a (16-byte) binary UUID to its string form (in hexadecimal): 
+  // Convert a (16-byte) binary UUID to its string form (in hexadecimal):
   // XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
   static void ConvertBinaryUUIDToString(unsigned char uuid[16],
     vtkstd::string &uuidString);
@@ -72,11 +72,11 @@ public:
   // Description:
   // Get the 6-byte binary MAC address.  Returns -1 on failure.
   static int GetMACAddress(unsigned char addr[6]);
-  
+
 protected:
   vtkKWEUUID() {};
   ~vtkKWEUUID() {};
-  
+
 private:
   vtkKWEUUID(const vtkKWEUUID&); // Not implemented.
   void operator=(const vtkKWEUUID&); // Not implemented.

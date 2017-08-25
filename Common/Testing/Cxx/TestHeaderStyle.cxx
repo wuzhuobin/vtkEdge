@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -32,11 +32,16 @@ void CleanLine( char *line )
     }
 }
 
-int ProcessFile( const char *fileName )
+int ProcessFile( const char *fileName, const char *newFileName )
 {
+//  cout << "  Processing file " << fileName << endl;
+
   int status = 0;
 
   FILE *fp = fopen(fileName, "r");
+
+  FILE *newfp = fopen(newFileName, "w");
+
 
   if ( !fp )
     {
@@ -44,9 +49,15 @@ int ProcessFile( const char *fileName )
     return 1;
     }
 
+  if ( !newfp )
+    {
+    cout << "Error opening file " << fileName << endl;
+    return 1;
+    }
+
   char line[256];
 
-  const char *slashText[20] = 
+  const char *slashText[20] =
     {"//=============================================================================",
      "//   This file is part of VTKEdge. See vtkedge.org for more information.",
      "//",
@@ -68,24 +79,82 @@ int ProcessFile( const char *fileName )
      "//",
      "//============================================================================="};
 
-  int i;
+  const char *slashTextNew[20] =
+    {"//=============================================================================",
+     "//   This file is part of VTKEdge. See vtkedge.org for more information.",
+     "//",
+     "//   Copyright (c) 2010 Kitware, Inc.",
+     "//",
+     "//   VTKEdge may be used under the terms of the BSD License",
+     "//   Please see the file Copyright.txt in the root directory of",
+     "//   VTKEdge for further information.",
+     "//",
+     "//   Alternatively, you may see: ",
+     "//",
+     "//   http://www.vtkedge.org/vtkedge/project/license.html",
+     "//",
+     "//",
+     "//   For custom extensions, consulting services, or training for",
+     "//   this or any other Kitware supported open source project, please",
+     "//   contact Kitware at sales@kitware.com.",
+     "//",
+     "//",
+     "//============================================================================="};
+
+    const char *hashText[20] =
+    {"##=============================================================================",
+     "##   This file is part of VTKEdge. See vtkedge.org for more information.",
+     "##",
+     "##   Copyright (c) 2008 Kitware, Inc.",
+     "##",
+     "##   VTKEdge may be used under the terms of the GNU General Public License",
+     "##   version 3 as published by the Free Software Foundation and appearing in",
+     "##   the file LICENSE.txt included in the top level directory of this source",
+     "##   code distribution. Alternatively you may (at your option) use any later",
+     "##   version of the GNU General Public License if such license has been",
+     "##   publicly approved by Kitware, Inc. (or its successors, if any).",
+     "##",
+     "##   VTKEdge is distributed \"AS IS\" with NO WARRANTY OF ANY KIND, INCLUDING",
+     "##   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR",
+     "##   PURPOSE. See LICENSE.txt for additional details.",
+     "##",
+     "##   VTKEdge is available under alternative license terms. Please visit",
+     "##   vtkedge.org or contact us at kitware@kitware.com for further information.",
+     "##",
+     "##============================================================================="};
+
+  const char *hashTextNew[20] =
+    {"##=============================================================================",
+     "##   This file is part of VTKEdge. See vtkedge.org for more information.",
+     "##",
+     "##   Copyright (c) 2010 Kitware, Inc.",
+     "##",
+     "##   VTKEdge may be used under the terms of the BSD License",
+     "##   Please see the file Copyright.txt in the root directory of",
+     "##   VTKEdge for further information.",
+     "##",
+     "##   Alternatively, you may see: ",
+     "##",
+     "##   http://www.vtkedge.org/vtkedge/project/license.html",
+     "##",
+     "##",
+     "##   For custom extensions, consulting services, or training, please",
+     "##   this or any other Kitware supported open source project, please",
+     "##   contact Kitware at sales@kitware.com.",
+     "##",
+     "##",
+     "##============================================================================="};
+
   char *result=0;
-  result=fgets( line, 255, fp );
-  if(result==0)
-    {
-    cout << "Error at line 0 in file " << fileName << endl;
-    cout << "Error reading the line or end of file." << endl;
-    status=1;
-    }
-  else
+
+  int i = 0;
+  while ( result=fgets( line, 255, fp ) )
     {
     CleanLine(line);
-    }
 
-  if ( status==0 && line[0] == '/' )
-    {
-    for ( i = 0; i < 20; i++ )
+    if ( status==0 && i < 20 && line[0] == '/' )
       {
+      fputs( slashTextNew[i], newfp );
       if ( strcmp(slashText[i], line) )
         {
         cout << "Error at line " << i << " in file " << fileName << endl;
@@ -94,29 +163,44 @@ int ProcessFile( const char *fileName )
         status = 1;
         break;
         }
-      result=fgets( line, 255, fp );
-      if(result==0)
+      }
+    else if ( status == 0 && i < 20 && line[0] == '#')
+      {
+      fputs( hashTextNew[i], newfp );
+      if ( strcmp(hashText[i], line) )
         {
-        cout << "Error at line " << i+1 << " in file " << fileName << endl;
-        cout << "Error reading the line or end of file." << endl;
-        status=1;
+        cout << "Error at line " << i << " in file " << fileName << endl;
+        cout << "  correct:  " << strlen(hashText[i]) << " " << hashText[i] << endl;
+        cout << "    found:  " << strlen(line) << " " << line << endl;
+        status = 1;
         break;
         }
-      CleanLine(line);
       }
+    else if ( i < 20 )
+      {
+      status = 1;
+      break;
+      }
+    else
+      {
+      fputs( line, newfp );
+      }
+    fputs( "\n", newfp );
+    i++;
     }
-  else 
-    {
-    // empty.
-    }
+
   fclose(fp);
-  
+  fclose(newfp);
+
+
   return status;
 }
 
 
 int ProcessDirectory(const char *dirName)
 {
+  cout << "Processing directory " << dirName << endl;
+
   int numFailures = 0;
 
   vtkDirectory *dir = vtkDirectory::New();
@@ -148,7 +232,7 @@ int ProcessDirectory(const char *dirName)
 
     char *fullName;
     size_t size = strlen(dir->GetFile(i)) + strlen(dirName) + 2;
-    
+
     fullName = new char[size];
     sprintf( fullName, "%s/%s", dirName, dir->GetFile(i) );
 
@@ -158,21 +242,31 @@ int ProcessDirectory(const char *dirName)
       }
     else
       {
-      numFailures += ProcessFile(fullName);
+      char newFileName[512];
+      sprintf(newFileName, "%s.new", fullName );
+
+      int numFailuresBefore = numFailures;
+      numFailures += ProcessFile(fullName, newFileName);
+      if ( numFailuresBefore == numFailures )
+        {
+        cout << "Attempting the rename" << newFileName << " " << fullName << endl;
+        remove(fullName);
+        dir->Rename(newFileName, fullName);
+        }
       }
 
     delete [] fullName;
     }
 
   dir->Delete();
-  
+
   return numFailures;
 }
 
 int TestHeaderStyle(int vtkNotUsed(argc), char *vtkNotUsed(argv)[])
 {
   int numFailures = 0;
-  
+
   numFailures = ProcessDirectory(VTKEdge_SOURCE_DIR);
 
   if ( numFailures > 0 )
@@ -180,6 +274,6 @@ int TestHeaderStyle(int vtkNotUsed(argc), char *vtkNotUsed(argv)[])
     cout << numFailures << " files failed header check." << endl;
     return 1;
     }
- 
+
   return 0;
 }

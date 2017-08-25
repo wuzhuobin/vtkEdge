@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -30,7 +30,7 @@
 #include "vtkActor2D.h"
 #include "vtkTextMapper.h"
 
-vtkCxxRevisionMacro(vtkKWEPaintbrushAnnotationRepresentation, "$Revision: 712 $");
+vtkCxxRevisionMacro(vtkKWEPaintbrushAnnotationRepresentation, "$Revision: 1774 $");
 vtkStandardNewMacro(vtkKWEPaintbrushAnnotationRepresentation);
 
 //----------------------------------------------------------------------
@@ -41,9 +41,9 @@ vtkKWEPaintbrushAnnotationRepresentation::vtkKWEPaintbrushAnnotationRepresentati
   this->LastDisplayPosition[0] = this->LastDisplayPosition[1] = 0;
   this->AnnotationPosition[0] = this->AnnotationPosition[1] = -1;
   this->BuildTime              = vtkTimeStamp::New();
-  
+
   // Annotation stuff
-  
+
   this->TextProperty = vtkTextProperty::New();
   this->TextProperty->SetBold(0);
   this->TextProperty->SetItalic(1);
@@ -55,7 +55,7 @@ vtkKWEPaintbrushAnnotationRepresentation::vtkKWEPaintbrushAnnotationRepresentati
   this->TextMapper->SetInput("0.0");
   this->TextActor = vtkActor2D::New();
   this->TextActor->SetMapper(this->TextMapper);
-  this->TextActor->VisibilityOn();  
+  this->TextActor->VisibilityOn();
 }
 
 //----------------------------------------------------------------------
@@ -71,14 +71,14 @@ vtkKWEPaintbrushAnnotationRepresentation::~vtkKWEPaintbrushAnnotationRepresentat
 //----------------------------------------------------------------------
 void vtkKWEPaintbrushAnnotationRepresentation::BuildRepresentation()
 {
-  if (!this->Annotation || 
-      !this->PaintbrushRepresentation || 
-      !this->Renderer) 
-    { 
+  if (!this->Annotation ||
+      !this->PaintbrushRepresentation ||
+      !this->Renderer)
+    {
     this->TextActor->VisibilityOff();
     return;
     }
-  
+
   int stringSize[2], *winSize = this->Renderer->GetSize();
   vtksys_stl::string annotation(this->Annotation);
 
@@ -90,18 +90,18 @@ void vtkKWEPaintbrushAnnotationRepresentation::BuildRepresentation()
 
   if (disp[0] < 0)
     {
-    // User did not provide a default position. Just place it where the 
+    // User did not provide a default position. Just place it where the
     // brush is.
-    vtkInteractorObserver::ComputeWorldToDisplay(this->Renderer, 
+    vtkInteractorObserver::ComputeWorldToDisplay(this->Renderer,
             this->PaintbrushRepresentation->CurrentShapePosition[0],
             this->PaintbrushRepresentation->CurrentShapePosition[1],
             this->PaintbrushRepresentation->CurrentShapePosition[2], disp);
     }
 
   this->TextActor->SetPosition(disp[0], disp[1]);
-  
+
   // Adjust the font size
-  vtkTextMapper::SetRelativeFontSize(this->TextMapper, 
+  vtkTextMapper::SetRelativeFontSize(this->TextMapper,
                 this->Renderer, winSize, stringSize, 0.01f);
 }
 

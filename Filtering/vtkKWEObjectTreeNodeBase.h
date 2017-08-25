@@ -1,42 +1,42 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License
-//   version 3 as published by the Free Software Foundation and appearing in
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later
-//   version of the GNU General Public License if such license has been
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 // .NAME vtkKWEObjectTreeNodeBase - Base class for ObjectTree nodes
 // .SECTION Description
 // The base class for ObjectTree nodes, vtkKWEObjectTreeNodeBase provides the
 // ability add and remove children of a node while guaranteeing that a cycle
-// isn't created.  Also, to change the characteristics of a "basic" node type, 
+// isn't created.  Also, to change the characteristics of a "basic" node type,
 // subclasses of vtkKWEObjectTreePropertyBase can be added to a node, though
-// a node can only have one instance of each property type (such as 
-// vtkKWEObjectTreeUserProperty).  Though not implemented yet, descendants of 
-// a node could (or would?) inherit these properties, if they don't have an 
+// a node can only have one instance of each property type (such as
+// vtkKWEObjectTreeUserProperty).  Though not implemented yet, descendants of
+// a node could (or would?) inherit these properties, if they don't have an
 // instance of the propeoerty type themselves.  Similar to Properties, but
 // not to be inherited by a descendant are Attributes of a node.  These
 // are more basic charateristics of the node, including the "Name" of the node
 // as well as its "State" (if "inactive", the node is "off", and children are
-// not traversed).  If requested, a node will also generate a UUID for the 
+// not traversed).  If requested, a node will also generate a UUID for the
 // purpose of uniquely identifying a node.
 //
 // As a subclass of vtkKWESerializableObject, this object can easily be
-// serialized via its Serialize method.  
-// 
+// serialized via its Serialize method.
+//
 // .SECTION See Also
 // vtkKWEObjectTreeTransformableNode vtkKWEObjectTreePropertyBase
 
@@ -109,7 +109,7 @@ public:
   vtkGetObjectMacro(Parent, vtkKWEObjectTreeNodeBase);
 
   // Description:
-  // Tests whether a node exists in the tree (returns true if it does).  
+  // Tests whether a node exists in the tree (returns true if it does).
   virtual bool IsDescendant(vtkKWEObjectTreeNodeBase *testNode);
 
   // Description:
@@ -125,7 +125,7 @@ public:
   // Description:
   // Retrieves the requested property, if it exists (otherwise returns NULL).  If
   // includeInheritance == true (and INHERIT_PROPERTIES is ON), will search
-  // ancestors for inheritable property of specified type.  The 
+  // ancestors for inheritable property of specified type.  The
   // inheritedProperty flag it set to true if the property is inherited from
   // an ancestor.
   vtkKWEObjectTreePropertyBase* GetProperty(vtkInformationObjectBaseKey *propertyKey,
@@ -167,19 +167,19 @@ public:
   // Description:
   // Check to see if the specified node is the same (Attributes and Properties)
   // as this node.  If checkDescendants == true, then the children (and their
-  // children) are compared as well (and must be in the same order).  If 
+  // children) are compared as well (and must be in the same order).  If
   // canBeSuperset == true, then it is considered "equal" if all attrbiutes
-  // and Properties that are set in the testNode match in "this" node (this 
-  // node can be a superset of testNode); the final flag 
-  // "considerInheritedProperties" will compare an inherited property as if 
+  // and Properties that are set in the testNode match in "this" node (this
+  // node can be a superset of testNode); the final flag
+  // "considerInheritedProperties" will compare an inherited property as if
   // it were a property specifed on the node.
-  virtual bool IsEqualTo(vtkKWEObjectTreeNodeBase *testNode, 
+  virtual bool IsEqualTo(vtkKWEObjectTreeNodeBase *testNode,
     bool checkDescendants, bool canBeSuperset = false,
     bool considerInheritedProperties = false);
 
   // Description:
   // Reads the state of an instance from an archive OR
-  // writes the state of an instance to an archive. 
+  // writes the state of an instance to an archive.
   virtual void Serialize(vtkKWESerializer*);
 
   // Description:
@@ -197,12 +197,12 @@ public:
 
   // Description:
   // Creates a UUID for this node (if one doesn't already exist).  Return 0
-  // if already exists, 1 if able to "generate" an uuid, and 2 if it was 
+  // if already exists, 1 if able to "generate" an uuid, and 2 if it was
   // necessary to "construct" (less unique) an uuid.
   int CreateUUID();
 
   // Description:
-  // Clear/remove the UUID for this node. Calling CreateUUID after ClearUUID 
+  // Clear/remove the UUID for this node. Calling CreateUUID after ClearUUID
   // will create a new/different UUID.
   void ClearUUID();
 
@@ -250,7 +250,7 @@ protected:
 
   // Description:
   // Adds the children of this node to the iterator according to how the
-  // iterator is defined/setup.  
+  // iterator is defined/setup.
   friend class vtkKWEObjectTreeNodeIterator;
   void AddChildren(vtkKWEObjectTreeNodeIterator *iterator);
 
@@ -261,7 +261,7 @@ protected:
   virtual void UpdateTreeModifiedTime(unsigned long treeTime);
 
   // Description:
-  // Add inheritable properties that don't already exist in allProperties. 
+  // Add inheritable properties that don't already exist in allProperties.
   // Should only be called by a child of "this" object and the resulting list
   // is only accurate for the original caller of GetAllProperties()
   void AddInheritedProperties(vtkInformation *allProperties);

@@ -1,21 +1,21 @@
 //=============================================================================
 //   This file is part of VTKEdge. See vtkedge.org for more information.
 //
-//   Copyright (c) 2008 Kitware, Inc.
+//   Copyright (c) 2010 Kitware, Inc.
 //
-//   VTKEdge may be used under the terms of the GNU General Public License 
-//   version 3 as published by the Free Software Foundation and appearing in 
-//   the file LICENSE.txt included in the top level directory of this source
-//   code distribution. Alternatively you may (at your option) use any later 
-//   version of the GNU General Public License if such license has been 
-//   publicly approved by Kitware, Inc. (or its successors, if any).
+//   VTKEdge may be used under the terms of the BSD License
+//   Please see the file Copyright.txt in the root directory of
+//   VTKEdge for further information.
 //
-//   VTKEdge is distributed "AS IS" with NO WARRANTY OF ANY KIND, INCLUDING
-//   THE WARRANTIES OF DESIGN, MERCHANTABILITY, AND FITNESS FOR A PARTICULAR
-//   PURPOSE. See LICENSE.txt for additional details.
+//   Alternatively, you may see: 
 //
-//   VTKEdge is available under alternative license terms. Please visit
-//   vtkedge.org or contact us at kitware@kitware.com for further information.
+//   http://www.vtkedge.org/vtkedge/project/license.html
+//
+//
+//   For custom extensions, consulting services, or training for
+//   this or any other Kitware supported open source project, please
+//   contact Kitware at sales@kitware.com.
+//
 //
 //=============================================================================
 
@@ -35,7 +35,7 @@
 // contexts, resets the graphics chip and recovers the graphics driver, in
 // order to keep the operating system responsive.
 // ref: http://www.opengl.org/pipeline/article/vol003_7/
-// This reset actually freezes the test. And it really times out this time... 
+// This reset actually freezes the test. And it really times out this time...
 // Example of pathological case: dash1vista32.kitware/Win32Vista-vs80
 
 #include "vtkTestUtilities.h"
@@ -84,7 +84,7 @@ void ComputeAndDisplayMeanErrorAndStandardDeviation(vtkDoubleArray *c,
   double *b=static_cast<double *>(g->GetVoidPointer(0));
 
   vtkIdType i;
-  
+
   // mean error
   double meanError=0.0;
   double maxError=0.0;
@@ -156,7 +156,7 @@ int TestKWEGPUArrayCalculator(int vtkNotUsed(argc),
   // Useful when looking at the test output in CDash:
   cout << "IF THIS TEST TIMEOUT, IT IS PROBABLY ON VISTA WITH"
        << " A NOT-FAST-ENOUGH GRAPHICS CARD."<<endl;
-  
+
   cout<<"numPoints="<<TestNumberOfPoints<<endl;
   vtkImageImport *im=CreateSource(TestNumberOfPoints,TestNumberOfComponents);
 
@@ -210,7 +210,7 @@ calc2->SetFunction("values+10");
   image2=vtkImageData::SafeDownCast(calc2->GetOutputDataObject(0));
   image2->GetPointData()->GetScalars()->GetRange(range);
   cout<<"range3[2]="<<range[0]<<" "<<range[1]<<endl;
- 
+
   ComputeAndDisplayMeanErrorAndStandardDeviation(
                                                  vtkDoubleArray::SafeDownCast(image->GetPointData()->GetScalars()),
                                                  vtkDoubleArray::SafeDownCast(image2->GetPointData()->GetScalars()));
@@ -252,7 +252,7 @@ calc2->SetFunction("values+10");
   calc2->Delete(); // need context
 
   iren->Delete();
-  
+
   im->Delete();
   calc->Delete();
 
